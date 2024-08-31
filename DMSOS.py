@@ -2,33 +2,62 @@ import customtkinter
 import tkinter
 import tkcalendar
 from tkcalendar import DateEntry
-from tkinter import ttk
+from tkinter import Tk, ttk
+from tkinter import filedialog
 from customtkinter import *
 from tktimepicker import AnalogPicker, AnalogThemes
 
 def placeLabels(root):
+    global file_list_text
+    def add_files():
+        file_path = filedialog.askopenfilename(
+            title="Select Files",
+            filetypes=[("All Files", "*.*")]
+        )
+
+        if file_path:
+            # Do something with the selected file path, e.g., add it to a list
+            file_list.append(file_path)
+            # Update the UI to display the selected files
+            update_file_list()
+
+    def update_file_list():
+        file_list_text.delete(0.0, END)
+        for file_path in file_list:
+            file_name = os.path.basename(file_path)
+            file_list_text.insert(END, file_name + "\n")
     # Contrato
     contratoNameLabel = StringVar()
     contratoNameLabel.set("Selecione o contrato: ")
     labelContrato = CTkLabel(root, textvariable=contratoNameLabel)
-    labelContrato.grid(row=1, column=0, sticky="w") 
+    labelContrato.place(x=10, y=10)
 
     contrato_options = ["SOHO", "Union", "CI", "Barra Shopping", "Park Shopping CG", "Park Shopping JPA", "ICATU", "IBMEC(Centro)", "Brookfield"]
     contratoName = CTkOptionMenu(root, width=100, values=contrato_options)
-    contratoName.grid(row=0, column=1, padx=10, pady=5, sticky="w")
+    contratoName.place(x=180, y=10)
+
+    typeJobLabel = StringVar()
+    typeJobLabel.set("Tipo: ")
+    typeJobText = CTkLabel(root, textvariable=typeJobLabel)
+    typeJobText.place(x=370, y=10)
+    typeJobOptions = ["Preventiva", "Corretiva", "Outros"]
+    typeJob = CTkOptionMenu(root, width=100, values=typeJobOptions )
+    typeJob.place(x=420, y=10)
+
 
     # Nome Tecnicos
     tecNameLabel = StringVar()
     tecNameLabel.set("Insira o nome dos técnicos: ")
     labelTec = CTkLabel(root, textvariable=tecNameLabel)
-    labelTec.grid(row=0, column=0, sticky="w") 
+    labelTec.place(x=10, y=40)
 
     tecnico = StringVar(None)
     tecName = CTkEntry(root, textvariable=tecnico, width=230)
-    tecName.grid(row=1, column=1, padx=10, pady=5, sticky="w") 
+    tecName.place(x=180, y=40)
+    addTec = CTkButton(root, text="Adicionar", width=80)  # Set width here
+    addTec.place(x=420, y=40)
 
     # Data e Hora
-
     date_label = StringVar()
     date_label.set("Selecione a data: ")
     start_label = StringVar()
@@ -36,29 +65,42 @@ def placeLabels(root):
     end_label = StringVar()
     end_label.set("Horario do fim")
     labelDate = CTkLabel(root, textvariable=date_label)
-    labelDate.grid(row=2, column=0, sticky="w")
+    labelDate.place(x=10, y=70)
 
-    
+    # Descrição
+    desc_text = StringVar()
+    desc_text.set("Descrição")
+    desc_label = CTkLabel(root, textvariable=desc_text)
+    desc_label.place(x=10, y=100)
+
+    desc_box = CTkTextbox(root, width=370, height=200)  # Set height here
+    desc_box.place(x=10, y=130)
+
+    #Add files
+    file_list = []
+
+    # Create a text box to display the selected file paths
+    file_list_text = CTkTextbox(root, width=200, height=50)
+    file_list_text.place(x=180, y=340 )
+
+    # Create a button to trigger the file selection dialog
+    add_files_button = CTkButton(root, text="Anexar arquivos", command=add_files)
+    add_files_button.place(x=10, y=340)
     # Create a DateEntry widget
     date_entry = DateEntry(root, width=12, background="white", foreground="black", locale="pt_BR")
-    date_entry.grid(row=2, column=1, sticky="w")
-def gui(root):
-    #Inicializa a pagina e define as configurações
+    date_entry.place(x=180, y=70)
 
+def gui(root):
+    # Inicializa a pagina e define as configurações
     customtkinter.set_appearance_mode("dark")
     root.geometry('800x400')
     root.title("OS DMSYS")
-    root.resizable(False,False)
+    root.resizable(False, False)
 
-    #Chama as funções
+    # Chama as funções
     placeLabels(root)
 
-
-
-
-
-
-
     root.mainloop()
+
 root = CTk()
 gui(root)
