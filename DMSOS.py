@@ -25,7 +25,6 @@ def login():
         return jsonify({'token': token, 'sucesso': message})
     else:
         return jsonify({'message': 'Credenciais inválidas'}), 401
-
-if __name__ == '__main__':
+    
+if __name__ == "__main__":
     app.run(debug=True)
-    print("oi")

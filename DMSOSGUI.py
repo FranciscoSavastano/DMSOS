@@ -1,11 +1,20 @@
 import customtkinter
+
+import threading
 import tkinter
 import DMSOS
 import tkcalendar
+import requests
 from tkcalendar import DateEntry
 from tkinter import Tk, ttk
 from tkinter import filedialog
 from customtkinter import *
+import subprocess
+import pexpect
+
+def start_server():
+    subprocess.Popen(["python", "DMSOS.py"])
+
 def admOsWindow(root):
     def placeLabels(root):
         global file_list_text
@@ -26,6 +35,8 @@ def admOsWindow(root):
             for file_path in file_list:
                 file_name = os.path.basename(file_path)
                 file_list_text.insert(END, file_name + "\n")
+        def send_info():
+            pass
         # Contrato
         contratoNameLabel = StringVar()
         contratoNameLabel.set("Selecione o contrato: ")
@@ -100,6 +111,10 @@ def admOsWindow(root):
         send_label.place(x=10, y=370)
     placeLabels(root)
 def loginScreen(root):
+    def try_login(username, password):
+        
+        data = {username : username, password : password}
+        requests.post('http://127.0.0.1:5000/login', json=data)
     login_text = StringVar()
     login_text.set("Login")
     login_label = CTkLabel(root, textvariable = login_text, font = ("Arial", 25))
@@ -119,7 +134,7 @@ def loginScreen(root):
     send_text = StringVar()
     send_text.set("Enviar")
 
-    send_button = CTkButton(root, textvariable=send_text)
+    send_button = CTkButton(root, textvariable=send_text, command=try_login(login_field.get(), password_field.get()))
     send_button.place(x=325, y = 200)
 def gui(root):
     # Inicializa a pagina e define as configurações
@@ -127,15 +142,16 @@ def gui(root):
     root.geometry('800x400')
     root.title("OS DMSYS")
     root.resizable(False, False)
-
     # Chama as funções
     if(is_login):
         admOsWindow(root)
     else:
         loginScreen(root)
     root.mainloop()
-global is_login
-is_login = True
-root = CTk()
 
-gui(root)
+if __name__ == "__main__":
+    start_server()
+    global is_login
+    is_login = False
+    root = CTk()
+    gui(root)
