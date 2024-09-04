@@ -33,7 +33,7 @@ def admOsWindow(root):
 
         contrato_options = ["SOHO", "Union", "CI", "Barra Shopping", "Park Shopping CG", "Park Shopping JPA", "ICATU", "IBMEC(Centro)"] #TODO: Informações alimentadas atraves de request/call para db
         contratoName = CTkOptionMenu(root, width=100, values=contrato_options)
-        contratoName.place(x=180, y=10)
+        contratoName.place(x=230, y=10)
 
         typeJobLabel = StringVar()
         typeJobLabel.set("Tipo: ")
@@ -41,22 +41,22 @@ def admOsWindow(root):
         typeJobText.place(x=370, y=10)
         typeJobOptions = ["Preventiva", "Corretiva", "Outros"]
         typeJob = CTkOptionMenu(root, width=100, values=typeJobOptions )
-        typeJob.place(x=420, y=10)
+        typeJob.place(x=430, y=10)
 
 
         # Nome Tecnicos
         tecNameLabel = StringVar()
-        tecNameLabel.set("Insira o nome dos técnicos: ") #TODO: Filtrar tecnicos REGISTRADOS por contrato e disponibilidade
+        tecNameLabel.set("Selecione os tecnicos responsaveis: ") #TODO: Filtrar tecnicos REGISTRADOS por contrato e disponibilidade
         labelTec = CTkLabel(root, textvariable=tecNameLabel)
         labelTec.place(x=10, y=40)
 
-        tecnico = StringVar(None)
-        tecName = CTkEntry(root, textvariable=tecnico, width=230)
-        tecName.place(x=180, y=40)
+        tecnicoOptions = ["Tecnico 1", "Tecnico 2"] #TODO: Alimentar lista com tecnicos registrados no DB, acessar via api
+        tecName = CTkOptionMenu(root, values=tecnicoOptions, width=190)
+        tecName.place(x=230, y=40)
         addTec = CTkButton(root, text="Adicionar", width=80)
-        addTec.place(x=420, y=40)
+        addTec.place(x=430, y=40)
 
-        # Data e Hora
+        # Data e Hora e widget
         date_label = StringVar()
         date_label.set("Selecione a data: ")
         start_label = StringVar()
@@ -88,7 +88,7 @@ def admOsWindow(root):
         add_files_button.place(x=10, y=340)
 
         date_entry = DateEntry(root, width=12, background="white", foreground="black", locale="pt_BR")
-        date_entry.place(x=180, y=70)
+        date_entry.place(x=230, y=70)
 
         #Enviar
 
