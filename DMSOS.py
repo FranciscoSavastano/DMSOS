@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 import jwt
+from jwt import encode
 
 app = Flask(__name__)
 
@@ -8,8 +9,8 @@ SECRET_KEY = 'your_secret_key'
 
 # Simulando um banco de dados de usuários
 users = {
-    'alice': 'password123',
-    'bob': 'secret456'
+    'anne': 'merenda',
+    'michael': 'leadamericas'
 }
 
 @app.route('/login', methods=['POST'])
@@ -19,8 +20,9 @@ def login():
     password = data.get('password')
 
     if username in users and users[username] == password:
+        message = "sucesso"
         token = jwt.encode({'username': username}, SECRET_KEY, algorithm='HS256')
-        return jsonify({'token': token})
+        return jsonify({'token': token, 'sucesso': message})
     else:
         return jsonify({'message': 'Credenciais inválidas'}), 401
 
