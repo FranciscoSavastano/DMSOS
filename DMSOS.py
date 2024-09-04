@@ -18,7 +18,7 @@ def login():
     data = request.get_json()
     username = data.get('username')
     password = data.get('password')
-
+    print(username, password)
     if username in users and users[username] == password:
         message = "sucesso"
         token = jwt.encode({'username': username}, SECRET_KEY, algorithm='HS256')

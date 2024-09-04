@@ -1,5 +1,4 @@
 import customtkinter
-
 import threading
 import tkinter
 import DMSOS
@@ -111,30 +110,34 @@ def admOsWindow(root):
         send_label.place(x=10, y=370)
     placeLabels(root)
 def loginScreen(root):
-    def try_login(username, password):
-        
-        data = {username : username, password : password}
+    def try_login():
+        user = login_var.get()
+        psw = password_var.get()
+
+        print(user,psw)
+        data = {'username' : user, 'password' : psw}
         requests.post('http://127.0.0.1:5000/login', json=data)
+        print("test")
     login_text = StringVar()
     login_text.set("Login")
     login_label = CTkLabel(root, textvariable = login_text, font = ("Arial", 25))
     login_label.place(x = 360, y = 80)
 
-    login_field = CTkEntry(root, width=200)
+    login_var = StringVar()
+    login_field = CTkEntry(root, width=200, textvariable=login_var)
     login_field.place(x= 295, y = 110)
 
     password_text = StringVar()
     password_text.set("Senha")
     password_label = CTkLabel(root, textvariable= password_text, font=("Arial", 25))
     password_label.place(x = 360, y= 140)
-
-    password_field = CTkEntry(root, width=200)
+    password_var = StringVar()
+    password_field = CTkEntry(root, width=200, textvariable=password_var)
     password_field.place(x = 295, y = 170)
 
     send_text = StringVar()
     send_text.set("Enviar")
-
-    send_button = CTkButton(root, textvariable=send_text, command=try_login(login_field.get(), password_field.get()))
+    send_button = CTkButton(root, textvariable=send_text, command=lambda:try_login())
     send_button.place(x=325, y = 200)
 def gui(root):
     # Inicializa a pagina e define as configurações
