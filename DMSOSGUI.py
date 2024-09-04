@@ -5,8 +5,6 @@ from tkcalendar import DateEntry
 from tkinter import Tk, ttk
 from tkinter import filedialog
 from customtkinter import *
-from tktimepicker import AnalogPicker, AnalogThemes
-
 def admOsWindow(root):
     def placeLabels(root):
         global file_list_text
