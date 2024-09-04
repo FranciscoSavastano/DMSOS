@@ -31,7 +31,7 @@ def admOsWindow(root):
         labelContrato = CTkLabel(root, textvariable=contratoNameLabel)
         labelContrato.place(x=10, y=10)
 
-        contrato_options = ["SOHO", "Union", "CI", "Barra Shopping", "Park Shopping CG", "Park Shopping JPA", "ICATU", "IBMEC(Centro)", "Brookfield"]
+        contrato_options = ["SOHO", "Union", "CI", "Barra Shopping", "Park Shopping CG", "Park Shopping JPA", "ICATU", "IBMEC(Centro)"] #TODO: Informações alimentadas atraves de request/call para db
         contratoName = CTkOptionMenu(root, width=100, values=contrato_options)
         contratoName.place(x=180, y=10)
 
@@ -46,14 +46,14 @@ def admOsWindow(root):
 
         # Nome Tecnicos
         tecNameLabel = StringVar()
-        tecNameLabel.set("Insira o nome dos técnicos: ")
+        tecNameLabel.set("Insira o nome dos técnicos: ") #TODO: Filtrar tecnicos REGISTRADOS por contrato e disponibilidade
         labelTec = CTkLabel(root, textvariable=tecNameLabel)
         labelTec.place(x=10, y=40)
 
         tecnico = StringVar(None)
         tecName = CTkEntry(root, textvariable=tecnico, width=230)
         tecName.place(x=180, y=40)
-        addTec = CTkButton(root, text="Adicionar", width=80)  # Set width here
+        addTec = CTkButton(root, text="Adicionar", width=80)
         addTec.place(x=420, y=40)
 
         # Data e Hora
@@ -67,25 +67,26 @@ def admOsWindow(root):
         labelDate.place(x=10, y=70)
 
         # Descrição
+
         desc_text = StringVar()
-        desc_text.set("Descrição")
+        desc_text.set("Descrição:")
         desc_label = CTkLabel(root, textvariable=desc_text)
         desc_label.place(x=10, y=100)
 
-        desc_box = CTkTextbox(root, width=370, height=200)  # Set height here
+        desc_box = CTkTextbox(root, width=370, height=200) 
         desc_box.place(x=10, y=130)
 
-        #Add files
+        #Selecionar arquivo
         file_list = []
 
-        # Create a text box to display the selected file paths
+        
         file_list_text = CTkTextbox(root, width=200, height=50)
         file_list_text.place(x=180, y=340 )
 
-        # Create a button to trigger the file selection dialog
+
         add_files_button = CTkButton(root, text="Anexar arquivos", command=add_files)
         add_files_button.place(x=10, y=340)
-        # Create a DateEntry widget
+
         date_entry = DateEntry(root, width=12, background="white", foreground="black", locale="pt_BR")
         date_entry.place(x=180, y=70)
 
@@ -133,7 +134,7 @@ def gui(root):
         loginScreen(root)
     root.mainloop()
 global is_login
-is_login = False
+is_login = True
 root = CTk()
 
 gui(root)
