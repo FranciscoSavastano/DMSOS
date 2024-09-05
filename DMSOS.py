@@ -20,9 +20,8 @@ def login():
     password = data.get('password')
     print(username, password)
     if username in users and users[username] == password:
-        message = "sucesso"
         token = jwt.encode({'username': username}, SECRET_KEY, algorithm='HS256')
-        return jsonify({'token': token, 'sucesso': message})
+        return jsonify({'token': token})
     else:
         return jsonify({'message': 'Credenciais inválidas'}), 401
     
