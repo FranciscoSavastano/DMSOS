@@ -52,7 +52,7 @@ def admOsWindow(root, token):
                 file_list_text.insert(END, file_name + "\n")
         def addTec(selectedTec, addedTec):
             print(addedTec.get(), selectedTec.get())
-            addedTec.set(addedTec.get() + selectedTec.get())
+            addedTec.set(addedTec.get() + " " + selectedTec.get())
             
             
 
@@ -87,15 +87,14 @@ def admOsWindow(root, token):
         labelTec = CTkLabel(root, textvariable=tecNameLabel, bg_color='#2b2b2b')
         labelTec.place(x=10, y=40)
         addedTec = StringVar()
-        addedTecLabel = CTkLabel(root, textvariable=addedTec, bg_color='#2b2b2b')
-        addedTecLabel.place(x=30, y=40)
+        addedTecLabel = CTkLabel(root, textvariable=addedTec, bg_color='#2b2b2b', wraplength= 120)
+        addedTecLabel.place(x=550, y=40)
 
         tecnicoOptions = ["Tecnico 1", "Tecnico 2"] #TODO: Alimentar lista com tecnicos registrados no DB, acessar via api
-        selectedTec = StringVar()
         tecName = CTkOptionMenu(root, values=tecnicoOptions, width=190)
         tecName.place(x=230, y=40)
-        addTec = CTkButton(root, text="Adicionar", width=80, command=lambda:addTec(tecName, addedTec))
-        addTec.place(x=430, y=40)
+        addTecName = CTkButton(root, text="Adicionar", width=80, command=lambda:addTec(tecName, addedTec))
+        addTecName.place(x=430, y=40)
         
 
         # Data e Hora e widget
@@ -168,6 +167,7 @@ def loginScreen(root):
     password_label.place(x = 360, y= 140)
     password_var = StringVar()
     password_field = CTkEntry(root, width=200, textvariable=password_var)
+    password_field.configure(show="*")
     password_field.place(x = 295, y = 170)
 
     send_text = StringVar()
