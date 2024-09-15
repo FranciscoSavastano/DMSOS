@@ -1,0 +1,53 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Table tecnicos {
+  cpf String [pk]
+  id String [not null]
+  nome String [unique, not null]
+  email String [unique, not null]
+  senha_hash String [not null]
+  tentativas_de_login Int [not null, default: 0]
+  last_login DateTime
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  AuthenticationAudit authentication_audit [not null]
+  OS OS [not null]
+}
+
+Table authentication_audit {
+  id Int [pk, increment]
+  ip_address String
+  remote_port String
+  browser String
+  status AUTHENTICATION_STATUS [not null]
+  tecnico_cpf String
+  tecnico tecnicos
+  created_at DateTime [default: `now()`, not null]
+}
+
+Table OS {
+  id Int [pk, increment]
+  tipo_manutencao String [not null]
+  titulo String [not null]
+  sistema String [not null]
+  tecnico_nome String [not null]
+  data DateTime [not null]
+  inicio DateTime [not null]
+  termino DateTime [not null]
+  descricao_tarefa String [not null]
+  anexos String [not null]
+  tecnico tecnicos [not null]
+}
+
+Enum AUTHENTICATION_STATUS {
+  SUCCESS
+  USER_NOT_EXISTS
+  INCORRECT_PASSWORD
+  BLOCKED
+}
+
+Ref: authentication_audit.tecnico_cpf > tecnicos.cpf [delete: No Action]
+
+Ref: OS.tecnico_nome > tecnicos.nome [delete: Cascade]

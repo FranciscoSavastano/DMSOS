@@ -1,0 +1,69 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator dbml {
+  provider = "prisma-dbml-generator"
+}
+
+model Tecnico {
+  cpf                   String    @id
+  id                    String    @default(uuid())
+  nome                  String    @unique
+  email                 String    @unique
+  senha_hash            String
+  tentativas_de_login   Int       @default(0)
+  last_login            DateTime?
+  created_at            DateTime  @default(now())
+  updated_at            DateTime  @updatedAt
+
+  AuthenticationAudit AuthenticationAudit[]
+  OS                  OS[]
+
+  @@map("tecnicos")
+}
+
+model AuthenticationAudit {
+  id          Int                   @id @default(autoincrement())
+  ip_address  String?
+  remote_port String?
+  browser     String?
+  status      AUTHENTICATION_STATUS
+  tecnico_cpf String?
+  tecnico     Tecnico?                 @relation(fields: [tecnico_cpf], references: [cpf], onDelete: NoAction)
+  created_at  DateTime              @default(now())
+
+  @@map("authentication_audit")
+}
+
+model OS {
+  id                    Int       @id @default(autoincrement())
+  tipo_manutencao       String
+  titulo                String    
+  sistema               String
+  tecnico_nome          String
+  data                  DateTime
+  inicio                DateTime
+  termino               DateTime
+  descricao_tarefa      String
+  anexos                String
+  tecnico               Tecnico    @relation(fields: [tecnico_nome], references: [nome], onDelete: Cascade)
+}
+
+enum AUTHENTICATION_STATUS {
+  SUCCESS
+  USER_NOT_EXISTS
+  INCORRECT_PASSWORD
+  BLOCKED
+}

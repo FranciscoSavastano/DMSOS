@@ -1,3 +1,4 @@
-DMSOS.py
-DMSOSGUI.py
-main.py
+node_modules
+build
+coverage
+.env
