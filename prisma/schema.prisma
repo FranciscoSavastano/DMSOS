@@ -34,6 +34,16 @@ model Tecnico {
   @@map("tecnicos")
 }
 
+model Cliente {
+  id          Int         @id @default(autoincrement())
+  responsavel String
+  telefone    String
+  email       String
+  endereco    String
+  cnpj        String      @unique
+  equipamento Equipamento[]
+  @@map("clientes")
+}
 model AuthenticationAudit {
   id          Int                   @id @default(autoincrement())
   ip_address  String?
@@ -58,7 +68,32 @@ model OS {
   termino               DateTime
   descricao_tarefa      String
   anexos                String
+  equipamento           Equipamento[]
   tecnico               Tecnico    @relation(fields: [tecnico_nome], references: [nome], onDelete: Cascade)
+  @@map("OS")
+}
+
+model Marca {
+  id                    Int        @id  @default(autoincrement())
+  marca                 String     @unique
+  telefone              String    
+  email                 String
+  site                  String
+  equipamento           Equipamento[]
+  @@map("marcas")
+}
+
+model Equipamento {
+  id                    Int         @id  @default(autoincrement())
+  id_os                 Int         @unique
+  nome                  String
+  modelo                String
+  marca_nome            String
+  cliente_id            Int
+  marca                 Marca       @relation(fields: [marca_nome], references: [marca])
+  cliente               Cliente     @relation(fields: [cliente_id], references: [id])
+  os                    OS          @relation(fields: [id_os], references: [id])
+
 }
 
 enum AUTHENTICATION_STATUS {

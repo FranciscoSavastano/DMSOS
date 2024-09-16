@@ -16,6 +16,16 @@ Table tecnicos {
   OS OS [not null]
 }
 
+Table clientes {
+  id Int [pk, increment]
+  responsavel String [not null]
+  telefone String [not null]
+  email String [not null]
+  endereco String [not null]
+  cnpj String [unique, not null]
+  equipamento Equipamento [not null]
+}
+
 Table authentication_audit {
   id Int [pk, increment]
   ip_address String
@@ -38,7 +48,29 @@ Table OS {
   termino DateTime [not null]
   descricao_tarefa String [not null]
   anexos String [not null]
+  equipamento Equipamento [not null]
   tecnico tecnicos [not null]
+}
+
+Table marcas {
+  id Int [pk, increment]
+  marca String [unique, not null]
+  telefone String [not null]
+  email String [not null]
+  site String [not null]
+  equipamento Equipamento [not null]
+}
+
+Table Equipamento {
+  id Int [pk, increment]
+  id_os Int [unique, not null]
+  nome String [not null]
+  modelo String [not null]
+  marca_nome String [not null]
+  cliente_id Int [not null]
+  marca marcas [not null]
+  cliente clientes [not null]
+  os OS [not null]
 }
 
 Enum AUTHENTICATION_STATUS {
@@ -51,3 +83,9 @@ Enum AUTHENTICATION_STATUS {
 Ref: authentication_audit.tecnico_cpf > tecnicos.cpf [delete: No Action]
 
 Ref: OS.tecnico_nome > tecnicos.nome [delete: Cascade]
+
+Ref: Equipamento.marca_nome > marcas.marca
+
+Ref: Equipamento.cliente_id > clientes.id
+
+Ref: Equipamento.id_os > OS.id
