@@ -6,18 +6,19 @@ import { z } from 'zod'
 export async function register(request: FastifyRequest, reply: FastifyReply) {
   const registerBodySchema = z
     .object({
-      name: z.string(),
+      nome: z.string(),
       email: z.string().email(),
+      cpf: z.string(),
       password: z.string().min(6),
     })
     .parse(request.body)
 
-  const { name, email, password } = registerBodySchema
+  const { nome, email, cpf, password } = registerBodySchema
 
   try {
     const registerUserCase = makeRegisterUseCase()
 
-    const { user } = await registerUserCase.execute({ name, email, password })
+    const { user } = await registerUserCase.execute({ nome, cpf, email, password })
 
     return await reply.status(201).send(user)
   } catch (err: unknown) {

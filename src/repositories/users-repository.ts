@@ -1,4 +1,4 @@
-import type { Prisma, User } from '@prisma/client'
+import type { Prisma, Tecnico } from '@prisma/client'
 
 export interface IChangePassword {
   email: string
@@ -6,8 +6,8 @@ export interface IChangePassword {
 }
 
 export interface UsersRepository {
-  findByEmail: (email: string) => Promise<User | null>
-  create: (data: Prisma.UserCreateInput) => Promise<User>
+  findByEmail: (email: string) => Promise<Tecnico | null>
+  create: (data: Prisma.TecnicoCreateInput) => Promise<Tecnico>
   setLastLogin: (id: string) => Promise<void>
-  changePassword: (data: IChangePassword) => Promise<User | null>
+  changePassword: (data: IChangePassword) => Promise<Tecnico | null>
 }

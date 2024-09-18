@@ -4,7 +4,7 @@ import type { IChangePassword, UsersRepository } from '../users-repository'
 
 export class PrismaUsersRepository implements UsersRepository {
   async findByEmail(email: string) {
-    const user = await prisma.user.findUnique({
+    const user = await prisma.tecnico.findUnique({
       where: {
         email,
       },
@@ -13,8 +13,8 @@ export class PrismaUsersRepository implements UsersRepository {
     return user
   }
 
-  async create(data: Prisma.UserCreateInput) {
-    const user = await prisma.user.create({
+  async create(data: Prisma.TecnicoCreateInput) {
+    const user = await prisma.tecnico.create({
       data,
     })
 
@@ -22,7 +22,7 @@ export class PrismaUsersRepository implements UsersRepository {
   }
 
   async setLastLogin(id: string) {
-    await prisma.user.update({
+    await prisma.tecnico.update({
       where: {
         id,
       },
@@ -33,7 +33,7 @@ export class PrismaUsersRepository implements UsersRepository {
   }
 
   async changePassword({ email, password_digest }: IChangePassword) {
-    const user = await prisma.user.update({
+    const user = await prisma.tecnico.update({
       where: { email },
       data: {
         password_digest,
