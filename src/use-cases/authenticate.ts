@@ -1,5 +1,5 @@
 import type { UsersRepository } from '@/repositories/users-repository'
-import type { User } from '@prisma/client'
+import type { Tecnico } from '@prisma/client'
 import { InvalidCredentialsError } from './errors/invalid-credentials-error'
 import { compare } from 'bcryptjs'
 import type { AuthenticationAuditRepository } from '@/repositories/authentication-audit-repository'
@@ -13,7 +13,7 @@ interface AuthenticateUseCaseRequest {
 }
 
 interface AuthenticateUseCaseResponse {
-  user: User
+  user: Tecnico
 }
 
 export class AuthenticateUseCase {
@@ -35,7 +35,7 @@ export class AuthenticateUseCase {
       browser: browser ?? null,
       ip_address: ipAddress ?? null,
       remote_port: remotePort ?? null,
-      user_id: user?.id ?? null,
+      tecnico_id: user?.id ?? null,
     }
 
     if (user == null) {
@@ -63,7 +63,7 @@ export class AuthenticateUseCase {
     await this.authenticationAuditRepository.create({
       ...auditAuthenticateObject,
       status: 'SUCCESS',
-      user_id: user.id,
+      tecnico_id: user.id,
     })
 
     return {

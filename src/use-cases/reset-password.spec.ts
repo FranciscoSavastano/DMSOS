@@ -18,7 +18,7 @@ describe('ResetPasswordUseCase', () => {
 
   it('should be able to reset password', async () => {
     await inMemoryUsersRepository.create({
-      name: 'John Doe',
+      nome: 'John Doe',
       email: 'johndoe@example.com',
       password_digest: 'password',
     })
@@ -38,7 +38,7 @@ describe('ResetPasswordUseCase', () => {
 
   it('should not be able to reset password with invalid jwt token', async () => {
     await inMemoryUsersRepository.create({
-      name: 'John Doe',
+      nome: 'John Doe',
       email: 'johndoe@example.com',
       password_digest: 'password',
     })
@@ -55,7 +55,7 @@ describe('ResetPasswordUseCase', () => {
 
   it('should not be able to reset password with an invalid email', async () => {
     await inMemoryUsersRepository.create({
-      name: 'John Doe',
+      nome: 'John Doe',
       email: 'johndoe@example.com',
       password_digest: 'password',
     })

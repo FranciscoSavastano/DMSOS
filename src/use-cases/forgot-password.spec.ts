@@ -17,7 +17,7 @@ describe('ForgotPasswordUseCase', () => {
   // TODO: how to assure that use case was successfully executed
   it('should be able to send reset password email', async () => {
     await inMemoryUsersRepository.create({
-      name: 'John Doe',
+      nome: 'John Doe',
       email: 'johndoe@example.com',
       password_digest: await hash('password', 1),
     })
@@ -31,7 +31,7 @@ describe('ForgotPasswordUseCase', () => {
 
   it('should not be able to send reset email with invalid email', async () => {
     await inMemoryUsersRepository.create({
-      name: 'John Doe',
+      nome: 'John Doe',
       email: 'johndoe@example.com',
       password_digest: await hash('password', 1),
     })

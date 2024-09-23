@@ -23,7 +23,7 @@ describe('AuthenticateUseCase', () => {
 
   it('should be able to authenticate', async () => {
     await inMemoryUsersRepository.create({
-      name: 'John Doe',
+      nome: 'John Doe',
       email: 'johndoe@example.com',
       password_digest: await hash('password', 1),
     })
@@ -63,7 +63,7 @@ describe('AuthenticateUseCase', () => {
 
   it('should not be able to authenticate with an invalid password', async () => {
     await inMemoryUsersRepository.create({
-      name: 'John Doe',
+      nome: 'John Doe',
       email: 'johndoe@example.com',
       password_digest: await hash('password', 1),
     })
@@ -79,7 +79,7 @@ describe('AuthenticateUseCase', () => {
 
   it('should create a record in audit authentication repository when password is invalid', async () => {
     await inMemoryUsersRepository.create({
-      name: 'John Doe',
+      nome: 'John Doe',
       email: 'johndoe@example.com',
       password_digest: await hash('password', 1),
     })
@@ -99,7 +99,7 @@ describe('AuthenticateUseCase', () => {
 
   it('should create a record in audit authentication repository when authenticate successfully', async () => {
     await inMemoryUsersRepository.create({
-      name: 'John Doe',
+      nome: 'John Doe',
       email: 'johndoe@example.com',
       password_digest: await hash('password', 1),
     })

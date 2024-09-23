@@ -8,6 +8,7 @@ Table tecnicos {
   nome String [unique, not null]
   email String [unique, not null]
   password_digest String [not null]
+  is_admin Boolean [not null, default: false]
   tentativas_de_login Int [not null, default: 0]
   last_login DateTime
   created_at DateTime [default: `now()`, not null]
@@ -17,12 +18,18 @@ Table tecnicos {
 }
 
 Table clientes {
-  id Int [pk, increment]
-  responsavel String [not null]
-  telefone String [not null]
-  email String [not null]
-  endereco String [not null]
+  id String [pk]
+  nome String [not null]
+  responsavel String [not null, default: '']
+  telefone String [not null, default: '']
+  email String [unique, not null]
+  password_digest String [not null]
+  endereco String [not null, default: '']
   cnpj String [unique, not null]
+  tentativas_de_login Int [not null, default: 0]
+  last_login DateTime
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
   equipamento Equipamento [not null]
 }
 
@@ -67,7 +74,7 @@ Table Equipamento {
   nome String [not null]
   modelo String [not null]
   marca_nome String [not null]
-  cliente_id Int [not null]
+  cliente_id String [not null]
   marca marcas [not null]
   cliente clientes [not null]
   os OS [not null]
