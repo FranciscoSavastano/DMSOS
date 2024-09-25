@@ -54,7 +54,7 @@ export class AuthenticateUseCase {
         ...auditAuthenticateObject,
         status: 'INCORRECT_PASSWORD',
       })
-      
+
       throw new InvalidCredentialsError()
     }
 

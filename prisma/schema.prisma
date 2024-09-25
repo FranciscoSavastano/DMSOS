@@ -50,6 +50,7 @@ model Cliente {
   updated_at            DateTime  @updatedAt
   equipamento Equipamento[]
   @@map("clientes")
+  AuthenticationAudit AuthenticationAudit[]
 }
 model AuthenticationAudit {
   id          Int                   @id @default(autoincrement())
@@ -57,11 +58,18 @@ model AuthenticationAudit {
   remote_port String?
   browser     String?
   status      AUTHENTICATION_STATUS
-  tecnico_id String?
-  tecnico     Tecnico?                 @relation(fields: [tecnico_id], references: [id], onDelete: NoAction)
+  user_id     String?
+  user_type   UserType              // Campo para distinguir entre Tecnico e Cliente
+  tecnico     Tecnico?              @relation(fields: [user_id], references: [id], onDelete: NoAction, map: "tecnico_user_id_fkey")
+  cliente     Cliente?              @relation(fields: [user_id], references: [id], onDelete: NoAction, map: "cliente_user_id_fkey")
   created_at  DateTime              @default(now())
 
   @@map("authentication_audit")
+}
+
+enum UserType {
+  TECNICO
+  CLIENTE
 }
 
 model OS {

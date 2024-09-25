@@ -15,5 +15,5 @@ export interface UsersRepository {
   create: (data: Prisma.TecnicoCreateInput) => Promise<Tecnico>
   setLastLogin: (id: string) => Promise<void>
   changePassword: (data: IChangePassword) => Promise<Tecnico | null>
-  makeAdmin: (data: IMakeAdmin) => Promise<Tecnico| null>
+  makeAdmin: (data: IMakeAdmin) => Promise<Tecnico | null>
 }

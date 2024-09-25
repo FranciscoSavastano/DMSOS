@@ -55,7 +55,7 @@ export class RegisterUseCase {
     return {
       user,
     }
-  }  
+  }
 }
 
 export class RegisterCustUseCase {
@@ -65,8 +65,7 @@ export class RegisterCustUseCase {
     nome,
     cnpj,
     email,
-    password
-
+    password,
   }: RegisterUseCaseCustRequest): Promise<RegisterUseCaseCustResponse> {
     const userWithSameEmail = await this.customerRepository.findByEmail(email)
 
@@ -79,7 +78,7 @@ export class RegisterCustUseCase {
       nome,
       cnpj,
       email,
-      password_digest: passwordDigest
+      password_digest: passwordDigest,
     })
 
     return {

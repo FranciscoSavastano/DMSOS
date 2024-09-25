@@ -1,6 +1,10 @@
 import { prisma } from '@/lib/prisma'
 import type { Prisma } from '@prisma/client'
-import type { IChangePassword, IMakeAdmin, UsersRepository } from '../users-repository'
+import type {
+  IChangePassword,
+  IMakeAdmin,
+  UsersRepository,
+} from '../users-repository'
 
 export class PrismaUsersRepository implements UsersRepository {
   async findByEmail(email: string) {
@@ -43,7 +47,7 @@ export class PrismaUsersRepository implements UsersRepository {
     return user
   }
 
-  async makeAdmin({email, is_admin}: IMakeAdmin){
+  async makeAdmin({ email, is_admin }: IMakeAdmin) {
     const user = await prisma.tecnico.update({
       where: { email },
       data: {
