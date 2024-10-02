@@ -2,47 +2,39 @@ import { makeCreateDutyUseCase } from '@/use-cases/factories/make-create-duty-us
 import { type FastifyRequest, type FastifyReply } from 'fastify'
 import { string, z } from 'zod'
 
-export async function register(request: FastifyRequest, reply: FastifyReply) {
+export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
     const registerBodySchema = z
         .object({
-        operator: z.string(),
-        date_start: z.string().datetime(),
-        date_end: z.string().datetime(),
-        rest_hour: z.string().datetime(),
-        ocurrence_desc: z.string(),
-        ocurrence_pm_hour: z.string().datetime(),
-        ocurrence_pm_location: z.string(),
-        ocurrence_pm_obs: z.string(),
-        ocurrence_pm_action: z.string()
+        operador: z.string(),
+        data_inicio: z.string().datetime(),
+        data_fim: z.string().datetime(),
+        horario_rf: z.string().datetime(),
+        ocorrencia_desc: z.string(),
+        ocorrencia_pm_horario: z.string().datetime(),
+        ocorrencia_pm_local: z.string(),
+        ocorrencia_pm_observacao: z.string(),
+        ocorrencia_pm_acao: z.string()
         })
         .parse(request.body)
 
-    const { operator, date_start, date_end, rest_hour, ocurrence_desc, ocurrence_pm_hour, ocurrence_pm_action, ocurrence_pm_location, ocurrence_pm_obs } = registerBodySchema
+    const { operador, data_inicio, data_fim, horario_rf, ocorrencia_desc, ocorrencia_pm_horario, ocorrencia_pm_local, ocorrencia_pm_observacao, ocorrencia_pm_acao } = registerBodySchema
 
     try {
         const registerDutyCase = makeCreateDutyUseCase()
 
-        const { duty } = await registerDutyCase.execute({
-        operator,
-        date_start,
-        date_end,
-        rest_hour
+        const { duty, ocurrence } = await registerDutyCase.execute({
+        operador,
+        data_inicio,
+        data_fim,
+        horario_rf,
+        ocorrencia_desc,
+        ocorrencia_pm_horario,
+        ocorrencia_pm_local,
+        ocorrencia_pm_observacao,
+        ocorrencia_pm_acao
         })
-        await reply.status(201).send(duty)
-        if(ocurrence_desc){
-            const registerOcurrenceCase = makeCreateOcurrenceUseCase()
-            const duty_id = duty.id
-            const {ocurrence} = await registerOcurrenceCase.execute({
-                duty_id,
-                ocurrence_desc,
-                ocurrence_pm_hour,
-                ocurrence_pm_location,
-                ocurrence_pm_obs,
-                ocurrence_pm_action
-            })
-            return await reply.status(201).send(ocurrence)
-        }
-        return
+        return await reply.status(201).send({duty,ocurrence})
+        
     } catch (err: unknown) {
 
         throw err

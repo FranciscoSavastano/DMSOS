@@ -4,6 +4,7 @@ import { authenticate } from './controllers/authenticate'
 import { refreshToken } from './controllers/refresh-token'
 import { forgotPassword } from './controllers/forgot-password'
 import { resetPassword } from './controllers/reset-password'
+import { createDuty } from './controllers/duty'
 
 export async function appRoutes(app: FastifyInstance) {
   app.post('/users', register)
@@ -15,4 +16,6 @@ export async function appRoutes(app: FastifyInstance) {
   app.post('/sessions', authenticate)
 
   app.post('/sessions/refresh-token', refreshToken)
+
+  app.post('/duty', createDuty)
 }

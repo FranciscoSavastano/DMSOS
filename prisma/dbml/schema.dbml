@@ -107,6 +107,11 @@ Table PlantaoToUser {
   operadorId String [ref: > users.id]
 }
 
+Enum UserType {
+  TECNICO
+  CLIENTE
+}
+
 Enum AUTHENTICATION_STATUS {
   SUCCESS
   USER_NOT_EXISTS

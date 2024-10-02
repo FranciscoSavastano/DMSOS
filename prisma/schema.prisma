@@ -50,7 +50,6 @@ model Cliente {
   updated_at            DateTime  @updatedAt
   equipamento Equipamento[]
   @@map("clientes")
-  AuthenticationAudit AuthenticationAudit[]
 }
 model AuthenticationAudit {
   id          Int                   @id @default(autoincrement())
