@@ -1,6 +1,9 @@
 import { prisma } from '@/lib/prisma'
 import type { Prisma } from '@prisma/client'
-import type { IChangePassword, CustomerRepository } from '../customers-repository'
+import type {
+  IChangePassword,
+  CustomerRepository,
+} from '../customers-repository'
 
 export class PrismaCustomerRepository implements CustomerRepository {
   async findByEmail(email: string) {

@@ -19,6 +19,7 @@ interface AuthenticateUseCaseResponse {
 export class AuthenticateUseCase {
   constructor(
     private readonly usersRepository: UsersRepository,
+    private readonly customerRepository: CustomerRepository,
     private readonly authenticationAuditRepository: AuthenticationAuditRepository,
   ) {}
 
@@ -30,12 +31,15 @@ export class AuthenticateUseCase {
     remotePort,
   }: AuthenticateUseCaseRequest): Promise<AuthenticateUseCaseResponse> {
     const user = await this.usersRepository.findByEmail(email)
+    if (!user) {
+      const user = await this.customerRepository.findByEmail(email)
+    }
 
     const auditAuthenticateObject = {
       browser: browser ?? null,
       ip_address: ipAddress ?? null,
       remote_port: remotePort ?? null,
-      tecnico_id: user?.id ?? null,
+      user_id: user?.id ?? null,
     }
 
     if (user == null) {
@@ -54,7 +58,7 @@ export class AuthenticateUseCase {
         ...auditAuthenticateObject,
         status: 'INCORRECT_PASSWORD',
       })
-      
+
       throw new InvalidCredentialsError()
     }
 
@@ -63,7 +67,7 @@ export class AuthenticateUseCase {
     await this.authenticationAuditRepository.create({
       ...auditAuthenticateObject,
       status: 'SUCCESS',
-      tecnico_id: user.id,
+      user_id: user.id,
     })
 
     return {

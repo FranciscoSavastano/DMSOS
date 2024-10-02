@@ -50,6 +50,7 @@ model Cliente {
   updated_at            DateTime  @updatedAt
   equipamento Equipamento[]
   @@map("clientes")
+  AuthenticationAudit AuthenticationAudit[]
 }
 model AuthenticationAudit {
   id          Int                   @id @default(autoincrement())
@@ -62,6 +63,11 @@ model AuthenticationAudit {
   created_at  DateTime              @default(now())
 
   @@map("authentication_audit")
+}
+
+enum UserType {
+  TECNICO
+  CLIENTE
 }
 
 model OS {

@@ -26,7 +26,7 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
         cpf,
         email,
         password,
-        user_role
+        user_role,
       })
 
       return await reply.status(201).send(user)
@@ -37,7 +37,7 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
 
       throw err
     }
-  } else{
+  } else {
     try {
       const cnpj = cpf
       const registerCustomerCase = makeRegisterCustUseCase()

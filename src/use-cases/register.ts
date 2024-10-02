@@ -4,7 +4,6 @@ import { hash } from 'bcryptjs'
 import { UserAlreadyExistsError } from './errors/user-already-exists'
 import type { Cliente, User } from '@prisma/client'
 
-
 interface RegisterUseCaseRequest {
   nome: string
   email: string
@@ -38,7 +37,7 @@ export class RegisterUseCase {
     cpf,
     email,
     password,
-    user_role
+    user_role,
   }: RegisterUseCaseRequest): Promise<RegisterUseCaseResponse> {
     const userWithSameEmail = await this.usersRepository.findByEmail(email)
 
@@ -53,13 +52,13 @@ export class RegisterUseCase {
       cpf,
       email,
       password_digest: passwordDigest,
-      user_role
+      user_role,
     })
 
     return {
       user,
     }
-  }  
+  }
 }
 
 export class RegisterCustUseCase {
@@ -69,8 +68,7 @@ export class RegisterCustUseCase {
     nome,
     cnpj,
     email,
-    password
-
+    password,
   }: RegisterUseCaseCustRequest): Promise<RegisterUseCaseCustResponse> {
     const userWithSameEmail = await this.customerRepository.findByEmail(email)
 
@@ -83,7 +81,7 @@ export class RegisterCustUseCase {
       nome,
       cnpj,
       email,
-      password_digest: passwordDigest
+      password_digest: passwordDigest,
     })
 
     return {

@@ -7,6 +7,6 @@ app
     port: process.env.PORT,
   })
   .then(() => {
-    console.log("Porta: " + process.env.PORT)
+    console.log('Porta: ' + process.env.PORT)
     console.log('🚀 Servidor está rodando 🚀')
   })
