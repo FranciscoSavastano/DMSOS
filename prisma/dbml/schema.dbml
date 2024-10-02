@@ -2,7 +2,7 @@
 //// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 //// ------------------------------------------------------
 
-Table tecnicos {
+Table users {
   cpf String [not null]
   id String [pk]
   nome String [unique, not null]
@@ -13,8 +13,10 @@ Table tecnicos {
   last_login DateTime
   created_at DateTime [default: `now()`, not null]
   updated_at DateTime [not null]
+  user_role String [not null, default: 'None']
   AuthenticationAudit authentication_audit [not null]
   OS OS [not null]
+  plantao plantoes [not null]
 }
 
 Table clientes {
@@ -40,7 +42,7 @@ Table authentication_audit {
   browser String
   status AUTHENTICATION_STATUS [not null]
   tecnico_id String
-  tecnico tecnicos
+  tecnico users
   created_at DateTime [default: `now()`, not null]
 }
 
@@ -56,7 +58,27 @@ Table OS {
   descricao_tarefa String [not null]
   anexos String [not null]
   equipamento Equipamento [not null]
-  tecnico tecnicos [not null]
+  tecnico users [not null]
+}
+
+Table plantoes {
+  id Int [pk, increment]
+  operador users [not null]
+  data_inicio DateTime [not null]
+  data_fim DateTime [not null]
+  horario_rf DateTime [not null]
+  ocorrencia ocorrencias [not null]
+}
+
+Table ocorrencias {
+  id Int [pk, increment]
+  plantao_id Int [not null]
+  plantao plantoes [not null]
+  descricao String [not null]
+  pm_horario DateTime
+  pm_local String
+  pm_observacao String
+  pm_acao String
 }
 
 Table marcas {
@@ -80,6 +102,11 @@ Table Equipamento {
   os OS [not null]
 }
 
+Table PlantaoToUser {
+  plantaoId Int [ref: > plantoes.id]
+  operadorId String [ref: > users.id]
+}
+
 Enum AUTHENTICATION_STATUS {
   SUCCESS
   USER_NOT_EXISTS
@@ -87,9 +114,11 @@ Enum AUTHENTICATION_STATUS {
   BLOCKED
 }
 
-Ref: authentication_audit.tecnico_id > tecnicos.id [delete: No Action]
+Ref: authentication_audit.tecnico_id > users.id [delete: No Action]
 
-Ref: OS.tecnico_nome > tecnicos.nome [delete: Cascade]
+Ref: OS.tecnico_nome > users.nome [delete: Cascade]
+
+Ref: ocorrencias.plantao_id > plantoes.id [delete: Cascade]
 
 Ref: Equipamento.marca_nome > marcas.marca
 

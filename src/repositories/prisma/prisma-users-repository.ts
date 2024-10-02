@@ -4,7 +4,7 @@ import type { IChangePassword, IMakeAdmin, UsersRepository } from '../users-repo
 
 export class PrismaUsersRepository implements UsersRepository {
   async findByEmail(email: string) {
-    const user = await prisma.tecnico.findUnique({
+    const user = await prisma.user.findUnique({
       where: {
         email,
       },
@@ -13,8 +13,8 @@ export class PrismaUsersRepository implements UsersRepository {
     return user
   }
 
-  async create(data: Prisma.TecnicoCreateInput) {
-    const user = await prisma.tecnico.create({
+  async create(data: Prisma.UserCreateInput) {
+    const user = await prisma.user.create({
       data,
     })
 
@@ -22,7 +22,7 @@ export class PrismaUsersRepository implements UsersRepository {
   }
 
   async setLastLogin(id: string) {
-    await prisma.tecnico.update({
+    await prisma.user.update({
       where: {
         id,
       },
@@ -33,7 +33,7 @@ export class PrismaUsersRepository implements UsersRepository {
   }
 
   async changePassword({ email, password_digest }: IChangePassword) {
-    const user = await prisma.tecnico.update({
+    const user = await prisma.user.update({
       where: { email },
       data: {
         password_digest,
@@ -43,8 +43,8 @@ export class PrismaUsersRepository implements UsersRepository {
     return user
   }
 
-  async makeAdmin({email, is_admin}: IMakeAdmin){
-    const user = await prisma.tecnico.update({
+  async makeAdmin({ email, is_admin }: IMakeAdmin) {
+    const user = await prisma.user.update({
       where: { email },
       data: {
         is_admin,

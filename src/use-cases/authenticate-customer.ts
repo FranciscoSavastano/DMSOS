@@ -2,7 +2,7 @@ import type { CustomerRepository } from '@/repositories/customers-repository'
 import type { Cliente } from '@prisma/client'
 import { InvalidCredentialsError } from './errors/invalid-credentials-error'
 import { compare } from 'bcryptjs'
-import type { AuthenticationAuditRepository } from '@/repositories/authentication-audit-repository'
+import type { AuthenticationAuditCustomerRepository } from '@/repositories/authentication-audit-customer-repository'
 
 interface AuthenticateUseCaseRequest {
   email: string
@@ -16,10 +16,10 @@ interface AuthenticateUseCaseResponse {
   user: Cliente
 }
 
-export class AuthenticateUseCase {
+export class AuthenticateCustomerUseCase {
   constructor(
     private readonly usersRepository: CustomerRepository,
-    private readonly authenticationAuditRepository: AuthenticationAuditRepository,
+    private readonly authenticationAuditRepository: AuthenticationAuditCustomerRepository,
   ) {}
 
   async execute({
@@ -54,7 +54,7 @@ export class AuthenticateUseCase {
         ...auditAuthenticateObject,
         status: 'INCORRECT_PASSWORD',
       })
-      
+
       throw new InvalidCredentialsError()
     }
 
@@ -63,7 +63,7 @@ export class AuthenticateUseCase {
     await this.authenticationAuditRepository.create({
       ...auditAuthenticateObject,
       status: 'SUCCESS',
-      tecnico_id: user.id,
+      cliente_id: user.id,
     })
 
     return {

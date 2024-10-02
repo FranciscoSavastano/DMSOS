@@ -12,12 +12,12 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
       email: z.string().email(),
       cpf: z.string(),
       password: z.string().min(6),
-      account_type: z.string()
+      user_role: z.string(),
     })
     .parse(request.body)
 
-  const { nome, email, cpf, password, account_type } = registerBodySchema
-  if(account_type === "Tecnico"){
+  const { nome, email, cpf, password, user_role } = registerBodySchema
+  if (user_role != 'Cliente') {
     try {
       const registerUserCase = makeRegisterTecUseCase()
 
@@ -26,6 +26,7 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
         cpf,
         email,
         password,
+        user_role
       })
 
       return await reply.status(201).send(user)
@@ -36,10 +37,8 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
 
       throw err
     }
-  }
-  else if (account_type === "Cliente"){
+  } else{
     try {
-
       const cnpj = cpf
       const registerCustomerCase = makeRegisterCustUseCase()
 
@@ -58,6 +57,5 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
 
       throw err
     }
-
   }
 }

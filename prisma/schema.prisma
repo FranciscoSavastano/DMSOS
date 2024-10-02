@@ -17,7 +17,7 @@ generator dbml {
   provider = "prisma-dbml-generator"
 }
 
-model Tecnico {
+model User {
   cpf                   String
   id                    String    @default(uuid()) @id
   nome                  String    @unique
@@ -28,11 +28,11 @@ model Tecnico {
   last_login            DateTime?
   created_at            DateTime  @default(now())
   updated_at            DateTime  @updatedAt
-
+  user_role             String    @default("None")
   AuthenticationAudit AuthenticationAudit[]
   OS                  OS[]
-
-  @@map("tecnicos")
+  plantao             Plantao[]
+  @@map("users")
 }
 
 model Cliente {
@@ -58,7 +58,7 @@ model AuthenticationAudit {
   browser     String?
   status      AUTHENTICATION_STATUS
   tecnico_id String?
-  tecnico     Tecnico?                 @relation(fields: [tecnico_id], references: [id], onDelete: NoAction)
+  tecnico     User?                 @relation(fields: [tecnico_id], references: [id], onDelete: NoAction)
   created_at  DateTime              @default(now())
 
   @@map("authentication_audit")
@@ -76,10 +76,31 @@ model OS {
   descricao_tarefa      String
   anexos                String
   equipamento           Equipamento[]
-  tecnico               Tecnico    @relation(fields: [tecnico_nome], references: [nome], onDelete: Cascade)
+  tecnico               User    @relation(fields: [tecnico_nome], references: [nome], onDelete: Cascade)
   @@map("OS")
 }
 
+model Plantao {
+  id                    Int         @id @default(autoincrement())
+  operador              User[] 
+  data_inicio           DateTime
+  data_fim              DateTime
+  horario_rf            DateTime
+  ocorrencia            Ocorrencia[]
+  @@map("plantoes")
+}
+
+model Ocorrencia {
+  id                    Int         @id @default(autoincrement())
+  plantao_id            Int
+  plantao               Plantao     @relation(fields: [plantao_id], references: [id], onDelete: Cascade)
+  descricao             String      
+  pm_horario            DateTime?    
+  pm_local              String?     
+  pm_observacao         String?     
+  pm_acao               String?
+  @@map("ocorrencias")
+}
 model Marca {
   id                    Int        @id  @default(autoincrement())
   marca                 String     @unique

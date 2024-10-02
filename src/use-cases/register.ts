@@ -2,17 +2,19 @@ import type { UsersRepository } from '@/repositories/users-repository'
 import type { CustomerRepository } from '@/repositories/customers-repository'
 import { hash } from 'bcryptjs'
 import { UserAlreadyExistsError } from './errors/user-already-exists'
-import type { Cliente, Tecnico } from '@prisma/client'
+import type { Cliente, User } from '@prisma/client'
+
 
 interface RegisterUseCaseRequest {
   nome: string
   email: string
   cpf: string
   password: string
+  user_role: string
 }
 
 interface RegisterUseCaseResponse {
-  user: Tecnico
+  user: User
 }
 
 interface RegisterUseCaseCustRequest {
@@ -36,6 +38,7 @@ export class RegisterUseCase {
     cpf,
     email,
     password,
+    user_role
   }: RegisterUseCaseRequest): Promise<RegisterUseCaseResponse> {
     const userWithSameEmail = await this.usersRepository.findByEmail(email)
 
@@ -50,6 +53,7 @@ export class RegisterUseCase {
       cpf,
       email,
       password_digest: passwordDigest,
+      user_role
     })
 
     return {
