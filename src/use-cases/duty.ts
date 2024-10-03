@@ -6,7 +6,7 @@ interface RegisterUseCaseRequest {
   data_inicio: string,
   data_fim: string,
   horario_rf: string,
-  ocorrencia_desc: string,
+  ocorrencia_desc?: string,
   ocorrencia_pm_horario?: string,
   ocorrencia_pm_local?: string,
   ocorrencia_pm_observacao?: string,
@@ -55,8 +55,9 @@ export class CreateDutyUseCase {
       pm_local: ocorrencia_pm_local,
       pm_observacao: ocorrencia_pm_observacao,
       pm_acao: ocorrencia_pm_acao
-
+      
     })
+    console.log("ok")
     return {
       duty, ocurrence
     }

@@ -99,7 +99,7 @@ model Ocorrencia {
   id                    Int         @id @default(autoincrement())
   plantao_id            Int
   plantao               Plantao     @relation(fields: [plantao_id], references: [id], onDelete: Cascade)
-  descricao             String      
+  descricao             String?      
   pm_horario            DateTime?    
   pm_local              String?     
   pm_observacao         String?     

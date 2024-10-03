@@ -9,11 +9,11 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
         data_inicio: z.string().datetime(),
         data_fim: z.string().datetime(),
         horario_rf: z.string().datetime(),
-        ocorrencia_desc: z.string(),
-        ocorrencia_pm_horario: z.string().datetime(),
-        ocorrencia_pm_local: z.string(),
-        ocorrencia_pm_observacao: z.string(),
-        ocorrencia_pm_acao: z.string()
+        ocorrencia_desc: z.string().optional(),
+        ocorrencia_pm_horario: z.string().datetime().optional(),
+        ocorrencia_pm_local: z.string().optional(),
+        ocorrencia_pm_observacao: z.string().optional(),
+        ocorrencia_pm_acao: z.string().optional()
         })
         .parse(request.body)
 
