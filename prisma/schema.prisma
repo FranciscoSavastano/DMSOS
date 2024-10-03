@@ -43,7 +43,7 @@ model Cliente {
   email           String      @unique
   password_digest String      
   endereco        String      @default("")
-  cnpj            String      @unique
+  cnpj            String
   tentativas_de_login   Int       @default(0)
   last_login            DateTime?
   created_at            DateTime  @default(now())
@@ -57,8 +57,8 @@ model AuthenticationAudit {
   remote_port String?
   browser     String?
   status      AUTHENTICATION_STATUS
-  tecnico_id String?
-  tecnico     User?                 @relation(fields: [tecnico_id], references: [id], onDelete: NoAction)
+  user_id String?
+  tecnico     User?                 @relation(fields: [user_id], references: [id], onDelete: NoAction)
   created_at  DateTime              @default(now())
 
   @@map("authentication_audit")

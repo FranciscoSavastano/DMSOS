@@ -19,7 +19,6 @@ interface AuthenticateUseCaseResponse {
 export class AuthenticateUseCase {
   constructor(
     private readonly usersRepository: UsersRepository,
-    private readonly customerRepository: CustomerRepository,
     private readonly authenticationAuditRepository: AuthenticationAuditRepository,
   ) {}
 
@@ -31,9 +30,6 @@ export class AuthenticateUseCase {
     remotePort,
   }: AuthenticateUseCaseRequest): Promise<AuthenticateUseCaseResponse> {
     const user = await this.usersRepository.findByEmail(email)
-    if (!user) {
-      const user = await this.customerRepository.findByEmail(email)
-    }
 
     const auditAuthenticateObject = {
       browser: browser ?? null,

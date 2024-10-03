@@ -27,7 +27,7 @@ Table clientes {
   email String [unique, not null]
   password_digest String [not null]
   endereco String [not null, default: '']
-  cnpj String [unique, not null]
+  cnpj String [not null]
   tentativas_de_login Int [not null, default: 0]
   last_login DateTime
   created_at DateTime [default: `now()`, not null]
@@ -41,7 +41,7 @@ Table authentication_audit {
   remote_port String
   browser String
   status AUTHENTICATION_STATUS [not null]
-  tecnico_id String
+  user_id String
   tecnico users
   created_at DateTime [default: `now()`, not null]
 }
@@ -119,7 +119,7 @@ Enum AUTHENTICATION_STATUS {
   BLOCKED
 }
 
-Ref: authentication_audit.tecnico_id > users.id [delete: No Action]
+Ref: authentication_audit.user_id > users.id [delete: No Action]
 
 Ref: OS.tecnico_nome > users.nome [delete: Cascade]
 

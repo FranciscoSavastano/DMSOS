@@ -3,6 +3,7 @@ import type { CustomerRepository } from '@/repositories/customers-repository'
 import { hash } from 'bcryptjs'
 import { UserAlreadyExistsError } from './errors/user-already-exists'
 import type { Cliente, User } from '@prisma/client'
+import { CustomerAlreadyExistsError } from './errors/customer-already-exists'
 
 interface RegisterUseCaseRequest {
   nome: string
@@ -63,7 +64,6 @@ export class RegisterUseCase {
 
 export class RegisterCustUseCase {
   constructor(private readonly customerRepository: CustomerRepository) {}
-
   async execute({
     nome,
     cnpj,
@@ -73,8 +73,9 @@ export class RegisterCustUseCase {
     const userWithSameEmail = await this.customerRepository.findByEmail(email)
 
     if (userWithSameEmail != null) {
-      throw new UserAlreadyExistsError()
+      throw new CustomerAlreadyExistsError()
     }
+
     const passwordDigest = await hash(password, 10)
 
     const user = await this.customerRepository.create({
@@ -83,9 +84,8 @@ export class RegisterCustUseCase {
       email,
       password_digest: passwordDigest,
     })
-
     return {
-      user,
+        user,
+      }
     }
-  }
 }
