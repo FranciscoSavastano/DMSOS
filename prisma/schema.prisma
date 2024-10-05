@@ -20,7 +20,7 @@ generator dbml {
 model User {
   cpf                   String
   id                    String    @default(uuid()) @id
-  nome                  String    @unique
+  nome                  String    
   email                 String    @unique
   password_digest       String
   is_admin              Boolean   @default(false)
@@ -58,7 +58,7 @@ model AuthenticationAudit {
   browser     String?
   status      AUTHENTICATION_STATUS
   user_id String?
-  tecnico     User?                 @relation(fields: [user_id], references: [id], onDelete: NoAction)
+  tecnico     User?                 @relation(fields: [user_id], references: [id], onDelete: Cascade)
   created_at  DateTime              @default(now())
 
   @@map("authentication_audit")
@@ -74,14 +74,14 @@ model OS {
   tipo_manutencao       String
   titulo                String    
   sistema               String
-  tecnico_nome          String
+  tecnico_id            String
   data                  DateTime
   inicio                DateTime
   termino               DateTime
   descricao_tarefa      String
   anexos                String
   equipamento           Equipamento[]
-  tecnico               User    @relation(fields: [tecnico_nome], references: [nome], onDelete: Cascade)
+  tecnico               User    @relation(fields: [tecnico_id], references: [id], onDelete: Cascade)
   @@map("OS")
 }
 

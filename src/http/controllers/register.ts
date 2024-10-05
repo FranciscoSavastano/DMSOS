@@ -55,7 +55,7 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
         return await reply.status(400).send({ message: err.message })
       }
       if (err instanceof CustomerAlreadyExistsError) {
-        return await reply.status(400).send({ message: err.message})
+        return await reply.status(400).send({ message: err.message })
       }
 
       throw err
