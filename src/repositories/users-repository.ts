@@ -5,9 +5,9 @@ export interface IUpdateUser {
   id: string
   data: {
     cpf?: string
-    nome?: string    
-    is_admin?: boolean   
-    user_role?: string 
+    nome?: string
+    is_admin?: boolean
+    user_role?: string
   }
 }
 export interface IChangePassword {
@@ -24,7 +24,7 @@ export interface UsersRepository {
   findByEmail: (email: string) => Promise<User | null>
   findById: (id: string) => Promise<User | null>
   create: (data: Prisma.UserCreateInput) => Promise<User>
-  read: (id : string) => Promise<User | null>
+  read: (id: string) => Promise<User | null>
   readAllUsers: () => Promise<User[]>
   update: (data: IUpdateUser) => Promise<User | null>
   deleteUser: (id: string) => Promise<boolean>

@@ -4,16 +4,12 @@ import { makeReadUserUseCase } from '@/use-cases/factories/make-read-user-use-ca
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
-export async function readUser(
-  request: FastifyRequest,
-  reply: FastifyReply,
-) {
-
+export async function readUser(request: FastifyRequest, reply: FastifyReply) {
   const readUserBodySchema = z
     .object({
-      id: z.string()
+      id: z.string(),
     })
-    
+
     .parse(request.body)
 
   const readUserHeadersSchema = z
@@ -21,13 +17,13 @@ export async function readUser(
       authorization: z.string(),
     })
     .parse(request.headers)
-  
+
   const { id } = readUserBodySchema
   const { authorization: bearerAuth } = readUserHeadersSchema
 
   try {
     const readUserUseCase = makeReadUserUseCase()
-    const user = await readUserUseCase.execute({id, bearerAuth })
+    const user = await readUserUseCase.execute({ id, bearerAuth })
 
     return await reply.status(200).send({ user })
   } catch (err: unknown) {

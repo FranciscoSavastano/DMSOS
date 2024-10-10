@@ -4,17 +4,14 @@ import { makeUpdateUserUseCase } from '@/use-cases/factories/make-update-user-us
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
-export async function updateUser(
-  request: FastifyRequest,
-  reply: FastifyReply,
-) {
+export async function updateUser(request: FastifyRequest, reply: FastifyReply) {
   const updateUserBodySchema = z
     .object({
       id: z.string(),
       nome: z.string().optional(),
       cpf: z.string().optional(),
       is_admin: z.boolean().optional(),
-      user_role: z.string().optional()
+      user_role: z.string().optional(),
     })
     .parse(request.body)
 
@@ -24,13 +21,16 @@ export async function updateUser(
     })
     .parse(request.headers)
   const { authorization: bearerAuth } = updateUserHeadersSchema
-  
-  // Valide que as strings nao sao vazias ou nulas. 
+
+  // Valide que as strings nao sao vazias ou nulas.
 
   try {
     const updateUserUseCase = makeUpdateUserUseCase()
 
-    const user = await updateUserUseCase.execute({...updateUserBodySchema, bearerAuth })
+    const user = await updateUserUseCase.execute({
+      ...updateUserBodySchema,
+      bearerAuth,
+    })
 
     return await reply.status(200).send({ user })
   } catch (err: unknown) {

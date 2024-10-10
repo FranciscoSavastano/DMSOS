@@ -49,17 +49,17 @@ export class PrismaUsersRepository implements UsersRepository {
     return users
   }
 
-  async update({id, data}: IUpdateUser) {
+  async update({ id, data }: IUpdateUser) {
     const user = await prisma.user.update({
-      where: {id},
-        data,
+      where: { id },
+      data,
     })
     return user
   }
 
   async deleteUser(id: string) {
     const user = await prisma.user.delete({
-      where: {id,},
+      where: { id },
     })
     return true
   }

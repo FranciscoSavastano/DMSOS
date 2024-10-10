@@ -1,31 +1,32 @@
 import { verify } from 'jsonwebtoken'
 import env from '@/config/env'
-import type { UsersRepository } from '@/repositories/users-repository'
-import type { User } from '@prisma/client'
+import type { DutyRepository } from '@/repositories/duties-repository'
+import type { Plantao } from '@prisma/client'
 import { InvalidJwtTokenError } from '../errors/invalid-jwt-token-error'
 import { UserEmailNotFoundError } from '../errors/user-email-not-found-error'
 
 interface UpdateUseCaseRequest {
   bearerAuth: string
-  nome?: string
-  cpf?: string
-  is_admin?: boolean
-  user_role?: string
+  id: number
+  data_inicio?: Date
+  data_fim?: Date
+  horario_rf?: Date
 }
 
 interface UpdateUseCaseResponse {
-  user: User
+  duty: Plantao
 }
 
-export class UpdateUserUseCase {
-  constructor(private readonly usersRepository: UsersRepository) {}
+export class UpdateDutyUseCase {
+  constructor(private readonly dutyRepository: DutyRepository) {}
 
   async execute({
     bearerAuth,
-    nome,
-    is_admin,
-    cpf,
-    user_role,
+    id,
+    data_inicio,
+    data_fim,
+    horario_rf,
+
   }: UpdateUseCaseRequest): Promise<UpdateUseCaseResponse> {
     const token = bearerAuth.split(' ')[1]
     let token_payload: { sub: string }
@@ -36,20 +37,19 @@ export class UpdateUserUseCase {
       throw new InvalidJwtTokenError()
     }
 
-    const token_user = await this.usersRepository.update({
-      id: token_payload.sub,
+    const duty = await this.dutyRepository.update({
+      id,
       data: {
-        cpf,
-        nome,
-        is_admin,
-        user_role,
+        data_inicio,
+        data_fim,
+        horario_rf,
       },
     })
 
-    if (token_user === null) {
+    if (duty === null) {
       throw new UserEmailNotFoundError()
     }
 
-    return { user: token_user }
+    return {duty}
   }
 }

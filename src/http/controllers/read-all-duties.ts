@@ -1,28 +1,28 @@
 import { InvalidJwtTokenError } from '@/use-cases/errors/invalid-jwt-token-error'
-import { UserIdNotFoundError } from '@/use-cases/errors/user-id-not-found-error'
-import { makeReadAllUserUseCase } from '@/use-cases/factories/make-read-all-user-use-case'
+import { DutyIdNotFoundError } from '@/use-cases/errors/duty-id-not-found-error'
+import { makeReadAllDutyUseCase } from '@/use-cases/factories/make-read-all-duty-use-case'
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
-export async function readAllUser(
+export async function readAllDuty(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const updateUserHeadersSchema = z
+  const readAllDutyHeadersSchema = z
     .object({
       authorization: z.string(),
     })
     .parse(request.headers)
-  const { authorization: bearerAuth } = updateUserHeadersSchema
+  const { authorization: bearerAuth } = readAllDutyHeadersSchema
 
   try {
-    const readAllUserUseCase = makeReadAllUserUseCase()
+    const readAllDutyUseCase = makeReadAllDutyUseCase()
 
-    const user = await readAllUserUseCase.execute({ bearerAuth })
+    const duty = await readAllDutyUseCase.execute({ bearerAuth })
 
-    return await reply.status(200).send({ user })
+    return await reply.status(200).send({ duty })
   } catch (err: unknown) {
-    if (err instanceof UserIdNotFoundError) {
+    if (err instanceof DutyIdNotFoundError) {
       return await reply.status(404).send({ message: err.message })
     }
 
