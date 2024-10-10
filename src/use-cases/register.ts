@@ -85,7 +85,7 @@ export class RegisterCustUseCase {
       password_digest: passwordDigest,
     })
     return {
-        user,
-      }
+      user,
     }
+  }
 }

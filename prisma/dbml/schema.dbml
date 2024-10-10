@@ -5,7 +5,7 @@
 Table users {
   cpf String [not null]
   id String [pk]
-  nome String [unique, not null]
+  nome String [not null]
   email String [unique, not null]
   password_digest String [not null]
   is_admin Boolean [not null, default: false]
@@ -51,7 +51,7 @@ Table OS {
   tipo_manutencao String [not null]
   titulo String [not null]
   sistema String [not null]
-  tecnico_nome String [not null]
+  tecnico_id String [not null]
   data DateTime [not null]
   inicio DateTime [not null]
   termino DateTime [not null]
@@ -119,9 +119,9 @@ Enum AUTHENTICATION_STATUS {
   BLOCKED
 }
 
-Ref: authentication_audit.user_id > users.id [delete: No Action]
+Ref: authentication_audit.user_id > users.id [delete: Cascade]
 
-Ref: OS.tecnico_nome > users.nome [delete: Cascade]
+Ref: OS.tecnico_id > users.id [delete: Cascade]
 
 Ref: ocorrencias.plantao_id > plantoes.id [delete: Cascade]
 
