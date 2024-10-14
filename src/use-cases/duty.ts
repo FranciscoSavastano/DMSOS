@@ -2,63 +2,71 @@ import type { DutyRepository } from '@/repositories/duties-repository'
 import type { Cliente, Ocorrencia, Plantao } from '@prisma/client'
 
 interface RegisterUseCaseRequest {
-  operador: string
+  operadores: string[]
   data_inicio: string
   data_fim: string
   horario_rf: string
-  ocorrencia_desc?: string
-  ocorrencia_pm_horario?: string
-  ocorrencia_pm_local?: string
-  ocorrencia_pm_observacao?: string
-  ocorrencia_pm_acao?: string
+  ocorrencias: {
+    ocorrencia_desc?: string
+    ocorrencia_pm_horario?: string
+    ocorrencia_pm_local?: string
+    ocorrencia_pm_observacao?: string
+    ocorrencia_pm_acao?: string
+  }[]
 }
 
 interface RegisterUseCaseResponse {
-  duty: Plantao
-  ocurrence: Ocorrencia
+  duties: Plantao[]
+  ocorrences: Ocorrencia[]
 }
 
 export class CreateDutyUseCase {
   constructor(private readonly dutyRepository: DutyRepository) {}
 
   async execute({
-    operador,
+    operadores,
     data_inicio,
     data_fim,
     horario_rf,
-    ocorrencia_desc,
-    ocorrencia_pm_horario,
-    ocorrencia_pm_local,
-    ocorrencia_pm_observacao,
-    ocorrencia_pm_acao,
+    ocorrencias,
   }: RegisterUseCaseRequest): Promise<RegisterUseCaseResponse> {
-    const duty = await this.dutyRepository.create({
-      operador: {
-        connect: {
-          id: operador,
-        },
-      },
-      data_inicio,
-      data_fim,
-      horario_rf,
-    })
+    const duties = []
+    const ocorrences = []
 
-    const ocurrence = await this.dutyRepository.createOcurrence({
-      plantao: {
-        connect: {
-          id: duty.id,
+    for (const operador of operadores) {
+      const duty = await this.dutyRepository.create({
+        operador: {
+          connect: {
+            id: operador,
+          },
         },
-      },
-      descricao: ocorrencia_desc,
-      pm_horario: ocorrencia_pm_horario,
-      pm_local: ocorrencia_pm_local,
-      pm_observacao: ocorrencia_pm_observacao,
-      pm_acao: ocorrencia_pm_acao,
-    })
-    console.log('ok')
+        data_inicio,
+        data_fim,
+        horario_rf,
+      })
+
+      for (const ocorrencia of ocorrencias) {
+        const ocurrence = await this.dutyRepository.createOcurrence({
+          plantao: {
+            connect: {
+              id: duty.id,
+            },
+          },
+          descricao: ocorrencia.ocorrencia_desc,
+          pm_horario: ocorrencia.ocorrencia_pm_horario,
+          pm_local: ocorrencia.ocorrencia_pm_local,
+          pm_observacao: ocorrencia.ocorrencia_pm_observacao,
+          pm_acao: ocorrencia.ocorrencia_pm_acao,
+        })
+        ocorrences.push(ocurrence)
+      }
+
+      duties.push(duty)
+    }
+
     return {
-      duty,
-      ocurrence,
+      duties,
+      ocorrences,
     }
   }
 }

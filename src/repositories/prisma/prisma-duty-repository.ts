@@ -73,5 +73,4 @@ export class PrismaDutyRepository implements DutyRepository {
     })
     return true
   }
-
 }
