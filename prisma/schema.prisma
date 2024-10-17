@@ -51,6 +51,7 @@ model Cliente {
   equipamento Equipamento[]
   @@map("clientes")
 }
+
 model AuthenticationAudit {
   id          Int                   @id @default(autoincrement())
   ip_address  String?
@@ -99,6 +100,7 @@ model Ocorrencia {
   id                    Int         @id @default(autoincrement())
   plantao_id            Int
   plantao               Plantao     @relation(fields: [plantao_id], references: [id], onDelete: Cascade)
+  ocurrence_type        String[]
   descricao             String?      
   pm_horario            DateTime?    
   pm_local              String?     
@@ -106,6 +108,14 @@ model Ocorrencia {
   pm_acao               String?
   @@map("ocorrencias")
 }
+
+model Ocurrence_types {
+  id              Int           @default(autoincrement()) @id
+  type            String
+  subtypes        String[]
+  @@map("Ocurrence_type")
+}
+
 model Marca {
   id                    Int        @id  @default(autoincrement())
   marca                 String     @unique

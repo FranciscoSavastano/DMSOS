@@ -13,6 +13,7 @@ import { readDuty } from './controllers/read-duty'
 import { readAllDuty } from './controllers/read-all-duties'
 import { updateDuty } from './controllers/update-duty'
 import { deleteDuty } from './controllers/delete-duty'
+import { createOcurrenceType } from './controllers/ocurrence_types'
 
 export async function appRoutes(app: FastifyInstance) {
   //Users
@@ -38,6 +39,7 @@ export async function appRoutes(app: FastifyInstance) {
 
   app.delete('/duty/delete', deleteDuty)
 
+  app.post('/ocurrencetypes', createOcurrenceType)
   //Outros
 
   app.post('/users/forgot-password', forgotPassword)

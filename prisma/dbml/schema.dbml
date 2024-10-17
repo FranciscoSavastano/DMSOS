@@ -74,11 +74,18 @@ Table ocorrencias {
   id Int [pk, increment]
   plantao_id Int [not null]
   plantao plantoes [not null]
+  ocurrence_type String[] [not null]
   descricao String
   pm_horario DateTime
   pm_local String
   pm_observacao String
   pm_acao String
+}
+
+Table Ocurrence_type {
+  id Int [pk, increment]
+  type String [not null]
+  subtypes String[] [not null]
 }
 
 Table marcas {
