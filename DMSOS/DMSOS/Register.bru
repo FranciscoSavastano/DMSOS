@@ -1,0 +1,21 @@
+meta {
+  name: Register
+  type: http
+  seq: 3
+}
+
+post {
+  url: 127.0.0.1:3333/users
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "nome": "francisco saasta",
+    "cpf": "14003118787",
+    "email": "francisco@gmil.com",
+    "password": "senha1234",
+    "user_role": "Tecnico"
+  }
+}

@@ -1,0 +1,137 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator dbml {
+  provider = "prisma-dbml-generator"
+}
+
+model User {
+  cpf                   String
+  id                    String    @default(uuid()) @id
+  nome                  String    
+  email                 String    @unique
+  password_digest       String
+  is_admin              Boolean   @default(false)
+  tentativas_de_login   Int       @default(0)
+  last_login            DateTime?
+  created_at            DateTime  @default(now())
+  updated_at            DateTime  @updatedAt
+  user_role             String    @default("None")
+  AuthenticationAudit AuthenticationAudit[]
+  OS                  OS[]
+  plantao             Plantao[]
+  @@map("users")
+}
+
+model Cliente {
+  id              String         @id @default(uuid())
+  nome            String
+  responsavel     String      @default("")
+  telefone        String      @default("")
+  email           String      @unique
+  password_digest String      
+  endereco        String      @default("")
+  cnpj            String
+  tentativas_de_login   Int       @default(0)
+  last_login            DateTime?
+  created_at            DateTime  @default(now())
+  updated_at            DateTime  @updatedAt
+  equipamento Equipamento[]
+  @@map("clientes")
+}
+model AuthenticationAudit {
+  id          Int                   @id @default(autoincrement())
+  ip_address  String?
+  remote_port String?
+  browser     String?
+  status      AUTHENTICATION_STATUS
+  user_id String?
+  tecnico     User?                 @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  created_at  DateTime              @default(now())
+
+  @@map("authentication_audit")
+}
+
+enum UserType {
+  TECNICO
+  CLIENTE
+}
+
+model OS {
+  id                    Int       @id @default(autoincrement())
+  tipo_manutencao       String
+  titulo                String    
+  sistema               String
+  tecnico_id            String
+  data                  DateTime
+  inicio                DateTime
+  termino               DateTime
+  descricao_tarefa      String
+  anexos                String
+  equipamento           Equipamento[]
+  tecnico               User    @relation(fields: [tecnico_id], references: [id], onDelete: Cascade)
+  @@map("OS")
+}
+
+model Plantao {
+  id                    Int         @id @default(autoincrement())
+  operador              User[] 
+  data_inicio           DateTime
+  data_fim              DateTime
+  horario_rf            DateTime
+  ocorrencia            Ocorrencia[]
+  @@map("plantoes")
+}
+
+model Ocorrencia {
+  id                    Int         @id @default(autoincrement())
+  plantao_id            Int
+  plantao               Plantao     @relation(fields: [plantao_id], references: [id], onDelete: Cascade)
+  descricao             String?      
+  pm_horario            DateTime?    
+  pm_local              String?     
+  pm_observacao         String?     
+  pm_acao               String?
+  @@map("ocorrencias")
+}
+model Marca {
+  id                    Int        @id  @default(autoincrement())
+  marca                 String     @unique
+  telefone              String    
+  email                 String
+  site                  String
+  equipamento           Equipamento[]
+  @@map("marcas")
+}
+
+model Equipamento {
+  id                    Int         @id  @default(autoincrement())
+  id_os                 Int         @unique
+  nome                  String
+  modelo                String
+  marca_nome            String
+  cliente_id            String
+  marca                 Marca       @relation(fields: [marca_nome], references: [marca])
+  cliente               Cliente     @relation(fields: [cliente_id], references: [id])
+  os                    OS          @relation(fields: [id_os], references: [id])
+
+}
+
+enum AUTHENTICATION_STATUS {
+  SUCCESS
+  USER_NOT_EXISTS
+  INCORRECT_PASSWORD
+  BLOCKED
+}

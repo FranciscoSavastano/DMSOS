@@ -1,0 +1,132 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Table users {
+  cpf String [not null]
+  id String [pk]
+  nome String [not null]
+  email String [unique, not null]
+  password_digest String [not null]
+  is_admin Boolean [not null, default: false]
+  tentativas_de_login Int [not null, default: 0]
+  last_login DateTime
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  user_role String [not null, default: 'None']
+  AuthenticationAudit authentication_audit [not null]
+  OS OS [not null]
+  plantao plantoes [not null]
+}
+
+Table clientes {
+  id String [pk]
+  nome String [not null]
+  responsavel String [not null, default: '']
+  telefone String [not null, default: '']
+  email String [unique, not null]
+  password_digest String [not null]
+  endereco String [not null, default: '']
+  cnpj String [not null]
+  tentativas_de_login Int [not null, default: 0]
+  last_login DateTime
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  equipamento Equipamento [not null]
+}
+
+Table authentication_audit {
+  id Int [pk, increment]
+  ip_address String
+  remote_port String
+  browser String
+  status AUTHENTICATION_STATUS [not null]
+  user_id String
+  tecnico users
+  created_at DateTime [default: `now()`, not null]
+}
+
+Table OS {
+  id Int [pk, increment]
+  tipo_manutencao String [not null]
+  titulo String [not null]
+  sistema String [not null]
+  tecnico_id String [not null]
+  data DateTime [not null]
+  inicio DateTime [not null]
+  termino DateTime [not null]
+  descricao_tarefa String [not null]
+  anexos String [not null]
+  equipamento Equipamento [not null]
+  tecnico users [not null]
+}
+
+Table plantoes {
+  id Int [pk, increment]
+  operador users [not null]
+  data_inicio DateTime [not null]
+  data_fim DateTime [not null]
+  horario_rf DateTime [not null]
+  ocorrencia ocorrencias [not null]
+}
+
+Table ocorrencias {
+  id Int [pk, increment]
+  plantao_id Int [not null]
+  plantao plantoes [not null]
+  descricao String
+  pm_horario DateTime
+  pm_local String
+  pm_observacao String
+  pm_acao String
+}
+
+Table marcas {
+  id Int [pk, increment]
+  marca String [unique, not null]
+  telefone String [not null]
+  email String [not null]
+  site String [not null]
+  equipamento Equipamento [not null]
+}
+
+Table Equipamento {
+  id Int [pk, increment]
+  id_os Int [unique, not null]
+  nome String [not null]
+  modelo String [not null]
+  marca_nome String [not null]
+  cliente_id String [not null]
+  marca marcas [not null]
+  cliente clientes [not null]
+  os OS [not null]
+}
+
+Table PlantaoToUser {
+  plantaoId Int [ref: > plantoes.id]
+  operadorId String [ref: > users.id]
+}
+
+Enum UserType {
+  TECNICO
+  CLIENTE
+}
+
+Enum AUTHENTICATION_STATUS {
+  SUCCESS
+  USER_NOT_EXISTS
+  INCORRECT_PASSWORD
+  BLOCKED
+}
+
+Ref: authentication_audit.user_id > users.id [delete: Cascade]
+
+Ref: OS.tecnico_id > users.id [delete: Cascade]
+
+Ref: ocorrencias.plantao_id > plantoes.id [delete: Cascade]
+
+Ref: Equipamento.marca_nome > marcas.marca
+
+Ref: Equipamento.cliente_id > clientes.id
+
+Ref: Equipamento.id_os > OS.id
