@@ -3,7 +3,9 @@ import { PrismaOcurrenceTypeRepository } from '@/repositories/prisma/prisma-ocur
 
 export function makeCreateOcurrenceTypeUseCase() {
   const ocurrenceTypeRepository = new PrismaOcurrenceTypeRepository()
-  const createOcurrenceTypeUseCase = new CreateOcurrenceTypeUseCase(ocurrenceTypeRepository)
+  const createOcurrenceTypeUseCase = new CreateOcurrenceTypeUseCase(
+    ocurrenceTypeRepository,
+  )
 
   return createOcurrenceTypeUseCase
 }

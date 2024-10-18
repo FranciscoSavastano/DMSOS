@@ -33,7 +33,7 @@ export class PrismaDutyRepository implements DutyRepository {
   async read(id: number) {
     const duty = await prisma.plantao.findUnique({
       where: {
-        id
+        id,
       },
       include: {
         operador: true,
@@ -43,15 +43,15 @@ export class PrismaDutyRepository implements DutyRepository {
   }
 
   async readAllDuties() {
-    const duty = await prisma.plantao.findMany({ 
+    const duty = await prisma.plantao.findMany({
       include: {
         operador: true,
-    }
-  })
+      },
+    })
     return duty
   }
 
-  async update({id, data}: IUpdateDuty) {
+  async update({ id, data }: IUpdateDuty) {
     const duty = await prisma.plantao.update({
       where: { id },
       data,
@@ -62,10 +62,10 @@ export class PrismaDutyRepository implements DutyRepository {
     return duty
   }
 
-  async deleteDuty(id: number ) {
+  async deleteDuty(id: number) {
     const duty = await prisma.plantao.delete({
       where: {
-        id
+        id,
       },
       include: {
         operador: true,

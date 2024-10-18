@@ -35,7 +35,7 @@ export async function appRoutes(app: FastifyInstance) {
 
   app.get('/duty/readAll', readAllDuty)
 
-  app.patch('/duty/update', updateDuty) 
+  app.patch('/duty/update', updateDuty)
 
   app.delete('/duty/delete', deleteDuty)
 
@@ -49,6 +49,4 @@ export async function appRoutes(app: FastifyInstance) {
   app.post('/sessions', authenticate)
 
   app.post('/sessions/refresh-token', refreshToken)
-
-  
 }

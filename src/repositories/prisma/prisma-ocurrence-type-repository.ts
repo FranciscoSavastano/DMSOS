@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import type { Prisma } from '@prisma/client'
-import type { OcurrenceTypesRepository} from '../ocurrence-types-repository'
+import type { OcurrenceTypesRepository } from '../ocurrence-types-repository'
 
 export class PrismaOcurrenceTypeRepository implements OcurrenceTypesRepository {
   async create(data: Prisma.Ocurrence_typesCreateInput) {
@@ -15,7 +15,7 @@ export class PrismaOcurrenceTypeRepository implements OcurrenceTypesRepository {
     const ocurrence_type = await prisma.ocurrence_types.findUnique({
       where: {
         id,
-      }
+      },
     })
     return ocurrence_type
   }
@@ -23,23 +23,21 @@ export class PrismaOcurrenceTypeRepository implements OcurrenceTypesRepository {
   async read(id: number) {
     const ocurrence_type = await prisma.ocurrence_types.findUnique({
       where: {
-        id
+        id,
       },
     })
     return ocurrence_type
   }
 
   async readAllOcurrenceType() {
-    const ocurrence_type = await prisma.ocurrence_types.findMany({
-  })
+    const ocurrence_type = await prisma.ocurrence_types.findMany({})
     return ocurrence_type
   }
 
-  
-  async deleteOcurrenceType(id: number ) {
+  async deleteOcurrenceType(id: number) {
     const ocurrence_type = await prisma.ocurrence_types.delete({
       where: {
-        id
+        id,
       },
     })
     return true

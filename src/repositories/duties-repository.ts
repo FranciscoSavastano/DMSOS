@@ -23,7 +23,7 @@ export interface DutyRepository {
   create: (data: Prisma.PlantaoCreateInput) => Promise<Plantao>
   createOcurrence: (data: Prisma.OcorrenciaCreateInput) => Promise<Ocorrencia>
   read: (id: number) => Promise<Plantao | null>
-  readAllDuties: () => Promise<Plantao[] >
+  readAllDuties: () => Promise<Plantao[]>
   update: (data: IUpdateDuty) => Promise<Plantao | null>
   deleteDuty: (id: number) => Promise<boolean>
   findById: (id: number) => Promise<Plantao | null>

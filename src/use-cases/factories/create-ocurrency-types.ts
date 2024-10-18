@@ -3,7 +3,7 @@ import type { Ocurrence_types } from '@prisma/client'
 
 interface RegisterUseCaseRequest {
   type: string
-  subtypes: string[]  
+  subtypes: string[]
 }
 
 interface RegisterUseCaseResponse {
@@ -11,21 +11,21 @@ interface RegisterUseCaseResponse {
 }
 
 export class CreateOcurrenceTypeUseCase {
-  constructor(private readonly ocurrenceTypeRepository: OcurrenceTypesRepository) {}
+  constructor(
+    private readonly ocurrenceTypeRepository: OcurrenceTypesRepository,
+  ) {}
 
   async execute({
     type,
-    subtypes
+    subtypes,
   }: RegisterUseCaseRequest): Promise<RegisterUseCaseResponse> {
-
     const ocurrence_type = await this.ocurrenceTypeRepository.create({
-        type,
-        subtypes,
+      type,
+      subtypes,
     })
 
     return {
-        ocurrence_type
+      ocurrence_type,
     }
-    }
+  }
 }
-  
