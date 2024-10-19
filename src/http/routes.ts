@@ -14,6 +14,7 @@ import { readAllDuty } from './controllers/read-all-duties'
 import { updateDuty } from './controllers/update-duty'
 import { deleteDuty } from './controllers/delete-duty'
 import { createOcurrenceType } from './controllers/ocurrence_types'
+import { fetchUserNames } from './controllers/read-all-user-type'
 
 export async function appRoutes(app: FastifyInstance) {
   //Users
@@ -26,7 +27,7 @@ export async function appRoutes(app: FastifyInstance) {
 
   app.patch('/users/update', updateUser)
 
-  app.delete('/users/delete', deleteUser)
+  app.get('/users/getnames', fetchUserNames)
 
   //Plantao
   app.post('/duty', createDuty)

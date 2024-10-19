@@ -1,0 +1,25 @@
+meta {
+  name: Duty
+  type: http
+  seq: 4
+}
+
+post {
+  url: 127.0.0.1:3333/duty
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "operador": "237e13a3-6c48-4428-8b9d-7d9e7d2090ac",
+    "data_inicio": "2023-12-31T23:59:59Z",
+    "data_fim": "2023-12-31T23:59:59Z",
+    "horario_rf": "2023-12-31T23:59:59Z",
+    "ocorrencia_desc" : "15:00 - zabbix",
+    "ocorrencia_pm_horario": "2023-12-31T23:59:59Z",
+    "ocorrencia_pm_local": "SOHO",
+    "ocorrencia_pm_observacao": "pm multou tal carro",
+    "ocorrencia_pm_acao": "Policia fez tal coisa"
+  }
+}

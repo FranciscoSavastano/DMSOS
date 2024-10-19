@@ -1,0 +1,21 @@
+meta {
+  name: ReadUser
+  type: http
+  seq: 6
+}
+
+post {
+  url: 127.0.0.1:3333/users/read
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmN2ZmZGYzYy1kZmEyLTQxYmQtODBmYS1jNWM3YjZlMDQ4MjciLCJpYXQiOjE3MjgwOTMxOTgsImV4cCI6MTcyODA5MzQ5OH0.y1OY7v_kxVqJu4uEcB1T-qrWkAHoHBJm-TkmQqhMnM8
+}
+
+body:json {
+  {
+    "id" : "f7ffdf3c-dfa2-41bd-80fa-c5c7b6e04827"
+  }
+}
