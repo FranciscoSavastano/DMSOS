@@ -7,17 +7,17 @@ interface RegisterUseCaseRequest {
   data_fim: string
   horario_rf: string
   ocorrencias: {
-    ocorrencia_desc?: string
-    ocorrencia_pm_horario?: string
-    ocorrencia_pm_local?: string
-    ocorrencia_pm_observacao?: string
-    ocorrencia_pm_acao?: string
+    ocorrencia_desc?: string;
+    ocorrencia_pm_horario?: string;
+    ocorrencia_pm_local?: string;
+    ocorrencia_pm_observacao?: string;
+    ocorrencia_pm_acao?: string;
   }[]
 }
 
 interface RegisterUseCaseResponse {
   duties: Plantao[]
-  ocorrences: Ocorrencia[]
+  ocurrences: Ocorrencia[]
 }
 
 export class CreateDutyUseCase {
@@ -31,7 +31,7 @@ export class CreateDutyUseCase {
     ocorrencias,
   }: RegisterUseCaseRequest): Promise<RegisterUseCaseResponse> {
     const duties = []
-    const ocorrences = []
+    const ocurrences = []
 
     for (const operador of operadores) {
       const duty = await this.dutyRepository.create({
@@ -58,7 +58,7 @@ export class CreateDutyUseCase {
           pm_observacao: ocorrencia.ocorrencia_pm_observacao,
           pm_acao: ocorrencia.ocorrencia_pm_acao,
         })
-        ocorrences.push(ocurrence)
+        ocurrences.push(ocurrence)
       }
 
       duties.push(duty)
@@ -66,7 +66,7 @@ export class CreateDutyUseCase {
 
     return {
       duties,
-      ocorrences,
+      ocurrences,
     }
   }
 }
