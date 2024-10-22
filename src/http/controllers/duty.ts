@@ -5,7 +5,8 @@ import { string, z } from 'zod'
 export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
   const registerBodySchema = z
     .object({
-      operadores: z.string().array(),
+      operador: z.string(),
+      operadoresNome: z.string().array(),
       data_inicio: z.string().datetime(),
       data_fim: z.string().datetime(),
       horario_rf: z.string().datetime(),
@@ -18,7 +19,8 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
     .parse(request.body)
 
   const {
-    operadores,
+    operador,
+    operadoresNome,
     data_inicio,
     data_fim,
     horario_rf,
@@ -32,7 +34,8 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
   try {
     const registerDutyCase = makeCreateDutyUseCase()
       const { duties, ocurrences } = await registerDutyCase.execute({
-      operadores,
+      operador,
+      operadoresNome,
       data_inicio,
       data_fim,
       horario_rf,

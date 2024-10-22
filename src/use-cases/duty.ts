@@ -2,7 +2,8 @@ import type { DutyRepository } from '@/repositories/duties-repository'
 import type { Cliente, Ocorrencia, Plantao } from '@prisma/client'
 
 interface RegisterUseCaseRequest {
-  operadores: string[]
+  operador: string
+  operadoresNome: string[]
   data_inicio: string
   data_fim: string
   horario_rf: string
@@ -16,7 +17,7 @@ interface RegisterUseCaseRequest {
 }
 
 interface RegisterUseCaseResponse {
-  duties: Plantao[]
+  duty: Plantao
   ocurrences: Ocorrencia[]
 }
 
@@ -24,27 +25,25 @@ export class CreateDutyUseCase {
   constructor(private readonly dutyRepository: DutyRepository) {}
   
   async execute({
-    operadores,
+    operador,
+    operadoresNome,
     data_inicio,
     data_fim,
     horario_rf,
     ocorrencias,
   }: RegisterUseCaseRequest): Promise<RegisterUseCaseResponse> {
-    const duties = []
     const ocurrences = []
-
-    for (const operador of operadores) {
-      const duty = await this.dutyRepository.create({
-        operadores: {
-          connect: {
-            id: operador,
-          },
-        },
-        data_inicio,
-        data_fim,
-        horario_rf,
-      })
-
+    const duty = await this.dutyRepository.create({
+      operadores: {
+        connect: {
+          id: operador
+        }
+      },
+      operadoresNome,
+      data_inicio,
+      data_fim,
+      horario_rf,
+    })
       for (const ocorrencia of ocorrencias) {
         const ocurrence = await this.dutyRepository.createOcurrence({
           plantao: {
@@ -60,13 +59,6 @@ export class CreateDutyUseCase {
         })
         ocurrences.push(ocurrence)
       }
-
-      duties.push(duty)
+      return {duty,ocurrences}
     }
-
-    return {
-      duties,
-      ocurrences,
-    }
-  }
-}
+  }  

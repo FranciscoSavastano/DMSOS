@@ -17,7 +17,7 @@ export class PrismaDutyRepository implements DutyRepository {
         id,
       },
       include: {
-        operador: true,
+        operadores: true,
       },
     })
     return duty
@@ -36,7 +36,7 @@ export class PrismaDutyRepository implements DutyRepository {
         id,
       },
       include: {
-        operador: true,
+        operadores: true,
       },
     })
     return duty
@@ -45,8 +45,10 @@ export class PrismaDutyRepository implements DutyRepository {
   async readAllDuties() {
     const duty = await prisma.plantao.findMany({
       include: {
-        operador: true,
+        operadores: true,
+        ocorrencia: true,
       },
+
     })
     return duty
   }
@@ -56,7 +58,7 @@ export class PrismaDutyRepository implements DutyRepository {
       where: { id },
       data,
       include: {
-        operador: true,
+        operadores: true,
       },
     })
     return duty
@@ -68,7 +70,7 @@ export class PrismaDutyRepository implements DutyRepository {
         id,
       },
       include: {
-        operador: true,
+        operadores: true,
       },
     })
     return true
