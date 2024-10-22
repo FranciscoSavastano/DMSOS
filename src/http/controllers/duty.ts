@@ -33,22 +33,23 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
 
   try {
     const registerDutyCase = makeCreateDutyUseCase()
-      const { duties, ocurrences } = await registerDutyCase.execute({
+    const { duty, ocurrences } = await registerDutyCase.execute({
       operador,
       operadoresNome,
       data_inicio,
       data_fim,
       horario_rf,
-      ocorrencias : [ { 
-        ocorrencia_desc,
-        ocorrencia_pm_horario,
-        ocorrencia_pm_local,
-        ocorrencia_pm_observacao,
-        ocorrencia_pm_acao,
-      },
-    ],
-          })
-    return await reply.status(201).send({ duties, ocurrences })
+      ocorrencias: [
+        {
+          ocorrencia_desc,
+          ocorrencia_pm_horario,
+          ocorrencia_pm_local,
+          ocorrencia_pm_observacao,
+          ocorrencia_pm_acao,
+        },
+      ],
+    })
+    return await reply.status(201).send({ duty, ocurrences })
   } catch (err: unknown) {
     throw err
   }

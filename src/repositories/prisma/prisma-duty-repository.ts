@@ -48,7 +48,6 @@ export class PrismaDutyRepository implements DutyRepository {
         operadores: true,
         ocorrencia: true,
       },
-
     })
     return duty
   }
