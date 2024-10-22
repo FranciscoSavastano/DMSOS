@@ -22,7 +22,7 @@ interface RegisterUseCaseResponse {
 
 export class CreateDutyUseCase {
   constructor(private readonly dutyRepository: DutyRepository) {}
-
+  
   async execute({
     operadores,
     data_inicio,
@@ -35,7 +35,7 @@ export class CreateDutyUseCase {
 
     for (const operador of operadores) {
       const duty = await this.dutyRepository.create({
-        operador: {
+        operadores: {
           connect: {
             id: operador,
           },

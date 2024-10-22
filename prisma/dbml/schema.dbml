@@ -63,11 +63,20 @@ Table OS {
 
 Table plantoes {
   id Int [pk, increment]
-  operador users [not null]
+  operadores users [not null]
   data_inicio DateTime [not null]
   data_fim DateTime [not null]
   horario_rf DateTime [not null]
   ocorrencia ocorrencias [not null]
+}
+
+Table plantao_operador {
+  plantaoId Int [not null]
+  operadorId String [not null]
+
+  indexes {
+    (plantaoId, operadorId) [pk]
+  }
 }
 
 Table ocorrencias {
@@ -111,7 +120,7 @@ Table Equipamento {
 
 Table PlantaoToUser {
   plantaoId Int [ref: > plantoes.id]
-  operadorId String [ref: > users.id]
+  operadoresId String [ref: > users.id]
 }
 
 Enum UserType {

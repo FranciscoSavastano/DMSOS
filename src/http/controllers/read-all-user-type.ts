@@ -35,7 +35,6 @@ export async function fetchUserNames(  request: FastifyRequest,
             }
         });
         const users = response.data.user.users;
-        console.log(users)
         // Extraia os dados desejados da response completa
         const filteredUsers = users.map(user => ({
             id: user.id,
@@ -44,7 +43,6 @@ export async function fetchUserNames(  request: FastifyRequest,
             user_role: user.user_role
         }));
 
-        console.log(filteredUsers)
         return filteredUsers
     } catch (error) {
         console.error('Error fetching user data:', error);

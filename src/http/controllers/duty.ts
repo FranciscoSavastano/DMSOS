@@ -31,8 +31,7 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
 
   try {
     const registerDutyCase = makeCreateDutyUseCase()
-
-    const { duties, ocurrences } = await registerDutyCase.execute({
+      const { duties, ocurrences } = await registerDutyCase.execute({
       operadores,
       data_inicio,
       data_fim,

@@ -88,7 +88,7 @@ model OS {
 
 model Plantao {
   id                    Int         @id @default(autoincrement())
-  operador              User[] 
+  operadores            User[]
   data_inicio           DateTime
   data_fim              DateTime
   horario_rf            DateTime
@@ -96,6 +96,12 @@ model Plantao {
   @@map("plantoes")
 }
 
+model PlantaoOperador {
+  plantaoId  Int
+  operadorId String
+  @@id([plantaoId, operadorId])
+  @@map("plantao_operador")
+}
 model Ocorrencia {
   id                    Int         @id @default(autoincrement())
   plantao_id            Int

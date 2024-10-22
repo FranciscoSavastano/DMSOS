@@ -27,6 +27,8 @@ export async function appRoutes(app: FastifyInstance) {
 
   app.patch('/users/update', updateUser)
 
+  app.delete('/users/delete', deleteUser)
+
   app.get('/users/getnames', fetchUserNames)
 
   //Plantao
