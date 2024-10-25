@@ -12,6 +12,7 @@
       }
       .s1 {
         color: #001233;
+        margin-left: 20%;
         font-family: 'Microsoft Sans Serif', sans-serif;
         font-style: normal;
         font-weight: normal;
@@ -159,9 +160,31 @@
         vertical-align: top;
         overflow: visible;
       }
+      .com-image {
+        width: 100%;;
+        position: relative;
+        z-index: 2;
+      }
+
+      .fade-logo {
+        position: absolute;
+        top: 550px; 
+        left: 0; 
+        z-index: 1;
+      }   
+      .simple-logo {
+        width: 13rem;
+        height: 9rem;
+        position:absolute;
+        left: 80%;
+        top: 49rem
+      }
     </style>
   </head>
   <body>
+    <img class = "com-image" width="795" height="700" src="/src/utils/pdf-img/com-image.png" />
+    <img class = "fade-logo" width="300" height="300" src="/src/utils/pdf-img/fade-logo.png" />
+ 
     <p style="text-indent: 0pt; text-align: left"><br /></p>
     <p
       class="s1"
@@ -190,7 +213,7 @@
         text-align: left;
       "
     >
-      OPERADOR: Sheldon Rocha PERÍODO: Diurno
+      OPERADOR: {{this.nome}} PERÍODO: {{this.day-period}}
     </p>
     <p style="padding-top: 5pt; text-indent: 0pt; text-align: left"><br /></p>
     <p class="s4" style="text-indent: 0pt; text-align: right">
@@ -200,39 +223,30 @@
       class="s5"
       style="padding-left: 17pt; text-indent: 0pt; text-align: left"
     >
-      01/10/2024
+      {{this.date}}
     </p>
     <p style="text-indent: 0pt; text-align: left">
       <span
         ><table border="0" cellspacing="0" cellpadding="0">
           <tr>
-            <td>
-              <img width="795" height="700" src="pdf-img/com-image.png" />
-            </td>
+              
           </tr></table></span
       ><span
         ><table border="0" cellspacing="0" cellpadding="0">
           <tr>
-            <td>
-              <img width="300" height="300" src="pdf-img/fade-logo.png" />
-            </td>
+            
+                       
           </tr>
           <tr>
             <td></td>
           </tr>
           <tr>
-            <td class="contract-name">CENTRO METROPOLITANO</td>
-            <td class="operator-name">OPERADOR: {{this.name}}</td>
-            <td class="day-period">PERÍODO: {{this.time}}</td>
-            <td class="date">{{this.date}}</td>
-
-            <td class="main-site-url">www.dmsys.com.br</td>
-            <td>
+                        <td>
               <img
                 class="simple-logo"
                 width="200"
                 height="200"
-                src="./pdf-img/logo-simple.png"
+                src="DMSOS/src/utils/pdf-img/logo-simple.png"
               />
             </td>
           </tr>
