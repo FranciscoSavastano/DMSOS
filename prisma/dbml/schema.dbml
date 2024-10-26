@@ -98,6 +98,7 @@ Table Ocurrence_type {
   id Int [pk, increment]
   type String [not null]
   subtypes String[] [not null]
+  contract String [not null]
 }
 
 Table marcas {
@@ -116,6 +117,9 @@ Table Equipamento {
   modelo String [not null]
   marca_nome String [not null]
   cliente_id String [not null]
+  ip String [not null]
+  mac String [not null]
+  NS String [not null]
   marca marcas [not null]
   cliente clientes [not null]
   os OS [not null]

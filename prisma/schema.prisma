@@ -122,6 +122,7 @@ model Ocurrence_types {
   id              Int           @default(autoincrement()) @id
   type            String
   subtypes        String[]
+  contract        String        
   @@map("Ocurrence_type")
 }
 
@@ -142,6 +143,9 @@ model Equipamento {
   modelo                String
   marca_nome            String
   cliente_id            String
+  ip                    String
+  mac                   String
+  NS                    String
   marca                 Marca       @relation(fields: [marca_nome], references: [marca])
   cliente               Cliente     @relation(fields: [cliente_id], references: [id])
   os                    OS          @relation(fields: [id_os], references: [id])

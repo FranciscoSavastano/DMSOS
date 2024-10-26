@@ -10,10 +10,11 @@ export async function createOcurrenceType(
     .object({
       type: z.string(),
       subtypes: z.string().array(),
+      contract: z.string()
     })
     .parse(request.body)
 
-  const { type, subtypes } = registerBodySchema
+  const { type, subtypes, contract } = registerBodySchema
 
   try {
     const registerOcurrenceTypeCase = makeCreateOcurrenceTypeUseCase()
@@ -21,6 +22,7 @@ export async function createOcurrenceType(
     const { ocurrence_type } = await registerOcurrenceTypeCase.execute({
       type,
       subtypes,
+      contract
     })
     return await reply.status(201).send(ocurrence_type)
   } catch (err: unknown) {

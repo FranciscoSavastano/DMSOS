@@ -161,30 +161,43 @@
         overflow: visible;
       }
       .com-image {
-        width: 100%;;
+        width: 100%;
         position: relative;
         z-index: 2;
       }
 
       .fade-logo {
         position: absolute;
-        top: 550px; 
-        left: 0; 
+        top: 550px;
+        left: 0;
         z-index: 1;
-      }   
+      }
       .simple-logo {
         width: 13rem;
         height: 9rem;
-        position:absolute;
+        position: absolute;
         left: 80%;
-        top: 49rem
+        top: 49rem;
       }
     </style>
   </head>
   <body>
-    <img class = "com-image" width="795" height="700" src="/src/utils/pdf-img/com-image.png" />
-    <img class = "fade-logo" width="300" height="300" src="/src/utils/pdf-img/fade-logo.png" />
- 
+    <img
+      class="com-image"
+      width="795"
+      height="700"
+      src="{{images.comercialImage}}"
+    />
+      
+      
+      
+    <img
+      class="fade-logo"
+      width="300"
+      height="300"
+      src="{{images.fadelogo}}"
+    />
+
     <p style="text-indent: 0pt; text-align: left"><br /></p>
     <p
       class="s1"
@@ -213,7 +226,7 @@
         text-align: left;
       "
     >
-      OPERADOR: {{this.nome}} PERÍODO: {{this.day-period}}
+      OPERADOR: {{#each operator}} {{this.nome}} {{/each}} PERÍODO: {{info.day-period}}
     </p>
     <p style="padding-top: 5pt; text-indent: 0pt; text-align: left"><br /></p>
     <p class="s4" style="text-indent: 0pt; text-align: right">
@@ -223,30 +236,25 @@
       class="s5"
       style="padding-left: 17pt; text-indent: 0pt; text-align: left"
     >
-      {{this.date}}
+      {{info.date}}
     </p>
     <p style="text-indent: 0pt; text-align: left">
       <span
         ><table border="0" cellspacing="0" cellpadding="0">
-          <tr>
-              
-          </tr></table></span
+          <tr></tr></table></span
       ><span
         ><table border="0" cellspacing="0" cellpadding="0">
-          <tr>
-            
-                       
-          </tr>
+          <tr></tr>
           <tr>
             <td></td>
           </tr>
           <tr>
-                        <td>
+            <td>
               <img
                 class="simple-logo"
                 width="200"
                 height="200"
-                src="DMSOS/src/utils/pdf-img/logo-simple.png"
+                src="{{images.simplelogo}}"
               />
             </td>
           </tr>
@@ -263,7 +271,7 @@
                 class="tech-border"
                 width="90"
                 height="500"
-                src="./pdf-img/tech-border.png"
+                src="{{images.techborder}}"
               />
             </td>
             <td class="PM">POLÍCIA MILITAR</td>

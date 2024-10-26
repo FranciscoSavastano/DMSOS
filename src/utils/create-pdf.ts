@@ -18,29 +18,33 @@ export async function CreatePdf() {
       user_role: 'Comercial',
     },
   ]
+  var logoB64Content = fs.readFileSync('./src/utils/pdf-img/com-image.png', {encoding: 'base64'});
+  const comercialImage = "data:image/jpeg;base64,"+logoB64Content;
+  logoB64Content = fs.readFileSync('./src/utils/pdf-img/fade-logo.png', {encoding: 'base64'});
+  const fadelogo = "data:image/jpeg;base64,"+logoB64Content;
+  logoB64Content = fs.readFileSync('./src/utils/pdf-img/logo-simple.png', {encoding: 'base64'});
+  const simplelogo = "data:image/jpeg;base64,"+logoB64Content;
+  logoB64Content = fs.readFileSync('./src/utils/pdf-img/tech-border.png', {encoding: 'base64'});
+  const techborder = "data:image/jpeg;base64,"+logoB64Content;
+
+  var images = 
+    {
+      comercialImage,
+      fadelogo,
+      simplelogo,
+      techborder
+    }
   var options = {
-    format: 'A3',
+    format: 'A4',
     orientation: 'portrait',
     border: '10mm',
-    header: {
-      height: '45mm',
-      contents: '<div style="text-align: center;">DMSYS</div>',
-    },
-    footer: {
-      height: '28mm',
-      contents: {
-        first: 'Cover page',
-        2: 'Second page', // Any page number is working. 1-based index
-        default:
-          '<span style="color: #444;">{{page}}</span>/<span>{{pages}}</span>', // fallback value
-        last: 'Last Page',
-      },
-    },
   }
   var document = {
     html: html,
     data: {
       users: users,
+      images: images,
+
     },
     path: './output.pdf',
     type: '',
