@@ -1,22 +1,21 @@
 import 'pdf-creator-node'
 import fs from 'fs'
-import moment from 'moment-timezone';
-function determinePeriod(created_at): string {
+import moment from 'moment-timezone'
+function determinePeriod(created_at: Date): string {
   const momenthour = moment(created_at)
-  const createdAt = momenthour.tz("Brazil/Brasilia");
-  const hour = createdAt.hour();
-  return hour >= 18 || hour < 6 ? 'Noturno' : 'Diurno';
+  const createdAt = momenthour.tz('America/Sao_Paulo')
+  const hour = createdAt.hour()
+  return hour >= 18 || hour < 6 ? 'Noturno' : 'Diurno'
 }
 
-function formatarData(created_at): string {
+function formatarData(created_at: Date): string {
   const momenthour = moment(created_at)
-  const data = momenthour.tz("Brazil/Brasilia");
-  return data.locale('pt-br').format('dddd, D [de] MMMM [de] YYYY [às] HH:mm');
+  const data = momenthour.tz('America/Sao_Paulo')
+  return data.locale('pt-br').format('dddd, D [de] MMMM [de] YYYY [às] HH:mm')
 }
-export async function CreatePdf(duty) {
-
-  const users = duty.operadoresNome;
-  const data = duty.created_at;
+export async function CreatePdf(duty: any) {
+  const users = duty.operadoresNome
+  const data = duty.created_at
   const dataformatada = formatarData(duty.created_at)
   const periodo = determinePeriod(duty.created_at)
   const pdf = require('pdf-creator-node')
@@ -57,7 +56,7 @@ export async function CreatePdf(duty) {
       images: images,
       data,
       periodo,
-      dataformatada
+      dataformatada,
     },
     path: './src/gendocs/output' + duty.id + '.pdf',
     type: '',
