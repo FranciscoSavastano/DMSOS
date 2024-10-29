@@ -1,4 +1,5 @@
 import { makeCreateDutyUseCase } from '@/use-cases/factories/make-create-duty-use-case'
+import { CreatePdf } from '@/utils/create-pdf'
 import { type FastifyRequest, type FastifyReply } from 'fastify'
 import { string, z } from 'zod'
 
@@ -49,6 +50,7 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
         },
       ],
     })
+    CreatePdf(duty)
     return await reply.status(201).send({ duty, ocurrences })
   } catch (err: unknown) {
     throw err

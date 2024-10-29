@@ -55,6 +55,7 @@
     "fs": "0.0.1-security",
     "html-pdf-node": "1.0.8",
     "jsonwebtoken": "9.0.2",
+    "moment-timezone": "0.5.46",
     "nodemailer": "6.9.13",
     "path": "0.12.7",
     "pdf-creator-node": "2.3.5",

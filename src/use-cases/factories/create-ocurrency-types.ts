@@ -24,7 +24,7 @@ export class CreateOcurrenceTypeUseCase {
     const ocurrence_type = await this.ocurrenceTypeRepository.create({
       type,
       subtypes,
-      contract
+      contract,
     })
 
     return {

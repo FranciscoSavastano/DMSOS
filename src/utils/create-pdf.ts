@@ -1,39 +1,50 @@
 import 'pdf-creator-node'
 import fs from 'fs'
+import moment from 'moment-timezone';
+function determinePeriod(created_at): string {
+  const momenthour = moment(created_at)
+  const createdAt = momenthour.tz("Brazil/Brasilia");
+  const hour = createdAt.hour();
+  return hour >= 18 || hour < 6 ? 'Noturno' : 'Diurno';
+}
 
-export async function CreatePdf() {
+function formatarData(created_at): string {
+  const momenthour = moment(created_at)
+  const data = momenthour.tz("Brazil/Brasilia");
+  return data.locale('pt-br').format('dddd, D [de] MMMM [de] YYYY [às] HH:mm');
+}
+export async function CreatePdf(duty) {
+
+  const users = duty.operadoresNome;
+  const data = duty.created_at;
+  const dataformatada = formatarData(duty.created_at)
+  const periodo = determinePeriod(duty.created_at)
   const pdf = require('pdf-creator-node')
   var html = fs.readFileSync('./src/utils/pdf-model.html', 'utf8')
-  var users = [
-    {
-      nome: 'Francisco',
-      user_role: 'Tecnico',
-    },
-    {
-      nome: 'Sheldon',
-      user_role: 'Operador',
-    },
-    {
-      nome: 'Bruno',
-      user_role: 'Comercial',
-    },
-  ]
-  var logoB64Content = fs.readFileSync('./src/utils/pdf-img/com-image.png', {encoding: 'base64'});
-  const comercialImage = "data:image/jpeg;base64,"+logoB64Content;
-  logoB64Content = fs.readFileSync('./src/utils/pdf-img/fade-logo.png', {encoding: 'base64'});
-  const fadelogo = "data:image/jpeg;base64,"+logoB64Content;
-  logoB64Content = fs.readFileSync('./src/utils/pdf-img/logo-simple.png', {encoding: 'base64'});
-  const simplelogo = "data:image/jpeg;base64,"+logoB64Content;
-  logoB64Content = fs.readFileSync('./src/utils/pdf-img/tech-border.png', {encoding: 'base64'});
-  const techborder = "data:image/jpeg;base64,"+logoB64Content;
 
-  var images = 
-    {
-      comercialImage,
-      fadelogo,
-      simplelogo,
-      techborder
-    }
+  var logoB64Content = fs.readFileSync('./src/utils/pdf-img/com-image.png', {
+    encoding: 'base64',
+  })
+  const comercialImage = 'data:image/jpeg;base64,' + logoB64Content
+  logoB64Content = fs.readFileSync('./src/utils/pdf-img/fade-logo.png', {
+    encoding: 'base64',
+  })
+  const fadelogo = 'data:image/jpeg;base64,' + logoB64Content
+  logoB64Content = fs.readFileSync('./src/utils/pdf-img/logo-simple.png', {
+    encoding: 'base64',
+  })
+  const simplelogo = 'data:image/jpeg;base64,' + logoB64Content
+  logoB64Content = fs.readFileSync('./src/utils/pdf-img/tech-border.png', {
+    encoding: 'base64',
+  })
+  const techborder = 'data:image/jpeg;base64,' + logoB64Content
+
+  var images = {
+    comercialImage,
+    fadelogo,
+    simplelogo,
+    techborder,
+  }
   var options = {
     format: 'A4',
     orientation: 'portrait',
@@ -42,11 +53,13 @@ export async function CreatePdf() {
   var document = {
     html: html,
     data: {
-      users: users,
+      users,
       images: images,
-
+      data,
+      periodo,
+      dataformatada
     },
-    path: './output.pdf',
+    path: './src/gendocs/output' + duty.id + '.pdf',
     type: '',
   }
   pdf
