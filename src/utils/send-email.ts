@@ -25,7 +25,7 @@ export async function sendEmail({
   })
 
   const emailOptions = {
-    from: 'fulano@injunior.com',
+    from: 'exemplo@dmsys.com.br',
     to,
     subject,
     text: message,

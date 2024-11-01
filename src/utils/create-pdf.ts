@@ -47,7 +47,6 @@ export async function CreatePdf(duty: any) {
   var options = {
     format: 'A4',
     orientation: 'portrait',
-    border: '10mm',
   }
   var document = {
     html: html,
@@ -58,7 +57,7 @@ export async function CreatePdf(duty: any) {
       periodo,
       dataformatada,
     },
-    path: './src/gendocs/output' + duty.id + '.pdf',
+    path: './src/gendocs/output' + " " + duty.id + '.pdf',
     type: '',
   }
   pdf
