@@ -37,12 +37,17 @@ export async function CreatePdf(duty: any) {
     encoding: 'base64',
   })
   const techborder = 'data:image/jpeg;base64,' + logoB64Content
+  logoB64Content = fs.readFileSync('./src/utils/pdf-img/border-cover.png', {
+    encoding: 'base64',
+  })
+  const bordercover = 'data:image/jpeg;base64,' + logoB64Content
 
   var images = {
     comercialImage,
     fadelogo,
     simplelogo,
     techborder,
+    bordercover
   }
   var options = {
     format: 'A4',
@@ -57,7 +62,7 @@ export async function CreatePdf(duty: any) {
       periodo,
       dataformatada,
     },
-    path: './src/gendocs/output' + " " + duty.id + '.pdf',
+    path: './src/gendocs/output' + ' ' + duty.id + '.pdf',
     type: '',
   }
   pdf
