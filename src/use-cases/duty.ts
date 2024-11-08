@@ -7,6 +7,7 @@ interface RegisterUseCaseRequest {
   data_inicio: string
   data_fim: string
   horario_rf: string
+  contrato: string
   ocorrencias: {
     ocorrencia_desc?: string
     ocorrencia_pm_horario?: string
@@ -30,6 +31,7 @@ export class CreateDutyUseCase {
     data_inicio,
     data_fim,
     horario_rf,
+    contrato,
     ocorrencias,
   }: RegisterUseCaseRequest): Promise<RegisterUseCaseResponse> {
     const ocurrences = []
@@ -43,6 +45,7 @@ export class CreateDutyUseCase {
       data_inicio,
       data_fim,
       horario_rf,
+      contrato,
     })
     for (const ocorrencia of ocorrencias) {
       const ocurrence = await this.dutyRepository.createOcurrence({

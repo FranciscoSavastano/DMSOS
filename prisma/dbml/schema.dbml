@@ -68,6 +68,7 @@ Table plantoes {
   data_inicio DateTime [not null]
   data_fim DateTime [not null]
   horario_rf DateTime [not null]
+  contrato String [not null]
   ocorrencia ocorrencias [not null]
   created_at DateTime [default: `now()`, not null]
   updated_at DateTime [not null]

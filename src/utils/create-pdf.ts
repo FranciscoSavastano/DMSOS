@@ -16,10 +16,11 @@ function formatarData(created_at: Date): string {
 export async function CreatePdf(duty: any) {
   const users = duty.operadoresNome
   const data = duty.created_at
+  const contract = duty.contrato
   const dataformatada = formatarData(duty.created_at)
   const periodo = determinePeriod(duty.created_at)
   const pdf = require('pdf-creator-node')
-  var html = fs.readFileSync('./src/utils/pdf-model.html', 'utf8')
+  var html = fs.readFileSync('./src/utils/pdf-model copy.html', 'utf8')
 
   var logoB64Content = fs.readFileSync('./src/utils/pdf-img/com-image.png', {
     encoding: 'base64',
@@ -41,13 +42,32 @@ export async function CreatePdf(duty: any) {
     encoding: 'base64',
   })
   const bordercover = 'data:image/jpeg;base64,' + logoB64Content
-
+  logoB64Content = fs.readFileSync('./src/utils/pdf-img/tech-border2.png', {
+    encoding: 'base64',
+  })
+  const techborderalt = 'data:image/jpeg;base64,' + logoB64Content
+  logoB64Content = fs.readFileSync('./src/utils/pdf-img/circle1.png', {
+    encoding: 'base64',
+  })
+  const circle1 = 'data:image/jpeg;base64,' + logoB64Content
+  logoB64Content = fs.readFileSync('./src/utils/pdf-img/circle2.png', {
+    encoding: 'base64',
+  })
+  const circle2 = 'data:image/jpeg;base64,' + logoB64Content
+  logoB64Content = fs.readFileSync('./src/utils/pdf-img/blue-border.png', {
+    encoding: 'base64',
+  })
+  const blueborder = 'data:image/jpeg;base64,' + logoB64Content
   var images = {
     comercialImage,
     fadelogo,
     simplelogo,
     techborder,
-    bordercover
+    bordercover,
+    techborderalt,
+    circle1,
+    circle2,
+    blueborder,
   }
   var options = {
     format: 'A4',
@@ -61,6 +81,7 @@ export async function CreatePdf(duty: any) {
       data,
       periodo,
       dataformatada,
+      contract
     },
     path: './src/gendocs/output' + ' ' + duty.id + '.pdf',
     type: '',

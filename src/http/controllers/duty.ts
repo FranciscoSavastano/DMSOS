@@ -10,6 +10,7 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
       operadoresNome: z.string().array(),
       data_inicio: z.string().datetime(),
       data_fim: z.string().datetime(),
+      contrato: z.string(),
       horario_rf: z.string().datetime(),
       ocorrencia_desc: z.string().optional(),
       ocorrencia_pm_horario: z.string().datetime().optional(),
@@ -24,6 +25,7 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
     operadoresNome,
     data_inicio,
     data_fim,
+    contrato,
     horario_rf,
     ocorrencia_desc,
     ocorrencia_pm_horario,
@@ -39,6 +41,7 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
       operadoresNome,
       data_inicio,
       data_fim,
+      contrato,
       horario_rf,
       ocorrencias: [
         {

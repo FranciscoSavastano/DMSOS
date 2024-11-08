@@ -12,12 +12,14 @@
       }
       .s1 {
         color: #001233;
-        margin-left: 10%;
         font-family: 'Microsoft Sans Serif', sans-serif;
         font-style: normal;
         font-weight: normal;
         text-decoration: none;
         font-size: 30pt;
+        padding-left: 22pt;
+        text-indent: 0pt; 
+        text-align: center
       }
       .s2 {
         color: #001233;
@@ -188,16 +190,36 @@
         left: 0;
         height: 77%;
         width: 17%;
-        top: 78rem;
+        top: 75.55rem;
       }
       .cftv-title {
         color: hsl(219, 80%, 12%);
-        font-size: 2rem;
+        font-size: 30.5pt;
+        font-family: sans-serif;
+        padding-left: 5%;
       }
       .cftv-text {
-        color: hsl(219, 80%, 12%);
-        font-size: 1rem;
+        padding-top: 2%;
+        color: hsl(0, 0%, 0%);
+        font-size: 16pt;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        padding-left: 17%;
       }
+      .PM {
+        position: absolute;
+        top: 143rem;
+        font-size: 29pt;
+        font-family: sans-serif;
+        padding-left: 5%;
+      }
+      .PMTABLE {
+        position: absolute;
+        top: 163rem;
+        padding-left: 5%;
+        border-width: 2;
+        border-color: black;
+      }
+
     </style>
   </head>
   <body>
@@ -213,9 +235,8 @@
     <p style="text-indent: 0pt; text-align: left"><br /></p>
     <p
       class="s1"
-      style="padding-left: 22pt; text-indent: 0pt; text-align: left"
     >
-      CENTRO METROPOLITANO
+      {{contract}}
     </p>
     <p
       class="s2"
@@ -277,7 +298,7 @@
           </tr>
           <tr>
             <td class="cftv-text">
-              Este documento tem por objetivo apresentar, documentar e registrar
+                    Este documento tem por objetivo apresentar, documentar e registrar
               todas as ocorrências, posturas e anomalias na operação diária do
               condomínio analisadas através do monitoramento das câmeras de
               vigilância (CFTV).
@@ -302,8 +323,29 @@
           <tr>
             <td class="PM">POLÍCIA MILITAR</td>
           </tr>
+          <script>
+            // Create the input field on page load
+            window.onload = function() {
+                createInputField();
+            };
+      
+            function createInputField() {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.id = 'myInput';
+                input.placeholder = 'Enter text here';
+                document.body.appendChild(input);
+            }
+        </script>
         </table></span
       >
-    </p>
+
+        <img
+      class="com-image"
+      width="695"
+      height="680"
+      src="{{images.situationalcomercialImage}}"
+    />
+
   </body>
 </html>

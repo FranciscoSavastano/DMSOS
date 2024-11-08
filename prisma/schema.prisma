@@ -93,6 +93,7 @@ model Plantao {
   data_inicio           DateTime
   data_fim              DateTime
   horario_rf            DateTime
+  contrato              String
   ocorrencia            Ocorrencia[]
   created_at            DateTime    @default(now())
   updated_at            DateTime    @updatedAt
