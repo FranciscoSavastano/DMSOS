@@ -1,6 +1,9 @@
 import 'pdf-creator-node'
 import fs from 'fs'
 import moment from 'moment-timezone'
+import type { DutyRepository } from '@/repositories/duties-repository'
+import type { Ocorrencia, Plantao } from '@prisma/client'
+import { prisma } from '@/lib/prisma'
 function determinePeriod(created_at: Date): string {
   const momenthour = moment(created_at)
   const createdAt = momenthour.tz('America/Sao_Paulo')
@@ -17,10 +20,23 @@ export async function CreatePdf(duty: any) {
   const users = duty.operadoresNome
   const data = duty.created_at
   const contract = duty.contrato
+  const dutyid = duty.id
+  const ocurrences = await prisma.ocorrencia.findMany({
+    where: {
+      plantao_id : dutyid
+    }
+  })
+  const ocurrence = ocurrences.map(ocurrence => {
+  const formattedDate = moment.utc(ocurrence.pm_horario).format('HH:mm');
+  return {
+    ...ocurrence,
+    newPmHorario: formattedDate
+  };
+});
   const dataformatada = formatarData(duty.created_at)
   const periodo = determinePeriod(duty.created_at)
   const pdf = require('pdf-creator-node')
-  var html = fs.readFileSync('./src/utils/pdf-model copy.html', 'utf8')
+  var html = fs.readFileSync('./src/utils/pdf-model.html', 'utf8')
 
   var logoB64Content = fs.readFileSync('./src/utils/pdf-img/com-image.png', {
     encoding: 'base64',
@@ -81,7 +97,8 @@ export async function CreatePdf(duty: any) {
       data,
       periodo,
       dataformatada,
-      contract
+      contract,
+      ocurrence,
     },
     path: './src/gendocs/output' + ' ' + duty.id + '.pdf',
     type: '',

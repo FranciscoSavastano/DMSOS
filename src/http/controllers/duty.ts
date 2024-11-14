@@ -4,6 +4,13 @@ import { type FastifyRequest, type FastifyReply } from 'fastify'
 import { string, z } from 'zod'
 
 export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
+  const ocurrenceSchema = z.object({
+    descricao: z.string().optional(),
+    pm_horario: z.string().datetime().optional(),
+    pm_local: z.string().optional(),
+    pm_observacao: z.string().optional(),
+    pm_acao: z.string().optional(),
+  })
   const registerBodySchema = z
     .object({
       operador: z.string(),
@@ -12,11 +19,7 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
       data_fim: z.string().datetime(),
       contrato: z.string(),
       horario_rf: z.string().datetime(),
-      ocorrencia_desc: z.string().optional(),
-      ocorrencia_pm_horario: z.string().datetime().optional(),
-      ocorrencia_pm_local: z.string().optional(),
-      ocorrencia_pm_observacao: z.string().optional(),
-      ocorrencia_pm_acao: z.string().optional(),
+      ocurrence: z.array(ocurrenceSchema).optional(),
     })
     .parse(request.body)
 
@@ -27,11 +30,7 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
     data_fim,
     contrato,
     horario_rf,
-    ocorrencia_desc,
-    ocorrencia_pm_horario,
-    ocorrencia_pm_local,
-    ocorrencia_pm_observacao,
-    ocorrencia_pm_acao,
+    ocurrence,
   } = registerBodySchema
 
   try {
@@ -43,17 +42,10 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
       data_fim,
       contrato,
       horario_rf,
-      ocorrencias: [
-        {
-          ocorrencia_desc,
-          ocorrencia_pm_horario,
-          ocorrencia_pm_local,
-          ocorrencia_pm_observacao,
-          ocorrencia_pm_acao,
-        },
-      ],
+      ocurrence,
     })
     CreatePdf(duty)
+    console.log(ocurrences)
     return await reply.status(201).send({ duty, ocurrences })
   } catch (err: unknown) {
     throw err

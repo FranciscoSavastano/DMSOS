@@ -8,15 +8,16 @@ interface RegisterUseCaseRequest {
   data_fim: string
   horario_rf: string
   contrato: string
-  ocorrencias: {
-    ocorrencia_desc?: string
-    ocorrencia_pm_horario?: string
-    ocorrencia_pm_local?: string
-    ocorrencia_pm_observacao?: string
-    ocorrencia_pm_acao?: string
-  }[]
+  ocurrence: Ocorrencia[]
 }
-
+interface Ocorrencia {
+  ocorrencia_desc?: string
+  ocorrencia_pm_horario?: string
+  ocorrencia_pm_local?: string
+  ocorrencia_pm_observacao?: string
+  ocurrence_type?: string[]
+  ocorrencia_pm_acao?: string
+}
 interface RegisterUseCaseResponse {
   duty: Plantao
   ocurrences: Ocorrencia[]
@@ -32,7 +33,7 @@ export class CreateDutyUseCase {
     data_fim,
     horario_rf,
     contrato,
-    ocorrencias,
+    ocurrence,
   }: RegisterUseCaseRequest): Promise<RegisterUseCaseResponse> {
     const ocurrences = []
     const duty = await this.dutyRepository.create({
@@ -47,8 +48,8 @@ export class CreateDutyUseCase {
       horario_rf,
       contrato,
     })
-    for (const ocorrencia of ocorrencias) {
-      const ocurrence = await this.dutyRepository.createOcurrence({
+    for (const ocorrencia of ocurrence) { // Use the correct array name 'ocurrencias'
+      const newOccurrence = await this.dutyRepository.createOcurrence({
         plantao: {
           connect: {
             id: duty.id,
@@ -59,9 +60,9 @@ export class CreateDutyUseCase {
         pm_local: ocorrencia.ocorrencia_pm_local,
         pm_observacao: ocorrencia.ocorrencia_pm_observacao,
         pm_acao: ocorrencia.ocorrencia_pm_acao,
-      })
-      ocurrences.push(ocurrence)
+      });
+      ocurrences.push(newOccurrence);
     }
-    return { duty, ocurrences }
+    return { duty, ocurrences}
   }
 }
