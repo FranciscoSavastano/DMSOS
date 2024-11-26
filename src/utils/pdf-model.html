@@ -343,53 +343,53 @@
             <td>
               <div>
                 <img
-                class="tech-border"
-                width="90"
-                height="500"
-                src="{{images.techborder}}"
+                  class="tech-border"
+                  width="90"
+                  height="500"
+                  src="{{images.techborder}}"
                 />
                 <img
-                class="tech-border"
-                width="90"
-                height="500"
-                src="{{images.bordercover}}"
+                  class="tech-border"
+                  width="90"
+                  height="500"
+                  src="{{images.bordercover}}"
                 />
               </div>
             </td>
             <br />
           </tr>
-          </table>
-          <tr>
-            <p class="anextext">ANEXO FOTOGRAFICO</p>
-            <div class="image-container">
-              {{#each anexpath}}
-              <img class = "aneximg" src = "{{this}}"></img>
-              {{/each}}
-            </div>
-        
-          </tr>
-          
-          <tr>
-            <td class="PM">POLÍCIA MILITAR</td>
-          </tr>
-          <table class="PMTABLE">
-            <thead>
-              <tr>
-                <th class="thpm">HORÁRIO</th>
-                <th class="thpm">LOCAL</th>
-                <th class="thpm">OBSERVAÇÃO</th>
-              </tr>
-            </thead>
-            <tbody>
-              {{#each ocurrence}}
-              <tr>
-                <td>{{this.newPmHorario}}</td>
-                <td>{{this.pm_local}}</td>
-                <td>{{this.pm_observacao}}</td>
-              </tr>
-              {{/each}}
-            </tbody>
-          </table>
+        </table>
+        <tr>
+          <p class="anextext">ANEXO FOTOGRAFICO</p>
+          <div class="image-container">
+            {{#each anexpath}}
+            <img class="aneximg" src="{{this}}" />
+            {{/each}}
+          </div>
+        </tr>
+
+        <tr>
+          <td class="PM">POLÍCIA MILITAR</td>
+        </tr>
+        <table class="PMTABLE">
+          <thead>
+            <tr>
+              <th class="thpm">HORÁRIO</th>
+              <th class="thpm">LOCAL</th>
+              <th class="thpm">OBSERVAÇÃO</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each ocurrence}}
+            <tr>
+              <td>{{this.newPmHorario}}</td>
+              <td>{{this.pm_local}}</td>
+              <td>{{this.pm_observacao}}</td>
+            </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </span>
     </p>
   </body>
 </html>

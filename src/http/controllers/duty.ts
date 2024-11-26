@@ -1,7 +1,7 @@
 import { makeCreateDutyUseCase } from '@/use-cases/factories/make-create-duty-use-case'
 import { WriteImages } from '@/use-cases/write-images'
 import { CreatePdf } from '@/utils/create-pdf'
-import multer from 'multer';
+import multer from 'multer'
 import { type FastifyRequest, type FastifyReply } from 'fastify'
 import { string, z } from 'zod'
 
@@ -11,8 +11,9 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
     ocorrencia_pm_horario: z.string().datetime().optional(),
     ocorrencia_pm_local: z.string().optional(),
     ocorrencia_pm_observacao: z.string().optional(),
-    ocorrencia_pm_acao: z.string().optional()
-});  const registerBodySchema = z
+    ocorrencia_pm_acao: z.string().optional(),
+  })
+  const registerBodySchema = z
     .object({
       operador: z.string(),
       operadoresNome: z.string().array(),
@@ -44,7 +45,7 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
       horario_rf,
       ocurrence,
     })
-    
+
     CreatePdf(duty)
     return await reply.status(201).send({ duty, ocurrences })
   } catch (err: unknown) {

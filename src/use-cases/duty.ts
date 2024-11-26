@@ -57,7 +57,7 @@ export class CreateDutyUseCase {
             id: duty.id,
           },
         },
-        
+
         descricao: ocorrencia.ocorrencia_desc,
         pm_horario: ocorrencia.ocorrencia_pm_horario,
         pm_local: ocorrencia.ocorrencia_pm_local,
@@ -65,7 +65,7 @@ export class CreateDutyUseCase {
         pm_acao: ocorrencia.ocorrencia_pm_acao,
         ocurrence_type: ocorrencia.ocorrencia_ocurrence_type,
       })
-  
+
       ocurrences.push(newOccurrence)
     }
     return { duty, ocurrences }

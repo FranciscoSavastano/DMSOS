@@ -4,7 +4,7 @@ import { ZodError } from 'zod'
 import 'dotenv/config'
 import fastifyJwt from '@fastify/jwt'
 import fastifyCookie from '@fastify/cookie'
-import multipart from '@fastify/multipart';
+import multipart from '@fastify/multipart'
 import cors from '@fastify/cors'
 
 export const app = fastify()
@@ -29,7 +29,6 @@ app.register(fastifyJwt, {
   sign: {
     expiresIn: '5m',
   },
-  
 })
 app.register(multipart)
 app.register(fastifyCookie)
