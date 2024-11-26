@@ -23,11 +23,9 @@ export class PrismaDutyRepository implements DutyRepository {
     return duty
   }
   async createOcurrence(data: Prisma.OcorrenciaCreateInput) {
-    console.log(ocurrence)
     const ocurrence = await prisma.ocorrencia.create({
       data,
     })
-
     return ocurrence
   }
 

@@ -15,7 +15,7 @@ import { updateDuty } from './controllers/update-duty'
 import { deleteDuty } from './controllers/delete-duty'
 import { createOcurrenceType } from './controllers/ocurrence_types'
 import { fetchUserNames } from './controllers/read-all-user-type'
-import { CreatePdf } from '@/utils/create-pdf'
+import { CreatePdf, initWrite } from '@/utils/create-pdf'
 
 export async function appRoutes(app: FastifyInstance) {
   //Users
@@ -55,4 +55,6 @@ export async function appRoutes(app: FastifyInstance) {
   app.post('/sessions/refresh-token', refreshToken)
 
   app.get('/createpdf', CreatePdf)
+
+  app.post('/writeFiles', initWrite)
 }

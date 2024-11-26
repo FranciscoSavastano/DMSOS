@@ -1,17 +1,18 @@
 import { makeCreateDutyUseCase } from '@/use-cases/factories/make-create-duty-use-case'
+import { WriteImages } from '@/use-cases/write-images'
 import { CreatePdf } from '@/utils/create-pdf'
+import multer from 'multer';
 import { type FastifyRequest, type FastifyReply } from 'fastify'
 import { string, z } from 'zod'
 
 export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
-  const ocurrenceSchema = z.object({
-    descricao: z.string().optional(),
-    pm_horario: z.string().datetime().optional(),
-    pm_local: z.string().optional(),
-    pm_observacao: z.string().optional(),
-    pm_acao: z.string().optional(),
-  })
-  const registerBodySchema = z
+  const occurrenceSchema = z.object({
+    ocorrencia_desc: z.string().optional().default(''),
+    ocorrencia_pm_horario: z.string().datetime().optional(),
+    ocorrencia_pm_local: z.string().optional(),
+    ocorrencia_pm_observacao: z.string().optional(),
+    ocorrencia_pm_acao: z.string().optional()
+});  const registerBodySchema = z
     .object({
       operador: z.string(),
       operadoresNome: z.string().array(),
@@ -19,10 +20,10 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
       data_fim: z.string().datetime(),
       contrato: z.string(),
       horario_rf: z.string().datetime(),
-      ocurrence: z.array(ocurrenceSchema).optional(),
+      imagens: z.any(),
+      ocurrence: z.array(occurrenceSchema).optional(),
     })
     .parse(request.body)
-
   const {
     operador,
     operadoresNome,
@@ -32,7 +33,6 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
     horario_rf,
     ocurrence,
   } = registerBodySchema
-
   try {
     const registerDutyCase = makeCreateDutyUseCase()
     const { duty, ocurrences } = await registerDutyCase.execute({
@@ -44,8 +44,8 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
       horario_rf,
       ocurrence,
     })
+    
     CreatePdf(duty)
-    console.log(ocurrences)
     return await reply.status(201).send({ duty, ocurrences })
   } catch (err: unknown) {
     throw err
