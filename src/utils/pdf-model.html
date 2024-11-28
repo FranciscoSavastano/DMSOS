@@ -28,6 +28,7 @@
         font-weight: normal;
         text-decoration: none;
         font-size: 21pt;
+        margin-top: 6rem;
       }
       .s3 {
         color: #001233;
@@ -36,6 +37,7 @@
         font-weight: normal;
         text-decoration: none;
         font-size: 16pt;
+        margin-top: 1rem;
       }
       .a {
         color: black;
@@ -174,7 +176,7 @@
 
       .fade-logo {
         position: absolute;
-        top: 30rem;
+        top: 35rem;
         left: 0;
         z-index: 1;
       }
@@ -182,27 +184,28 @@
         width: 13rem;
         height: 9rem;
         position: absolute;
-        left: 73%;
-        top: 59.5rem;
+        left: 70%;
+        top: 	59rem;
+        z-index: 3;
       }
       .tech-border {
         position: absolute;
         left: 0;
-        height: 77%;
+        height: 90.8%;
         width: 17%;
-        top: 75.55rem;
+        top: 6.55rem;
       }
       .cftv-title {
         color: hsl(219, 80%, 12%);
         font-size: 30.5pt;
-        font-family: sans-serif;
+        font-family: 'Microsoft Sans Serif', sans-serif;
         padding-left: 5%;
       }
       .cftv-text {
         padding-top: 2%;
         color: hsl(0, 0%, 0%);
         font-size: 16pt;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-family: 'Segoe UI';
         padding-left: 17%;
       }
       .PM {
@@ -213,164 +216,144 @@
         padding-left: 5%;
         color: #001233;
       }
-
-      .PMTABLE {
+      .Tablediv {
         position: relative;
-        top: 193rem;
-        padding-left: 5%;
-        border-width: 2;
-        border-color: black;
-        width: 50%;
-        border-collapse: collapse;
-        left: 25%;
+        top: 125rem;
+        width: 100%;
+        height: 100%
       }
-      .tdpm {
-        border: 1px solid black;
-        padding: 10px;
-        text-align: center;
-      }
+      .PMTABLE {
+    border-collapse: collapse;
+    width: 100%; 
+    
+}
 
-      .thpm {
+    .PMTABLE th, .PMTABLE td {
         border: 1px solid black;
-        padding: 10px;
+        padding: 8px;
         text-align: center;
+        
+    }
+
+    .thpm {
         background-color: #007bff;
         color: white;
         font-family: sans-serif;
         font-size: 12pt;
-      }
+    }
       .image-container {
-        top: 123rem;
+        padding-top: 4rem;
+        padding-left: 1rem;
         display: flex;
-        position: absolute;
-        flex-wrap: wrap; /* Allow images to wrap to the next line if needed */
-        justify-content: space-between; /* Space images evenly */
+        position: relative;
+        flex-wrap: wrap; 
+        justify-content: space-between;
       }
-
       .aneximg {
-        top: 103rem;
+        border: 3px #007bff solid;
+        border-radius: 5%;
+        padding: 5px;
         width: 200px;
         height: 200px;
         margin: 10px;
       }
 
       .anextext {
+        color: hsl(219, 80%, 12%);
+        font-size: 30.5pt;
+        font-family: 'Microsoft Sans Serif', sans-serif;
+        padding-left: 5%;
         position: absolute;
-        top: 200;
-        padding-top: 30%;
+      }
+      .divcover {
+        width: 100%;
+        height: 100%;
+        position: relative;
+      }
+      .divobjetivo {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        border: 1px solid red;
+        padding-bottom: 118.23%;
+      }
+      .divaneximg {
+        position: relative;
+        width: 100%;
+        min-height: 100%;
+        border: 1px solid black;
+      }
+      .divimgdesc {
+        position: absolute;
+        background-color: #007bff;
+        color: #007bff;
+        
       }
     </style>
   </head>
   <body>
-    <img
-      class="com-image"
-      width="695"
-      height="680"
-      src="{{images.comercialImage}}"
-    />
+    <div class="divcover">
+      <img class="com-image" width="695" height="680" src="{{images.comercialImage}}" alt="Commercial Image">
+  
+      <img class="fade-logo" width="200" height="200" src="{{images.fadelogo}}" alt="Fade Logo">
+  
+      <h1 class="s1">{{contract}}</h1>  <h2 class="s2">RELATÓRIO DIÁRIO DE OPERAÇÃO</h2>  <p class="s3">
+        OPERADOR: {{users}} PERÍODO: {{periodo}}
+      </p>
+      <img class="simple-logo" width="200" height="200" src="{{images.simplelogo}}" alt="Simple Logo">
+      <p class="s4" style="text-align: right">
+        <a href="http://dmsys.com.br" class="a" target="_blank">www.dmsys.com.br</a>
+      </p>
+  
+      <p class="s5">{{dataformatada}}</p>
+  
+      <div class="divobjetivo">
+        <h3 class="cftv-title">OBJETIVO</h3>
+        <p class="cftv-text">
+          Este documento tem por objetivo apresentar, documentar e registrar todas as
+          ocorrências, posturas e anomalias na operação diária do condomínio analisadas
+          através do monitoramento das câmeras de vigilância (CFTV).
+        </p>
+      
+  
+      <img class="tech-border" src="{{images.techborder}}" alt="Tech Border 1">
+      <img class="tech-border" src="{{images.bordercover}}" alt="Tech Border 2">
+    </div>
+  
 
-    <img class="fade-logo" width="200" height="200" src="{{images.fadelogo}}" />
+    <div class="divaneximg">
+      <section class="anex-section">  <h3 class="anextext">RELATÓRIO FOTOGRAFICO</h3>
+        <div class="image-container">
+          {{#each anexpath}}
+          <img class="aneximg" src="{{this}}">
+          <div class="divimgdesc"><p>{{this.desc}}</p>
 
-    <p style="text-indent: 0pt; text-align: left"><br /></p>
-    <p class="s1">{{contract}}</p>
-    <p
-      class="s2"
-      style="
-        padding-top: 40pt;
-        padding-left: 17pt;
-        text-indent: 0pt;
-        text-align: left;
-      "
-    >
-      RELATÓRIO DIÁRIO DE OPERAÇÃO
-    </p>
-    <p style="padding-top: 2pt; text-indent: 0pt; text-align: left"><br /></p>
-    <p
-      class="s3"
-      style="
-        padding-left: 19pt;
-        text-indent: 0pt;
-        line-height: 109%;
-        text-align: left;
-      "
-    >
-      OPERADOR: {{users}} PERÍODO: {{periodo}}
-    </p>
-    <p style="padding-top: 5pt; text-indent: 0pt; text-align: left"><br /></p>
-    <p class="s4" style="text-indent: 0pt; text-align: right">
-      <a href="http://dmsys.com.br" class="a" target="_blank"
-        >www.dmsys.com.br</a
-      >
-    </p>
-    <p
-      class="s5"
-      style="padding-left: 17pt; text-indent: 0pt; text-align: left"
-    >
-      {{dataformatada}}
-    </p>
-    <p style="text-indent: 0pt; text-align: left">
-      <span
-        ><table border="0" cellspacing="0" cellpadding="0">
-          <tr></tr></table></span
-      ><span
-        ><table border="0" cellspacing="0" cellpadding="0">
-          <tr></tr>
-          <tr>
-            <td></td>
-          </tr>
-          <tr>
-            <td>
-              <img
-                class="simple-logo"
-                width="200"
-                height="200"
-                src="{{images.simplelogo}}"
-              />
-            </td>
-          </tr>
-          <tr>
-            <td class="cftv-title">OBJETIVO</td>
-          </tr>
-          <tr>
-            <td class="cftv-text">
-              Este documento tem por objetivo apresentar, documentar e registrar
-              todas as ocorrências, posturas e anomalias na operação diária do
-              condomínio analisadas através do monitoramento das câmeras de
-              vigilância (CFTV).
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <div>
-                <img
-                  class="tech-border"
-                  width="90"
-                  height="500"
-                  src="{{images.techborder}}"
-                />
-                <img
-                  class="tech-border"
-                  width="90"
-                  height="500"
-                  src="{{images.bordercover}}"
-                />
-              </div>
-            </td>
-            <br />
-          </tr>
-        </table>
-        <tr>
-          <p class="anextext">ANEXO FOTOGRAFICO</p>
-          <div class="image-container">
-            {{#each anexpath}}
-            <img class="aneximg" src="{{this}}" />
-            {{/each}}
-          </div>
-        </tr>
+          </p></div>
+        {{/each}}
+      </div>
+      </section>
+    </div>
+    <script>
+      const divaneximg = document.querySelectorAll('.divaneximg');
 
-        <tr>
-          <td class="PM">POLÍCIA MILITAR</td>
-        </tr>
+      divaneximg.forEach(div => {
+        const image = div.querySelector('img');
+        const imageHeight = image.naturalHeight;
+        const imageWidth = image.naturalWidth;
+        const aspectRatio = imageHeight / imageWidth;
+        const baseHeight = div.clientWidth * aspectRatio;
+      
+        // Calculate the additional height based on the base height
+        const additionalHeight = baseHeight  // 15% of the base height
+        const totalHeight = baseHeight + additionalHeight;
+      
+        div.style.minHeight = `${totalHeight}px`;
+      });
+  </script>
+  
+    <div class="Tablediv">
+      <section class="pm-section">
+        <h3 class="PM">POLÍCIA MILITAR</h3>
         <table class="PMTABLE">
           <thead>
             <tr>
@@ -389,7 +372,6 @@
             {{/each}}
           </tbody>
         </table>
-      </span>
-    </p>
+      </section>
+    </div>
   </body>
-</html>
