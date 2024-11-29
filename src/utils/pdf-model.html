@@ -289,6 +289,19 @@
         color: #007bff;
         
       }
+      .image-wrapper {
+        position: relative;
+        display: inline-block;
+        margin: 10px; /* Adjust margin as needed */
+      }
+
+      .image-text {
+        font-size: 14px;
+        margin-top: 5px;
+        text-align: center;
+        word-wrap: break-word; /* This will wrap the text */
+        width: 200px; /* Set the maximum width */
+      }
     </style>
   </head>
   <body>
@@ -322,15 +335,16 @@
   
 
     <div class="divaneximg">
-      <section class="anex-section">  <h3 class="anextext">RELATÓRIO FOTOGRAFICO</h3>
+      <section class="anex-section">
+        <h3 class="anextext">RELATÓRIO FOTOGRAFICO</h3>
         <div class="image-container">
           {{#each anexpath}}
-          <img class="aneximg" src="{{this}}">
-          <div class="divimgdesc"><p>{{this.desc}}</p>
-
-          </p></div>
-        {{/each}}
-      </div>
+          <div class="image-wrapper">
+            <img class="aneximg" src="{{this}}">
+            <p class="image-text">{{this.description}} ANEEEEEEE MIREXXXXX NASCIMEXXXXXX</p>
+          </div>
+          {{/each}}
+        </div>
       </section>
     </div>
     <script>
