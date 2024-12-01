@@ -13,7 +13,7 @@ var images
 var pdf
 var canwrite = false
 var anexpath = []
-export async function initWrite(request: FastifyRequest, reply: FastifyReply) {
+async function initWrite(request: FastifyRequest, reply: FastifyReply) {
   const tempFilePath = path.join(__dirname, 'temp_anexpath.txt')
 
   if (!request.headers['content-type'].startsWith('multipart/form-data')) {
@@ -75,7 +75,7 @@ function formatarData(created_at: Date): string {
   const data = momenthour.tz('America/Sao_Paulo')
   return data.locale('pt-br').format('dddd, D [de] MMMM [de] YYYY [às] HH:mm')
 }
-export async function CreatePdf(duty: any) {
+async function CreatePdf(duty: any) {
   const tempFilePath = path.join(__dirname, 'temp_anexpath.txt')
   const users = duty.operadoresNome
   const data = duty.created_at
