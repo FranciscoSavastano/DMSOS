@@ -45,7 +45,7 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
       horario_rf,
       ocurrence,
     })
-    console.log("gerando pdf")
+    console.log('gerando pdf')
     CreatePdf(duty)
     return await reply.status(201).send({ duty, ocurrences })
   } catch (err: unknown) {

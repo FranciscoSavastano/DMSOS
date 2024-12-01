@@ -185,7 +185,7 @@
         height: 9rem;
         position: absolute;
         left: 70%;
-        top: 	59rem;
+        top: 59rem;
         z-index: 3;
       }
       .tech-border {
@@ -220,33 +220,32 @@
         position: relative;
         top: 125rem;
         width: 100%;
-        height: 100%
+        height: 100%;
       }
       .PMTABLE {
-    border-collapse: collapse;
-    width: 100%; 
-    
-}
+        border-collapse: collapse;
+        width: 100%;
+      }
 
-    .PMTABLE th, .PMTABLE td {
+      .PMTABLE th,
+      .PMTABLE td {
         border: 1px solid black;
         padding: 8px;
         text-align: center;
-        
-    }
+      }
 
-    .thpm {
+      .thpm {
         background-color: #007bff;
         color: white;
         font-family: sans-serif;
         font-size: 12pt;
-    }
+      }
       .image-container {
         padding-top: 4rem;
         padding-left: 1rem;
         display: flex;
         position: relative;
-        flex-wrap: wrap; 
+        flex-wrap: wrap;
         justify-content: space-between;
       }
       .aneximg {
@@ -287,7 +286,6 @@
         position: absolute;
         background-color: #007bff;
         color: #007bff;
-        
       }
       .image-wrapper {
         position: relative;
@@ -306,33 +304,59 @@
   </head>
   <body>
     <div class="divcover">
-      <img class="com-image" width="695" height="680" src="{{images.comercialImage}}" alt="Commercial Image">
-  
-      <img class="fade-logo" width="200" height="200" src="{{images.fadelogo}}" alt="Fade Logo">
-  
-      <h1 class="s1">{{contract}}</h1>  <h2 class="s2">RELATÓRIO DIÁRIO DE OPERAÇÃO</h2>  <p class="s3">
-        OPERADOR: {{users}} PERÍODO: {{periodo}}
-      </p>
-      <img class="simple-logo" width="200" height="200" src="{{images.simplelogo}}" alt="Simple Logo">
+      <img
+        class="com-image"
+        width="695"
+        height="680"
+        src="{{images.comercialImage}}"
+        alt="Commercial Image"
+      />
+
+      <img
+        class="fade-logo"
+        width="200"
+        height="200"
+        src="{{images.fadelogo}}"
+        alt="Fade Logo"
+      />
+
+      <h1 class="s1">{{contract}}</h1>
+      <h2 class="s2">RELATÓRIO DIÁRIO DE OPERAÇÃO</h2>
+      <p class="s3">OPERADOR: {{users}} PERÍODO: {{periodo}}</p>
+      <img
+        class="simple-logo"
+        width="200"
+        height="200"
+        src="{{images.simplelogo}}"
+        alt="Simple Logo"
+      />
       <p class="s4" style="text-align: right">
-        <a href="http://dmsys.com.br" class="a" target="_blank">www.dmsys.com.br</a>
+        <a href="http://dmsys.com.br" class="a" target="_blank"
+          >www.dmsys.com.br</a
+        >
       </p>
-      
+
       <p class="s5">{{dataformatada}}</p>
-      </div>
-      <div class="divobjetivo">
-        <h3 class="cftv-title">OBJETIVO</h3>
-        <p class="cftv-text">
-          Este documento tem por objetivo apresentar, documentar e registrar todas as
-          ocorrências, posturas e anomalias na operação diária do condomínio analisadas
-          através do monitoramento das câmeras de vigilância (CFTV).
-        </p>
-      
-  
-      <img class="tech-border" src="{{images.techborder}}" alt="Tech Border 1">
-      <img class="tech-border" src="{{images.bordercover}}" alt="Tech Border 2">
     </div>
-  
+    <div class="divobjetivo">
+      <h3 class="cftv-title">OBJETIVO</h3>
+      <p class="cftv-text">
+        Este documento tem por objetivo apresentar, documentar e registrar todas
+        as ocorrências, posturas e anomalias na operação diária do condomínio
+        analisadas através do monitoramento das câmeras de vigilância (CFTV).
+      </p>
+
+      <img
+        class="tech-border"
+        src="{{images.techborder}}"
+        alt="Tech Border 1"
+      />
+      <img
+        class="tech-border"
+        src="{{images.bordercover}}"
+        alt="Tech Border 2"
+      />
+    </div>
 
     <div class="divaneximg">
       <section class="anex-section">
@@ -340,31 +364,33 @@
         <div class="image-container">
           {{#each anexpath}}
           <div class="image-wrapper">
-            <img class="aneximg" src="{{this}}">
-            <p class="image-text">{{this.description}} ANEEEEEEE MIREXXXXX NASCIMEXXXXXX</p>
+            <img class="aneximg" src="{{this}}" />
+            <p class="image-text">
+              {{this.description}} ANEEEEEEE MIREXXXXX NASCIMEXXXXXX
+            </p>
           </div>
           {{/each}}
         </div>
       </section>
     </div>
     <script>
-      const divaneximg = document.querySelectorAll('.divaneximg');
+      const divaneximg = document.querySelectorAll('.divaneximg')
 
-      divaneximg.forEach(div => {
-        const image = div.querySelector('img');
-        const imageHeight = image.naturalHeight;
-        const imageWidth = image.naturalWidth;
-        const aspectRatio = imageHeight / imageWidth;
-        const baseHeight = div.clientWidth * aspectRatio;
-      
+      divaneximg.forEach((div) => {
+        const image = div.querySelector('img')
+        const imageHeight = image.naturalHeight
+        const imageWidth = image.naturalWidth
+        const aspectRatio = imageHeight / imageWidth
+        const baseHeight = div.clientWidth * aspectRatio
+
         // Calculate the additional height based on the base height
-        const additionalHeight = baseHeight  // 15% of the base height
-        const totalHeight = baseHeight + additionalHeight;
-      
-        div.style.minHeight = `${totalHeight}px`;
-      });
-  </script>
-  
+        const additionalHeight = baseHeight // 15% of the base height
+        const totalHeight = baseHeight + additionalHeight
+
+        div.style.minHeight = `${totalHeight}px`
+      })
+    </script>
+
     <div class="Tablediv">
       <section class="pm-section">
         <h3 class="PM">POLÍCIA MILITAR</h3>
@@ -389,3 +415,4 @@
       </section>
     </div>
   </body>
+</html>
