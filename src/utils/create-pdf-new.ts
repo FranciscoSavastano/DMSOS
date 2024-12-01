@@ -137,6 +137,7 @@ export async function CreatePdf(duty: any) {
   // Add the second page (OBJETIVO)
   doc.addPage()
   doc.image(images.techborder, 0, 122, { width: 90, height: 720 })
+  doc.image(images.bordercover, 0, 122, { width: 90, height: 720 })
   const objectivetext =
     'Este documento tem por objetivo apresentar, documentar e registrar todas as ocorrências, posturas e anomalias na operação diária do condomínio analisadas através do monitoramento das câmeras de vigilância (CFTV).'
   doc.fontSize(32).fill('#001233').text('OBJETIVO', { align: 'center' })
