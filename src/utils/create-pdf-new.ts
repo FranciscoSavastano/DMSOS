@@ -1,12 +1,17 @@
-import pdfkit from 'pdfkit'
+import pdfkit from 'pdfkit-table'
 import fs from 'fs'
 import path from 'path'
 import moment from 'moment-timezone'
 import 'pdf-creator-node'
 import { prisma } from '@/lib/prisma'
+import { FastifyRequest, FastifyReply } from 'fastify'
+var canwrite = false
+var PDFtable = require("pdfkit-table");
 const tempFilePath = path.join(__dirname, 'temp_anexpath.txt')
-export async function initWrite(request: any, reply: any) {
-  if (!request.isMultipart()) {
+export async function initWrite(request: FastifyRequest, reply: FastifyReply) {
+  const tempFilePath = path.join(__dirname, 'temp_anexpath.txt')
+
+  if (!request.headers['content-type'].startsWith('multipart/form-data')) {
     console.log(request.headers['content-type'])
     return reply.status(400).send({ message: 'Invalid content type' })
   }
@@ -15,16 +20,24 @@ export async function initWrite(request: any, reply: any) {
     fs.unlinkSync(tempFilePath)
   }
 
-  const files = await request.multipart() // Use multipart parsing
+  const files = request.files()
 
   const fileData = []
   for await (const file of files) {
-    const buffer = await file.toBuffer()
-    const base64Image = `data:<span class="math-inline">\{file\.mimetype\};base64,</span>{buffer.toString('base64')}`
-    fileData.push(base64Image)
+    const buffer = await new Promise<Buffer>((resolve, reject) => {
+      const chunks = []
+      file.file.on('data', (chunk) => chunks.push(chunk))
+      file.file.on('end', () => resolve(Buffer.concat(chunks)))
+      file.file.on('error', reject)
+    })
+
+    const base64Image = buffer.toString('base64')
+    fileData.push(base64Image) // Store only the Base64 string
   }
 
+  // Write the file data to the temporary file
   fs.writeFileSync(tempFilePath, fileData.join('\n'))
+  canwrite = true
   return reply.send({ message: 'Files uploaded successfully' })
 }
 
@@ -145,11 +158,71 @@ export async function CreatePdf(duty: any) {
     .fontSize(15)
     .fill('#001233')
     .text(objectivetext, 100, 200, { lineGap: 10 })
+  
+    doc.addPage()
+    doc.fontSize(32).fill('#001233').text("RELATORIO FOTOGRAFICO", 40, 30, {align: 'center'})
 
-  // ... rest of your code to add content for subsequent pages
+  const base64Images = fs.readFileSync('./src/utils/temp_anexpath.txt', 'utf-8').split('\n');
+  // Calculate the maximum number of images per row based on page width
+  const maxImagesPerPage = 3;
+  const imageWidth = 90;
+  const imageMargin = 20;
+  
+  let x = imageMargin;
+  let y = imageWidth;
+  
+  base64Images.forEach((base64Image, index) => {
+      // Convert base64 string to buffer
+      const imageBuffer = Buffer.from(base64Image, 'base64');
+  
+      // Add the image to the PDF
+      doc.image(imageBuffer, x, y, { fit: [150,150] });
+      doc.rect(x, y + 150, 150, 70)
+        .fill('#007bff'); // Adjust the color as needed
+      // Add text within the rectangle
+      doc.fontSize(10)
+          .fill('#fff')
+          .text(`Esta é a imagem ${index + 1}, descrição, se voce esta lendo isto significa que esta vendo uma versao de testes e se pergunta porque o texto é tao longo`, x + 5, y + 155, { width: 150});
+      x += 200
+      if(index != 0){
+      if((index + 1) % 3 === 0){
+        x = imageMargin
+        y += 230
+      }
+      }
+      if ((index + 1) % 9 === 0) {
+        doc.addPage()
+        doc.fontSize(32).fill('#001233').text("RELATORIO FOTOGRAFICO", 40, 30, {align: 'center'})
+        x = imageMargin;
+        y = imageWidth;      
+    }
 
-  // Write the PDF to a file
+  });
+  //POLICIA MILITAR
+  doc.addPage()
+  doc.fontSize(32).fill('#001233').text("POLICIA MILITAR", {align: 'center'})
+  const table: {
+    title: string;
+    headers: string[];
+    rows: string[][];
+    } = {
+    title: "OCORRENCIAS",
+    headers: [
+        "HORÁRIO",
+        "LOCAL",
+        "OBSERVAÇÃO"
+    ],
+    rows: ocurrence.map(ocurrence => [
+        ocurrence.newPmHorario || '',
+        ocurrence.pm_local || '',
+        ocurrence.pm_observacao || ''
+    ])
+  };
+  await doc.table(table, {
+    width: 500, // Adjust the width as needed
+    // Other table options, like font size, colors, etc.
+  });
   console.log('Criado')
-  doc.pipe(fs.createWriteStream(`./src/gendocs/output.pdf`))
+  doc.pipe(fs.createWriteStream(`./src/gendocs/output ${duty.id}.pdf`))
   doc.end()
 }
