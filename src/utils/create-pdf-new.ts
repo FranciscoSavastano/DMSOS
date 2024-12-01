@@ -6,7 +6,7 @@ import 'pdf-creator-node'
 import { prisma } from '@/lib/prisma'
 import { FastifyRequest, FastifyReply } from 'fastify'
 var canwrite = false
-var PDFtable = require("pdfkit-table");
+var PDFtable = require('pdfkit-table')
 const tempFilePath = path.join(__dirname, 'temp_anexpath.txt')
 export async function initWrite(request: FastifyRequest, reply: FastifyReply) {
   const tempFilePath = path.join(__dirname, 'temp_anexpath.txt')
@@ -131,14 +131,12 @@ export async function CreatePdf(duty: any) {
 
   // Add the website link (assuming it's a string)
   const linkFontSize = 13 // Adjust font size as needed// Adjust link color
-  doc
-    .fontSize(linkFontSize)
-    .text(`www.dmsys.com.br`, 440, 800, {
-      link: 'http://dmsys.com.br',
-      align: 'right',
-      height: 50,
-      width: 120,
-    }) // Set link behavior and underline
+  doc.fontSize(linkFontSize).text(`www.dmsys.com.br`, 440, 800, {
+    link: 'http://dmsys.com.br',
+    align: 'right',
+    height: 50,
+    width: 120,
+  }) // Set link behavior and underline
 
   // Add the formatted date (assuming `dataformatada` is a string)
   doc
@@ -158,70 +156,78 @@ export async function CreatePdf(duty: any) {
     .fontSize(15)
     .fill('#001233')
     .text(objectivetext, 100, 200, { lineGap: 10 })
-  
-    doc.addPage()
-    doc.fontSize(32).fill('#001233').text("RELATORIO FOTOGRAFICO", 40, 30, {align: 'center'})
 
-  const base64Images = fs.readFileSync('./src/utils/temp_anexpath.txt', 'utf-8').split('\n');
+  doc.addPage()
+  doc
+    .fontSize(32)
+    .fill('#001233')
+    .text('RELATORIO FOTOGRAFICO', 40, 30, { align: 'center' })
+
+  const base64Images = fs
+    .readFileSync('./src/utils/temp_anexpath.txt', 'utf-8')
+    .split('\n')
   // Calculate the maximum number of images per row based on page width
-  const maxImagesPerPage = 3;
-  const imageWidth = 90;
-  const imageMargin = 20;
-  
-  let x = imageMargin;
-  let y = imageWidth;
-  
+  const maxImagesPerPage = 3
+  const imageWidth = 90
+  const imageMargin = 20
+
+  let x = imageMargin
+  let y = imageWidth
+
   base64Images.forEach((base64Image, index) => {
-      // Convert base64 string to buffer
-      const imageBuffer = Buffer.from(base64Image, 'base64');
-  
-      // Add the image to the PDF
-      doc.image(imageBuffer, x, y, { fit: [150,150] });
-      doc.rect(x, y + 150, 150, 70)
-        .fill('#007bff'); // Adjust the color as needed
-      // Add text within the rectangle
-      doc.fontSize(10)
-          .fill('#fff')
-          .text(`Esta é a imagem ${index + 1}, descrição, se voce esta lendo isto significa que esta vendo uma versao de testes e se pergunta porque o texto é tao longo`, x + 5, y + 155, { width: 150});
-      x += 200
-      if(index != 0){
-      if((index + 1) % 3 === 0){
+    // Convert base64 string to buffer
+    const imageBuffer = Buffer.from(base64Image, 'base64')
+
+    // Add the image to the PDF
+    doc.image(imageBuffer, x, y, { fit: [150, 150] })
+    doc.rect(x, y + 150, 150, 70).fill('#007bff') // Adjust the color as needed
+    // Add text within the rectangle
+    doc
+      .fontSize(10)
+      .fill('#fff')
+      .text(
+        `Esta é a imagem ${index + 1}, descrição, se voce esta lendo isto significa que esta vendo uma versao de testes e se pergunta porque o texto é tao longo`,
+        x + 5,
+        y + 155,
+        { width: 150 },
+      )
+    x += 200
+    if (index != 0) {
+      if ((index + 1) % 3 === 0) {
         x = imageMargin
         y += 230
       }
-      }
-      if ((index + 1) % 9 === 0) {
-        doc.addPage()
-        doc.fontSize(32).fill('#001233').text("RELATORIO FOTOGRAFICO", 40, 30, {align: 'center'})
-        x = imageMargin;
-        y = imageWidth;      
     }
-
-  });
+    if ((index + 1) % 9 === 0) {
+      doc.addPage()
+      doc
+        .fontSize(32)
+        .fill('#001233')
+        .text('RELATORIO FOTOGRAFICO', 40, 30, { align: 'center' })
+      x = imageMargin
+      y = imageWidth
+    }
+  })
   //POLICIA MILITAR
   doc.addPage()
-  doc.fontSize(32).fill('#001233').text("POLICIA MILITAR", {align: 'center'})
+  doc.fontSize(32).fill('#001233').text('POLICIA MILITAR', { align: 'center' })
   const table: {
-    title: string;
-    headers: string[];
-    rows: string[][];
-    } = {
-    title: "OCORRENCIAS",
-    headers: [
-        "HORÁRIO",
-        "LOCAL",
-        "OBSERVAÇÃO"
-    ],
-    rows: ocurrence.map(ocurrence => [
-        ocurrence.newPmHorario || '',
-        ocurrence.pm_local || '',
-        ocurrence.pm_observacao || ''
-    ])
-  };
+    title: string
+    headers: string[]
+    rows: string[][]
+  } = {
+    title: 'OCORRENCIAS',
+    headers: ['HORÁRIO', 'LOCAL', 'OBSERVAÇÃO'],
+    rows: ocurrence.map((ocurrence) => [
+      ocurrence.newPmHorario || '',
+      ocurrence.pm_local || '',
+      ocurrence.pm_observacao || '',
+    ]),
+  }
   await doc.table(table, {
     width: 500, // Adjust the width as needed
     // Other table options, like font size, colors, etc.
-  });
+  })
   console.log('Criado')
   doc.pipe(fs.createWriteStream(`./src/gendocs/output ${duty.id}.pdf`))
   doc.end()
