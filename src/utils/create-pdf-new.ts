@@ -7,38 +7,41 @@ import { prisma } from '@/lib/prisma'
 import { FastifyRequest, FastifyReply } from 'fastify'
 var canwrite = false
 var PDFtable = require('pdfkit-table')
-const tempFilePath = path.join(__dirname, 'temp_anexpath.txt')
 export async function initWrite(request: FastifyRequest, reply: FastifyReply) {
-  const tempFilePath = path.join(__dirname, 'temp_anexpath.txt')
-
   if (!request.headers['content-type'].startsWith('multipart/form-data')) {
-    console.log(request.headers['content-type'])
-    return reply.status(400).send({ message: 'Invalid content type' })
+    console.log(request.headers['content-type']);
+    return reply.status(400).send({ message: 'Invalid content type' });
   }
 
-  if (fs.existsSync(tempFilePath)) {
-    fs.unlinkSync(tempFilePath)
+  const files = await request.files();
+  const messages = request.body.messages;
+  console.log(messages)
+  const tempFilePath = path.join(__dirname, 'temp_anexpath.txt')
+  const fileData = [];
+  const imageDescriptions = [];
+
+  try {
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const buffer = await file.toBuffer();
+      const base64Image = buffer.toString('base64');
+      fileData.push(base64Image);
+
+      const message = messages[i];
+      imageDescriptions.push(message);
+    }
+
+    fs.writeFileSync(tempFilePath, JSON.stringify({
+      images: fileData,
+      descriptions: imageDescriptions
+    }));
+
+    canwrite = true;
+    return reply.status(200).send({ message: 'Files uploaded successfully' });
+  } catch (error) {
+    console.error('Error writing to file:', error);
+    return reply.status(500).send({ message: 'Internal server error' });
   }
-
-  const files = request.files()
-
-  const fileData = []
-  for await (const file of files) {
-    const buffer = await new Promise<Buffer>((resolve, reject) => {
-      const chunks = []
-      file.file.on('data', (chunk) => chunks.push(chunk))
-      file.file.on('end', () => resolve(Buffer.concat(chunks)))
-      file.file.on('error', reject)
-    })
-
-    const base64Image = buffer.toString('base64')
-    fileData.push(base64Image) // Store only the Base64 string
-  }
-
-  // Write the file data to the temporary file
-  fs.writeFileSync(tempFilePath, fileData.join('\n'))
-  canwrite = true
-  return reply.send({ message: 'Files uploaded successfully' })
 }
 
 function determinePeriod(created_at: Date): string {
@@ -72,12 +75,19 @@ export async function CreatePdf(duty: any) {
       newPmHorario: formattedDate,
     }
   })
+  var anexpath;
   const dataformatada = formatarData(duty.created_at)
   const periodo = determinePeriod(duty.created_at)
-
+  const tempFilePath = path.join(__dirname, 'temp_anexpath.txt')
+  if (fs.existsSync(tempFilePath)) {
+    anexpath = fs.readFileSync(tempFilePath, 'utf-8').split('\n')
+  }
+  else {
+    anexpath = false
+  }
   const html = fs.readFileSync('./src/utils/pdf-model.html', 'utf8')
 
-  const anexpath = fs.readFileSync(tempFilePath, 'utf-8').split('\n')
+  
 
   async function getImage() {
     const images = {
@@ -157,57 +167,59 @@ export async function CreatePdf(duty: any) {
     .fill('#001233')
     .text(objectivetext, 100, 200, { lineGap: 10 })
 
-  doc.addPage()
-  doc
-    .fontSize(32)
-    .fill('#001233')
-    .text('RELATORIO FOTOGRAFICO', 40, 30, { align: 'center' })
-
-  const base64Images = fs
-    .readFileSync('./src/utils/temp_anexpath.txt', 'utf-8')
-    .split('\n')
-  // Calculate the maximum number of images per row based on page width
-  const maxImagesPerPage = 3
-  const imageWidth = 90
-  const imageMargin = 20
-
-  let x = imageMargin
-  let y = imageWidth
-
-  base64Images.forEach((base64Image, index) => {
-    // Convert base64 string to buffer
-    const imageBuffer = Buffer.from(base64Image, 'base64')
-
-    // Add the image to the PDF
-    doc.image(imageBuffer, x, y, { fit: [150, 150] })
-    doc.rect(x, y + 150, 150, 70).fill('#007bff') // Adjust the color as needed
-    // Add text within the rectangle
+  if(anexpath != false){
+    doc.addPage()
     doc
-      .fontSize(10)
-      .fill('#fff')
-      .text(
-        `Esta é a imagem ${index + 1}, descrição, se voce esta lendo isto significa que esta vendo uma versao de testes e se pergunta porque o texto é tao longo`,
-        x + 5,
-        y + 155,
-        { width: 150 },
-      )
-    x += 200
-    if (index != 0) {
-      if ((index + 1) % 3 === 0) {
-        x = imageMargin
-        y += 230
-      }
-    }
-    if ((index + 1) % 9 === 0) {
-      doc.addPage()
+      .fontSize(32)
+      .fill('#001233')
+      .text('RELATORIO FOTOGRAFICO', 40, 30, { align: 'center' })
+
+    const base64Images = fs
+      .readFileSync('./src/utils/temp_anexpath.txt', 'utf-8')
+      .split('\n')
+    // Calculate the maximum number of images per row based on page width
+    const maxImagesPerPage = 3
+    const imageWidth = 90
+    const imageMargin = 20
+
+    let x = imageMargin
+    let y = imageWidth
+
+    base64Images.forEach((base64Image, index) => {
+      // Convert base64 string to buffer
+      const imageBuffer = Buffer.from(base64Image, 'base64')
+
+      // Add the image to the PDF
+      doc.image(imageBuffer, x, y, { fit: [150, 150] })
+      doc.rect(x, y + 150, 150, 70).fill('#007bff') // Adjust the color as needed
+      // Add text within the rectangle
       doc
-        .fontSize(32)
-        .fill('#001233')
-        .text('RELATORIO FOTOGRAFICO', 40, 30, { align: 'center' })
-      x = imageMargin
-      y = imageWidth
-    }
-  })
+        .fontSize(10)
+        .fill('#fff')
+        .text(
+          `Esta é a imagem ${index + 1}, descrição, se voce esta lendo isto significa que esta vendo uma versao de testes e se pergunta porque o texto é tao longo`,
+          x + 5,
+          y + 155,
+          { width: 150 },
+        )
+      x += 200
+      if (index != 0) {
+        if ((index + 1) % 3 === 0) {
+          x = imageMargin
+          y += 230
+        }
+      }
+      if ((index + 1) % 9 === 0) {
+        doc.addPage()
+        doc
+          .fontSize(32)
+          .fill('#001233')
+          .text('RELATORIO FOTOGRAFICO', 40, 30, { align: 'center' })
+        x = imageMargin
+        y = imageWidth
+      }
+    })
+  }
   //POLICIA MILITAR
   doc.addPage()
   doc.fontSize(32).fill('#001233').text('POLICIA MILITAR', { align: 'center' })
