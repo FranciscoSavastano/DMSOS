@@ -20,6 +20,7 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
       data_inicio: z.string().datetime(),
       data_fim: z.string().datetime(),
       contrato: z.string(),
+      consideracoes: z.string(),
       horario_rf: z.string().datetime(),
       imagens: z.any(),
       ocurrence: z.array(occurrenceSchema).optional(),
@@ -33,6 +34,7 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
     contrato,
     horario_rf,
     ocurrence,
+    consideracoes,
   } = registerBodySchema
   try {
     const registerDutyCase = makeCreateDutyUseCase()
@@ -44,8 +46,8 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
       contrato,
       horario_rf,
       ocurrence,
+      consideracoes,
     })
-    console.log('gerando pdf')
     CreatePdf(duty)
     return await reply.status(201).send({ duty, ocurrences })
   } catch (err: unknown) {

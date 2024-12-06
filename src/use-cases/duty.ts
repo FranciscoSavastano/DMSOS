@@ -35,6 +35,7 @@ export class CreateDutyUseCase {
     horario_rf,
     contrato,
     ocurrence,
+    consideracoes,
   }: RegisterUseCaseRequest): Promise<RegisterUseCaseResponse> {
     const ocurrences = []
     const duty = await this.dutyRepository.create({
@@ -48,9 +49,9 @@ export class CreateDutyUseCase {
       data_fim,
       horario_rf,
       contrato,
+      consideracoes,
     })
     for (const ocorrencia of ocurrence) {
-      console.log(ocorrencia)
       const newOccurrence = await this.dutyRepository.createOcurrence({
         plantao: {
           connect: {

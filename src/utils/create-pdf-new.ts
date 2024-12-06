@@ -8,42 +8,51 @@ import { FastifyRequest, FastifyReply } from 'fastify'
 var canwrite = false
 var PDFtable = require('pdfkit-table')
 export async function initWrite(request: FastifyRequest, reply: FastifyReply) {
+  const tempFilePath = path.join(__dirname, 'temp_anexpath.txt')
+
   if (!request.headers['content-type'].startsWith('multipart/form-data')) {
-    console.log(request.headers['content-type']);
-    return reply.status(400).send({ message: 'Invalid content type' });
+    console.log(request.headers['content-type'])
+    return reply.status(400).send({ message: 'Invalid content type' })
   }
 
-  const files = await request.files();
-  const messages = request.body.messages;
-  console.log(messages)
-  const tempFilePath = path.join(__dirname, 'temp_anexpath.txt')
-  const fileData = [];
-  const imageDescriptions = [];
+  if (fs.existsSync(tempFilePath)) {
+    fs.unlinkSync(tempFilePath)
+  }
+
+  const files = request.files()
+
+  const fileData = []
+  for await (const file of files) {
+    const buffer = await new Promise<Buffer>((resolve, reject) => {
+      const chunks = []
+      file.file.on('data', (chunk) => chunks.push(chunk))
+      file.file.on('end', () => resolve(Buffer.concat(chunks)))
+      file.file.on('error', reject)
+    })
+
+    const base64Image = buffer.toString('base64')
+    fileData.push(base64Image) // Store only the Base64 string
+  }
+
+  // Write the file data to the temporary file
+  fs.writeFileSync(tempFilePath, fileData.join('\n'))
+  canwrite = true
+  return reply.send({ message: 'Files uploaded successfully' })
+}
+
+export async function writeDesc(request: FastifyRequest, reply: FastifyReply) {
+  const tempFilePath = path.join(__dirname, 'temp_anexpath_desc.txt');
+  const descriptions = request.body.descriptions; // Assuming descriptions are sent as an array in the request body
 
   try {
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      const buffer = await file.toBuffer();
-      const base64Image = buffer.toString('base64');
-      fileData.push(base64Image);
+    fs.writeFileSync(tempFilePath, descriptions.join('\n'));
 
-      const message = messages[i];
-      imageDescriptions.push(message);
-    }
-
-    fs.writeFileSync(tempFilePath, JSON.stringify({
-      images: fileData,
-      descriptions: imageDescriptions
-    }));
-
-    canwrite = true;
-    return reply.status(200).send({ message: 'Files uploaded successfully' });
+    return reply.status(200).send({ message: "Descriptions written successfully" });
   } catch (error) {
     console.error('Error writing to file:', error);
     return reply.status(500).send({ message: 'Internal server error' });
   }
 }
-
 function determinePeriod(created_at: Date): string {
   const momenthour = moment(created_at)
   const createdAt = momenthour.tz('America/Sao_Paulo')
@@ -58,7 +67,6 @@ function formatarData(created_at: Date): string {
 }
 
 export async function CreatePdf(duty: any) {
-  console.log('Chamdo')
   const users = duty.operadoresNome
   const data = duty.created_at
   const contract = duty.contrato
@@ -177,8 +185,12 @@ export async function CreatePdf(duty: any) {
     const base64Images = fs
       .readFileSync('./src/utils/temp_anexpath.txt', 'utf-8')
       .split('\n')
+
+    const imagesdescription = fs
+      .readFileSync('./src/utils/temp_anexpath_desc.txt', 'utf-8')
+      .split('\n')
+
     // Calculate the maximum number of images per row based on page width
-    const maxImagesPerPage = 3
     const imageWidth = 90
     const imageMargin = 20
 
@@ -188,7 +200,7 @@ export async function CreatePdf(duty: any) {
     base64Images.forEach((base64Image, index) => {
       // Convert base64 string to buffer
       const imageBuffer = Buffer.from(base64Image, 'base64')
-
+      const imagedesc = imagesdescription[index];
       // Add the image to the PDF
       doc.image(imageBuffer, x, y, { fit: [150, 150] })
       doc.rect(x, y + 150, 150, 70).fill('#007bff') // Adjust the color as needed
@@ -196,8 +208,7 @@ export async function CreatePdf(duty: any) {
       doc
         .fontSize(10)
         .fill('#fff')
-        .text(
-          `Esta é a imagem ${index + 1}, descrição, se voce esta lendo isto significa que esta vendo uma versao de testes e se pergunta porque o texto é tao longo`,
+        .text(imagedesc,
           x + 5,
           y + 155,
           { width: 150 },

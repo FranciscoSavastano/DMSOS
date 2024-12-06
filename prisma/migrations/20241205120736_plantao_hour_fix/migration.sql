@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "plantoes" ALTER COLUMN "data_inicio" SET DEFAULT CURRENT_TIMESTAMP;

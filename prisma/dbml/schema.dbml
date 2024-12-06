@@ -65,11 +65,12 @@ Table plantoes {
   id Int [pk, increment]
   operadoresNome String[] [not null]
   operadores users [not null]
-  data_inicio DateTime [not null]
+  data_inicio DateTime [default: `now()`, not null]
   data_fim DateTime [not null]
   horario_rf DateTime [not null]
   contrato String [not null]
   ocorrencia ocorrencias [not null]
+  consideracoes String [not null, default: '']
   created_at DateTime [default: `now()`, not null]
   updated_at DateTime [not null]
 }

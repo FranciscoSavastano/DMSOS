@@ -90,11 +90,12 @@ model Plantao {
   id                    Int         @id @default(autoincrement())
   operadoresNome        String[]
   operadores            User[]
-  data_inicio           DateTime
+  data_inicio           DateTime    @default(now())
   data_fim              DateTime
   horario_rf            DateTime
   contrato              String
   ocorrencia            Ocorrencia[]
+  consideracoes         String      @default("")
   created_at            DateTime    @default(now())
   updated_at            DateTime    @updatedAt
   @@map("plantoes")
