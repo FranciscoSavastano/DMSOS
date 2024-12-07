@@ -41,16 +41,18 @@ export async function initWrite(request: FastifyRequest, reply: FastifyReply) {
 }
 
 export async function writeDesc(request: FastifyRequest, reply: FastifyReply) {
-  const tempFilePath = path.join(__dirname, 'temp_anexpath_desc.txt');
-  const descriptions = request.body.descriptions; // Assuming descriptions are sent as an array in the request body
+  const tempFilePath = path.join(__dirname, 'temp_anexpath_desc.txt')
+  const descriptions = request.body.descriptions // Assuming descriptions are sent as an array in the request body
 
   try {
-    fs.writeFileSync(tempFilePath, descriptions.join('\n'));
+    fs.writeFileSync(tempFilePath, descriptions.join('\n'))
 
-    return reply.status(200).send({ message: "Descriptions written successfully" });
+    return reply
+      .status(200)
+      .send({ message: 'Descriptions written successfully' })
   } catch (error) {
-    console.error('Error writing to file:', error);
-    return reply.status(500).send({ message: 'Internal server error' });
+    console.error('Error writing to file:', error)
+    return reply.status(500).send({ message: 'Internal server error' })
   }
 }
 function determinePeriod(created_at: Date): string {
@@ -83,19 +85,16 @@ export async function CreatePdf(duty: any) {
       newPmHorario: formattedDate,
     }
   })
-  var anexpath;
+  var anexpath
   const dataformatada = formatarData(duty.created_at)
   const periodo = determinePeriod(duty.created_at)
   const tempFilePath = path.join(__dirname, 'temp_anexpath.txt')
   if (fs.existsSync(tempFilePath)) {
     anexpath = fs.readFileSync(tempFilePath, 'utf-8').split('\n')
-  }
-  else {
+  } else {
     anexpath = false
   }
   const html = fs.readFileSync('./src/utils/pdf-model.html', 'utf8')
-
-  
 
   async function getImage() {
     const images = {
@@ -175,7 +174,7 @@ export async function CreatePdf(duty: any) {
     .fill('#001233')
     .text(objectivetext, 100, 200, { lineGap: 10 })
 
-  if(anexpath != false){
+  if (anexpath != false) {
     doc.addPage()
     doc
       .fontSize(32)
@@ -200,19 +199,15 @@ export async function CreatePdf(duty: any) {
     base64Images.forEach((base64Image, index) => {
       // Convert base64 string to buffer
       const imageBuffer = Buffer.from(base64Image, 'base64')
-      const imagedesc = imagesdescription[index];
+      const imagedesc = imagesdescription[index]
       // Add the image to the PDF
-      doc.image(imageBuffer, x, y, { fit: [150, 150] })
+      doc.image(imageBuffer, x, y, { width: 150, height: 150 })
       doc.rect(x, y + 150, 150, 70).fill('#007bff') // Adjust the color as needed
       // Add text within the rectangle
       doc
         .fontSize(10)
         .fill('#fff')
-        .text(imagedesc,
-          x + 5,
-          y + 155,
-          { width: 150 },
-        )
+        .text(imagedesc, x + 5, y + 155, { width: 150 })
       x += 200
       if (index != 0) {
         if ((index + 1) % 3 === 0) {
@@ -251,6 +246,11 @@ export async function CreatePdf(duty: any) {
     width: 500, // Adjust the width as needed
     // Other table options, like font size, colors, etc.
   })
+  doc.addPage()
+  doc.fontSize(32).fill('#001233').text('CONSIDERACOES FINAIS', { align: 'center' })
+  doc.rect(0, doc.y, doc.page.width, 80).fill('#fff');
+  doc.y += 90; // Adjust the y-coordinate to account for the added space  
+  doc.fontSize(15).fill('black').text(duty.consideracoes, {align: 'center'})
   console.log('Criado')
   doc.pipe(fs.createWriteStream(`./src/gendocs/output ${duty.id}.pdf`))
   doc.end()

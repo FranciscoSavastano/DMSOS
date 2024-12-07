@@ -25,7 +25,8 @@ export interface DutyRepository {
     data: Prisma.OcorrenciaCreateInput,
   ) => Promise<Ocorrencia | null>
   read: (id: number) => Promise<Plantao | null>
-  readAllDuties: () => Promise<Plantao[]>
+  readAllDuties: () => Promise<Plantao[] | null>
+  readAllUserDuties: () => Promise<Plantao[] | null>
   update: (data: IUpdateDuty) => Promise<Plantao | null>
   deleteDuty: (id: number) => Promise<boolean>
   findById: (id: number) => Promise<Plantao | null>

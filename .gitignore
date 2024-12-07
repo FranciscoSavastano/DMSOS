@@ -3,3 +3,5 @@ build
 coverage
 .env
 src/gendocs
+src/utils/temp_anexpath_desc.txt
+src/utils/temp_anexpath.txt

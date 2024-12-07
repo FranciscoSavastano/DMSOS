@@ -1,0 +1,21 @@
+meta {
+  name: ReadAllUserDutie
+  type: http
+  seq: 18
+}
+
+post {
+  url: 127.0.0.1:3333/duty/readAllUserDuty
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NmY5NDNmMC0wZWVmLTQ4ZDMtYjUwNC0xYWY5YjUyNGJiZDciLCJpYXQiOjE3MzM1NzUxNjAsImV4cCI6MTczMzU3ODc2MH0.SOKuETB0yRpoNZzAKS5wQsyYBzCO-abQLzH5oQm6UEM
+}
+
+body:json {
+  {
+    "id" : "96f943f0-0eef-48d3-b504-1af9b524bbd7"
+  }
+}
