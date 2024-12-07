@@ -18,7 +18,7 @@ export class ReadAllUserDutyUseCase {
 
   async execute({
     bearerAuth,
-    id
+    id,
   }: ReadAllDutyUseCaseRequest): Promise<ReadAllDutyUseCaseResponse> {
     const token = bearerAuth.split(' ')[1]
 

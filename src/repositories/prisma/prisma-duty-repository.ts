@@ -58,23 +58,23 @@ export class PrismaDutyRepository implements DutyRepository {
         where: {
           id,
         },
-      });
-  
+      })
+
       const plantoes = await prisma.plantao.findMany({
         where: {
           operadoresNome: {
-            has: user.nome
-          }
-        }
-      });
-  
-      return plantoes;
+            has: user.nome,
+          },
+        },
+      })
+
+      return plantoes
     } catch (err) {
       if (err instanceof NotFoundError) {
-        return err.message;
+        return err.message
       }
     }
-    return null;
+    return null
   }
   async update({ id, data }: IUpdateDuty) {
     const duty = await prisma.plantao.update({

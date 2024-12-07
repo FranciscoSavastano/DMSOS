@@ -1,6 +1,6 @@
 import { makeCreateDutyUseCase } from '@/use-cases/factories/make-create-duty-use-case'
 import { WriteImages } from '@/use-cases/write-images'
-import { CreatePdf } from '@/utils/create-pdf-new'
+import { CreatePdf } from '@/utils/create-pdf'
 import multer from 'multer'
 import { type FastifyRequest, type FastifyReply } from 'fastify'
 import { string, z } from 'zod'

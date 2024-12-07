@@ -8,21 +8,21 @@ export async function readAllUserDuty(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const readAllDutiesBodySchema = z.
-  object({
-    id: z.string(),
-  })
+  const readAllDutiesBodySchema = z
+    .object({
+      id: z.string(),
+    })
 
-  .parse(request.body)
+    .parse(request.body)
 
   const readAllDutyHeadersSchema = z
-    
+
     .object({
       authorization: z.string(),
     })
     .parse(request.headers)
   const { authorization: bearerAuth } = readAllDutyHeadersSchema
-  const {id} = readAllDutiesBodySchema
+  const { id } = readAllDutiesBodySchema
   try {
     const readAllUserDutyUseCase = makeReadAllUserDutyUseCase()
 
