@@ -88,14 +88,13 @@ export async function CreatePdf(duty: any) {
   var anexpath
   const dataformatada = formatarData(duty.created_at)
   const periodo = determinePeriod(duty.created_at)
+  const tempDescFilePath = path.join(__dirname, 'temp_anexpath_desc.txt')
   const tempFilePath = path.join(__dirname, 'temp_anexpath.txt')
   if (fs.existsSync(tempFilePath)) {
     anexpath = fs.readFileSync(tempFilePath, 'utf-8').split('\n')
   } else {
     anexpath = false
   }
-  const html = fs.readFileSync('./src/utils/pdf-model.html', 'utf8')
-
   async function getImage() {
     const images = {
       comercialImage: './src/utils/pdf-img/com-image.png',
@@ -227,34 +226,54 @@ export async function CreatePdf(duty: any) {
     })
   }
   //POLICIA MILITAR
-  doc.addPage()
-  doc.fontSize(32).fill('#001233').text('POLICIA MILITAR', { align: 'center' })
-  const table: {
-    title: string
-    headers: string[]
-    rows: string[][]
-  } = {
-    title: 'OCORRENCIAS',
-    headers: ['HORÁRIO', 'LOCAL', 'OBSERVAÇÃO'],
-    rows: ocurrence.map((ocurrence) => [
-      ocurrence.newPmHorario || '',
-      ocurrence.pm_local || '',
-      ocurrence.pm_observacao || '',
-    ]),
+  if(ocurrence){
+    doc.addPage()
+    doc.fontSize(32).fill('#001233').text('POLICIA MILITAR', { align: 'center' })
+    const table: {
+      title: string
+      headers: string[]
+      rows: string[][]
+    } = {
+      title: 'OCORRENCIAS',
+      headers: ['HORÁRIO', 'LOCAL', 'OBSERVAÇÃO'],
+      rows: ocurrence.map((ocurrence) => [
+        ocurrence.newPmHorario || '',
+        ocurrence.pm_local || '',
+        ocurrence.pm_observacao || '',
+      ]),
+    }
+    await doc.table(table, {
+      width: 500, // Adjust the width as needed
+      // Other table options, like font size, colors, etc.
+    })
   }
-  await doc.table(table, {
-    width: 500, // Adjust the width as needed
-    // Other table options, like font size, colors, etc.
-  })
   doc.addPage()
   doc
     .fontSize(32)
     .fill('#001233')
     .text('CONSIDERACOES FINAIS', { align: 'center' })
-  doc.rect(0, doc.y, doc.page.width, 80).fill('#fff')
-  doc.y += 90 // Adjust the y-coordinate to account for the added space
-  doc.fontSize(15).fill('black').text(duty.consideracoes, { align: 'center' })
+  doc.rect(0, doc.y, doc.page.width, 50).fill('#fff')
+  doc.y += 50 // Adjust the y-coordinate to account for the added space
+  doc.fontSize(13).fill('black').text(duty.consideracoes, { align: 'center' })
+  
+  //Finalize o arquivo e salve na pasta
   console.log('Criado')
-  doc.pipe(fs.createWriteStream(`./src/gendocs/output ${duty.id}.pdf`))
+  doc.pipe(fs.createWriteStream(`./src/gendocs/Relatorio ${contract} ${dataformatada}.pdf`))
   doc.end()
-}
+
+
+
+  //Delete os arquivos temporarios, se não houver, descreva no console
+  try {
+    fs.unlinkSync(tempFilePath)
+  }
+  catch(err) {
+    console.log("Não existem imagens")
+  }
+  try {
+    fs.unlinkSync(tempDescFilePath)
+  }
+  catch(err) {
+    console.log("Não existem descrições")
+  }
+} 
