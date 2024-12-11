@@ -226,9 +226,12 @@ export async function CreatePdf(duty: any) {
     })
   }
   //POLICIA MILITAR
-  if(ocurrence){
+  if (ocurrence) {
     doc.addPage()
-    doc.fontSize(32).fill('#001233').text('POLICIA MILITAR', { align: 'center' })
+    doc
+      .fontSize(32)
+      .fill('#001233')
+      .text('POLICIA MILITAR', { align: 'center' })
     const table: {
       title: string
       headers: string[]
@@ -255,25 +258,25 @@ export async function CreatePdf(duty: any) {
   doc.rect(0, doc.y, doc.page.width, 50).fill('#fff')
   doc.y += 50 // Adjust the y-coordinate to account for the added space
   doc.fontSize(13).fill('black').text(duty.consideracoes, { align: 'center' })
-  
+
   //Finalize o arquivo e salve na pasta
   console.log('Criado')
-  doc.pipe(fs.createWriteStream(`./src/gendocs/Relatorio ${contract} ${dataformatada}.pdf`))
+  doc.pipe(
+    fs.createWriteStream(
+      `./src/gendocs/Relatorio ${contract} ${dataformatada}.pdf`,
+    ),
+  )
   doc.end()
-
-
 
   //Delete os arquivos temporarios, se não houver, descreva no console
   try {
     fs.unlinkSync(tempFilePath)
-  }
-  catch(err) {
-    console.log("Não existem imagens")
+  } catch (err) {
+    console.log('Não existem imagens')
   }
   try {
     fs.unlinkSync(tempDescFilePath)
+  } catch (err) {
+    console.log('Não existem descrições')
   }
-  catch(err) {
-    console.log("Não existem descrições")
-  }
-} 
+}
