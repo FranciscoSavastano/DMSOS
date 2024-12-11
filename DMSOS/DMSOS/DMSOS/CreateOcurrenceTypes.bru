@@ -1,0 +1,18 @@
+meta {
+  name: CreateOcurrenceTypes
+  type: http
+  seq: 3
+}
+
+post {
+  url: http://127.0.0.1:3333/ocurrencetypes
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "type": "Policia",
+    "subtypes": ["Teste"]
+  }
+}

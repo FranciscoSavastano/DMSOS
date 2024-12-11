@@ -1,0 +1,21 @@
+meta {
+  name: DeleteUser
+  type: http
+  seq: 5
+}
+
+delete {
+  url: 127.0.0.1:3333/users/delete
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmN2ZmZGYzYy1kZmEyLTQxYmQtODBmYS1jNWM3YjZlMDQ4MjciLCJpYXQiOjE3MjgwOTQwODAsImV4cCI6MTcyODA5NDM4MH0.x84YHCI7jtjiYtj_C9j8R2QQph6t_0kYrT29_vdTwwQ
+}
+
+body:json {
+  {
+    "id" : "97f470d1-8108-4846-a672-8558346aa428"
+  }
+}

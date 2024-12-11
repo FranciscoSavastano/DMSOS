@@ -1,0 +1,15 @@
+meta {
+  name: ReadAllDuty
+  type: http
+  seq: 10
+}
+
+get {
+  url: 127.0.0.1:3333/duty/readAll
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0Nzk4MWFjOC05NGYwLTRmNzUtYWRkOC0zNTA4MGVkNmNmYWIiLCJpYXQiOjE3Mjk2MDEyNDIsImV4cCI6MTcyOTYwMTU0Mn0.-v9R_sR6ET4pn0A5Him8eOFCSyUGpBBdKe-jWNE3mOY
+}
