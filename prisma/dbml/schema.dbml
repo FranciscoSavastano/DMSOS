@@ -63,22 +63,44 @@ Table OS {
 
 Table plantoes {
   id Int [pk, increment]
-  operador users [not null]
-  data_inicio DateTime [not null]
+  operadoresNome String[] [not null]
+  operadores users [not null]
+  data_inicio DateTime [default: `now()`, not null]
   data_fim DateTime [not null]
   horario_rf DateTime [not null]
+  contrato String [not null]
   ocorrencia ocorrencias [not null]
+  consideracoes String [not null, default: '']
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+}
+
+Table plantao_operador {
+  plantaoId Int [not null]
+  operadorId String [not null]
+
+  indexes {
+    (plantaoId, operadorId) [pk]
+  }
 }
 
 Table ocorrencias {
   id Int [pk, increment]
   plantao_id Int [not null]
   plantao plantoes [not null]
+  ocurrence_type String[] [not null]
   descricao String
   pm_horario DateTime
   pm_local String
   pm_observacao String
   pm_acao String
+}
+
+Table Ocurrence_type {
+  id Int [pk, increment]
+  type String [not null]
+  subtypes String[] [not null]
+  contract String [not null]
 }
 
 Table marcas {
@@ -97,6 +119,9 @@ Table Equipamento {
   modelo String [not null]
   marca_nome String [not null]
   cliente_id String [not null]
+  ip String [not null]
+  mac String [not null]
+  NS String [not null]
   marca marcas [not null]
   cliente clientes [not null]
   os OS [not null]
@@ -104,7 +129,7 @@ Table Equipamento {
 
 Table PlantaoToUser {
   plantaoId Int [ref: > plantoes.id]
-  operadorId String [ref: > users.id]
+  operadoresId String [ref: > users.id]
 }
 
 Enum UserType {

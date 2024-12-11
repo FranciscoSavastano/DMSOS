@@ -1,0 +1,19 @@
+meta {
+  name: createocurrencetypes
+  type: http
+  seq: 14
+}
+
+post {
+  url: 127.0.0.1:3333/ocurrencetypes
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "type": "Defeito",
+    "subtypes": ["Cam 300 BL3 Union","Cam 200 BL2 Union", "Cam 150 BL2 Union"],
+    "contract": "Union Square"
+  }
+}

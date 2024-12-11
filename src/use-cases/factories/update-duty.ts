@@ -26,7 +26,6 @@ export class UpdateDutyUseCase {
     data_inicio,
     data_fim,
     horario_rf,
-
   }: UpdateUseCaseRequest): Promise<UpdateUseCaseResponse> {
     const token = bearerAuth.split(' ')[1]
     let token_payload: { sub: string }
@@ -50,6 +49,6 @@ export class UpdateDutyUseCase {
       throw new UserEmailNotFoundError()
     }
 
-    return {duty}
+    return { duty }
   }
 }

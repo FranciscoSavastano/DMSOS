@@ -13,6 +13,10 @@ import { readDuty } from './controllers/read-duty'
 import { readAllDuty } from './controllers/read-all-duties'
 import { updateDuty } from './controllers/update-duty'
 import { deleteDuty } from './controllers/delete-duty'
+import { createOcurrenceType } from './controllers/ocurrence_types'
+import { fetchUserNames } from './controllers/read-all-user-type'
+import { CreatePdf, initWrite, writeDesc } from '@/utils/create-pdf'
+import { readAllUserDuty } from './controllers/read-all-user-duties'
 
 export async function appRoutes(app: FastifyInstance) {
   //Users
@@ -27,6 +31,8 @@ export async function appRoutes(app: FastifyInstance) {
 
   app.delete('/users/delete', deleteUser)
 
+  app.get('/users/getnames', fetchUserNames)
+
   //Plantao
   app.post('/duty', createDuty)
 
@@ -34,10 +40,13 @@ export async function appRoutes(app: FastifyInstance) {
 
   app.get('/duty/readAll', readAllDuty)
 
-  app.patch('/duty/update', updateDuty) 
+  app.post('/duty/readAllUserDuty', readAllUserDuty)
+
+  app.patch('/duty/update', updateDuty)
 
   app.delete('/duty/delete', deleteDuty)
 
+  app.post('/ocurrencetypes', createOcurrenceType)
   //Outros
 
   app.post('/users/forgot-password', forgotPassword)
@@ -48,5 +57,9 @@ export async function appRoutes(app: FastifyInstance) {
 
   app.post('/sessions/refresh-token', refreshToken)
 
-  
+  app.get('/createpdf', CreatePdf)
+
+  app.post('/writeFiles', initWrite)
+
+  app.post('/writeDescriptions', writeDesc)
 }

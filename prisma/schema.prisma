@@ -51,6 +51,7 @@ model Cliente {
   equipamento Equipamento[]
   @@map("clientes")
 }
+
 model AuthenticationAudit {
   id          Int                   @id @default(autoincrement())
   ip_address  String?
@@ -87,18 +88,30 @@ model OS {
 
 model Plantao {
   id                    Int         @id @default(autoincrement())
-  operador              User[] 
-  data_inicio           DateTime
+  operadoresNome        String[]
+  operadores            User[]
+  data_inicio           DateTime    @default(now())
   data_fim              DateTime
   horario_rf            DateTime
+  contrato              String
   ocorrencia            Ocorrencia[]
+  consideracoes         String      @default("")
+  created_at            DateTime    @default(now())
+  updated_at            DateTime    @updatedAt
   @@map("plantoes")
 }
 
+model PlantaoOperador {
+  plantaoId  Int
+  operadorId String
+  @@id([plantaoId, operadorId])
+  @@map("plantao_operador")
+}
 model Ocorrencia {
   id                    Int         @id @default(autoincrement())
   plantao_id            Int
   plantao               Plantao     @relation(fields: [plantao_id], references: [id], onDelete: Cascade)
+  ocurrence_type        String[]
   descricao             String?      
   pm_horario            DateTime?    
   pm_local              String?     
@@ -106,6 +119,15 @@ model Ocorrencia {
   pm_acao               String?
   @@map("ocorrencias")
 }
+
+model Ocurrence_types {
+  id              Int           @default(autoincrement()) @id
+  type            String
+  subtypes        String[]
+  contract        String        
+  @@map("Ocurrence_type")
+}
+
 model Marca {
   id                    Int        @id  @default(autoincrement())
   marca                 String     @unique
@@ -123,6 +145,9 @@ model Equipamento {
   modelo                String
   marca_nome            String
   cliente_id            String
+  ip                    String
+  mac                   String
+  NS                    String
   marca                 Marca       @relation(fields: [marca_nome], references: [marca])
   cliente               Cliente     @relation(fields: [cliente_id], references: [id])
   os                    OS          @relation(fields: [id_os], references: [id])

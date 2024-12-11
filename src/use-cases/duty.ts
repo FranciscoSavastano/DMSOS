@@ -3,19 +3,25 @@ import type { Cliente, Ocorrencia, Plantao } from '@prisma/client'
 
 interface RegisterUseCaseRequest {
   operador: string
+  operadoresNome: string[]
   data_inicio: string
   data_fim: string
   horario_rf: string
-  ocorrencia_desc?: string
-  ocorrencia_pm_horario?: string
-  ocorrencia_pm_local?: string
-  ocorrencia_pm_observacao?: string
-  ocorrencia_pm_acao?: string
+  contrato: string
+  imagens: unknown
+  ocurrence: Ocorrencia[]
 }
-
+interface Ocorrencia {
+  descricao: string | null
+  pm_horario: Date | null
+  pm_local: string | null
+  pm_observacao: string | null
+  ocurrence_type: string[] | OcorrenciaCreateocurrence_typeInput | undefined
+  pm_acao: string | null
+}
 interface RegisterUseCaseResponse {
   duty: Plantao
-  ocurrence: Ocorrencia
+  ocurrences: Ocorrencia[]
 }
 
 export class CreateDutyUseCase {
@@ -23,42 +29,46 @@ export class CreateDutyUseCase {
 
   async execute({
     operador,
+    operadoresNome,
     data_inicio,
     data_fim,
     horario_rf,
-    ocorrencia_desc,
-    ocorrencia_pm_horario,
-    ocorrencia_pm_local,
-    ocorrencia_pm_observacao,
-    ocorrencia_pm_acao,
+    contrato,
+    ocurrence,
+    consideracoes,
   }: RegisterUseCaseRequest): Promise<RegisterUseCaseResponse> {
+    const ocurrences = []
     const duty = await this.dutyRepository.create({
-      operador: {
+      operadores: {
         connect: {
           id: operador,
         },
       },
+      operadoresNome,
       data_inicio,
       data_fim,
       horario_rf,
+      contrato,
+      consideracoes,
     })
-
-    const ocurrence = await this.dutyRepository.createOcurrence({
-      plantao: {
-        connect: {
-          id: duty.id,
+    for (const ocorrencia of ocurrence) {
+      const newOccurrence = await this.dutyRepository.createOcurrence({
+        plantao: {
+          connect: {
+            id: duty.id,
+          },
         },
-      },
-      descricao: ocorrencia_desc,
-      pm_horario: ocorrencia_pm_horario,
-      pm_local: ocorrencia_pm_local,
-      pm_observacao: ocorrencia_pm_observacao,
-      pm_acao: ocorrencia_pm_acao,
-    })
-    console.log('ok')
-    return {
-      duty,
-      ocurrence,
+
+        descricao: ocorrencia.ocorrencia_desc,
+        pm_horario: ocorrencia.ocorrencia_pm_horario,
+        pm_local: ocorrencia.ocorrencia_pm_local,
+        pm_observacao: ocorrencia.ocorrencia_pm_observacao,
+        pm_acao: ocorrencia.ocorrencia_pm_acao,
+        ocurrence_type: ocorrencia.ocorrencia_ocurrence_type,
+      })
+
+      ocurrences.push(newOccurrence)
     }
+    return { duty, ocurrences }
   }
 }
