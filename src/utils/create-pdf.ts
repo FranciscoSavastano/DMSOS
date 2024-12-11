@@ -2,7 +2,6 @@ import pdfkit from 'pdfkit-table'
 import fs from 'fs'
 import path from 'path'
 import moment from 'moment-timezone'
-import 'pdf-creator-node'
 import { prisma } from '@/lib/prisma'
 import { FastifyRequest, FastifyReply } from 'fastify'
 var canwrite = false
