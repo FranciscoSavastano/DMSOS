@@ -11,7 +11,7 @@ export const app = fastify()
 
 const allowedOrigins = [
   'http://127.0.0.1:5500',
-  'https://your-frontend-domain.com',
+  'http://127.0.0.1:80',
 ]
 
 app.register(cors, {
