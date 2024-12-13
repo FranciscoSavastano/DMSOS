@@ -9,10 +9,7 @@ import cors from '@fastify/cors'
 
 export const app = fastify()
 
-const allowedOrigins = [
-  'http://127.0.0.1:5500',
-  'http://127.0.0.1:80',
-]
+const allowedOrigins = ['http://127.0.0.1:5500', 'http://127.0.0.1:80']
 
 app.register(cors, {
   origin: allowedOrigins,
