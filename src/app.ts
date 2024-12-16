@@ -47,7 +47,7 @@ app.setErrorHandler((error, _, reply) => {
   reply.status(500).send({ message: 'Internal server error' })
 })
 
-app.listen({ port: 3333, host: '127.0.0.1' }, (err, address) => {
+app.listen({ port: 3333, host: '0.0.0.0' }, (err, address) => {
   if (err) {
     console.error(err)
     process.exit(1)
