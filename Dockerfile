@@ -4,6 +4,7 @@ WORKDIR .
 
 COPY package*.json ./
 RUN npm install
+RUN apk add --no-cache openssl
 
 COPY . . 
 
