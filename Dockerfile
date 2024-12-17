@@ -10,4 +10,4 @@ COPY . .
 
 EXPOSE 3333
 
-CMD ["./start.sh"]
+CMD ["sh", "-c", "npx prisma migrate dev && npx prisma generate && npm run start:prod"]
