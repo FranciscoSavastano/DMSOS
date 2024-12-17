@@ -15,10 +15,17 @@ const allowedOrigins = [
 ]
 
 app.register(cors, {
-  origin: allowedOrigins,
+  origin: (origin, cb) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+          cb(null, true);
+      } else {
+          cb(new Error('Not allowed by CORS'), false);
+      }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true,
-})
+  allowedHeaders: ['Content-Type', 'Authorization'], // Add any custom headers your frontend sends
+});
 
 app.register(fastifyJwt, {
   secret: process.env.JWT_SECRET,
