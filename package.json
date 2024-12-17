@@ -7,7 +7,7 @@
     "pdf": "tsx watch src/utils/create-pdf-new.ts",
     "start:dev": "tsx watch src/server.ts",
     "start:prod": "node build/server.js",
-    "build": "tsup src --out-dir build",
+    "build": "tsup src --out-dir build --external vitest",
     "lint": "prettier ./src/ --write && eslint \"**/*.{ts,tsx}\" --fix",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage"
