@@ -10,15 +10,25 @@ import cors from '@fastify/cors'
 export const app = fastify()
 
 const allowedOrigins = [
-  'http://127.0.0.1:5500',
-  'http://127.0.0.1:80', 'http://192.168.10.246', 'http://192.168.10.246:80'
-]
+  'http://127.0.0.1:5500', // For local development
+  'http://192.168.10.246', 
+  'http://192.168.10.246:80', 
+];
 
 app.register(cors, {
-  origin: '*', // This disables CORS restrictions. DO NOT USE IN PRODUCTION.
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Important to keep this if you use these methods
-  credentials: true, // Keep this if you use cookies or authorization headers
-  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'], // Keep if you use these headers
+  origin: (origin, cb) => {
+
+      if (!origin || allowedOrigins.includes(origin)) {
+          console.log("allowed origin")
+          cb(null, true);
+      } else {
+          console.log("not allowed origin")
+          cb(new Error('Not allowed by CORS'), false);
+      }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'], // Add any custom headers your frontend sends
 });
 
 app.register(fastifyJwt, {
