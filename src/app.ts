@@ -12,23 +12,22 @@ export const app = fastify()
 const allowedOrigins = [
   'http://127.0.0.1:5500', // For local development
   'http://192.168.10.246', 
-  'http://192.168.10.246:80', 
+  'http://192.168.10.246:80',
+  'http://dmsys.app.ci'
 ];
 
 app.register(cors, {
   origin: (origin, cb) => {
 
       if (!origin || allowedOrigins.includes(origin)) {
-          console.log("allowed origin")
           cb(null, true);
       } else {
-          console.log("not allowed origin")
           cb(new Error('Not allowed by CORS'), false);
       }
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true,
-  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'], // Add any custom headers your frontend sends
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie', 'X-Filename'], // Add any custom headers your frontend sends
 });
 
 app.register(fastifyJwt, {
