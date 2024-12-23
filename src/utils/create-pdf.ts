@@ -2,33 +2,33 @@ import pdfkit from 'pdfkit-table'
 import fs from 'fs'
 import path from 'path'
 import moment from 'moment-timezone'
-import * as crypto from 'crypto'; 
-import * as zlib from 'zlib';
+import * as crypto from 'crypto'
+import * as zlib from 'zlib'
 import { prisma } from '@/lib/prisma'
 import { FastifyRequest, FastifyReply } from 'fastify'
 import { time } from 'console'
 import { readFile } from 'fs/promises'
 import { aR } from 'vitest/dist/reporters-MmQN-57K'
 import { finished } from 'stream'
-import { gzip } from 'zlib';
+import { gzip } from 'zlib'
 var canwrite = false
 var PDFtable = require('pdfkit-table')
 
-let pdfCreationPromise: Promise<unknown>;
-var archpath = '';
-let startTime: number;
+let pdfCreationPromise: Promise<unknown>
+var archpath = ''
+let startTime: number
 var wait = false
 var created = false
 export function startWait(): number {
-  startTime = Date.now();
-  return startTime;
+  startTime = Date.now()
+  return startTime
 }
 
 export function getElapsedTime(): number {
   if (!startTime) {
-    throw new Error("Wait function hasn't been started yet!");
+    throw new Error("Wait function hasn't been started yet!")
   }
-  return Date.now() - startTime;
+  return Date.now() - startTime
 }
 
 export async function initWrite(request: FastifyRequest, reply: FastifyReply) {
@@ -40,21 +40,21 @@ export async function initWrite(request: FastifyRequest, reply: FastifyReply) {
   }
 
   if (fs.existsSync(tempFilePath)) {
-    const startTime = Date.now(); 
-    wait = true;
-    while (wait && (Date.now() - startTime) < 900) { 
+    const startTime = Date.now()
+    wait = true
+    while (wait && Date.now() - startTime < 900) {
       // Wait for up to 900ms
-      console.log("Waiting..."); 
+      console.log('Waiting...')
     }
-  
+
     // Check if the timeout occurred
-    if (Date.now() - startTime >= 900) { 
-      console.log("Timeout occurred.");
-      fs.unlinkSync('./src/utils/temp_anexpath_desc.txt'); 
-      fs.unlinkSync('./src/utils/temp_anexpath.txt'); 
+    if (Date.now() - startTime >= 900) {
+      console.log('Timeout occurred.')
+      fs.unlinkSync('./src/utils/temp_anexpath_desc.txt')
+      fs.unlinkSync('./src/utils/temp_anexpath.txt')
     } else {
       // If the file disappeared within the timeout, proceed
-      console.log("File removed within timeout.");
+      console.log('File removed within timeout.')
     }
   }
   const files = request.files()
@@ -111,14 +111,14 @@ function formatDateForFilename(createdAt: Date): string {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
-  });
+  })
 
   // Replace "/" and ":" with underscores for a more file-friendly format
-  return formattedDate.replace(/[/:]/g, '_');
+  return formattedDate.replace(/[/:]/g, '_')
 }
 
 export async function CreatePdf(duty: any) {
-  pdfCreationPromise = new Promise(async resolve => {
+  pdfCreationPromise = new Promise(async (resolve) => {
     const users = duty.operadoresNome
     const data = duty.created_at
     const contract = duty.contrato
@@ -310,18 +310,18 @@ export async function CreatePdf(duty: any) {
     doc.fontSize(13).fill('black').text(duty.consideracoes, { align: 'center' })
 
     //Finalize o arquivo e salve na pasta
-    const filedate = formatDateForFilename(data);
+    const filedate = formatDateForFilename(data)
     console.log('Criado')
     const filePath = `./src/gendocs/Relatorio ${contract} ${filedate} ${dutyid}.pdf`
     const generatePdf = async (doc, filePath): Promise<void> => {
       return new Promise<void>((resolve, reject) => {
-        doc.pipe(fs.createWriteStream(filePath));
-        doc.on('end', () => resolve());
-        doc.on('error', (err) => reject(err));
-        doc.end();
-      });
-    };
-    await generatePdf(doc, filePath);
+        doc.pipe(fs.createWriteStream(filePath))
+        doc.on('end', () => resolve())
+        doc.on('error', (err) => reject(err))
+        doc.end()
+      })
+    }
+    await generatePdf(doc, filePath)
     doc.end()
     archpath = `./src/gendocs/Relatorio ${contract} ${filedate} ${dutyid}.pdf`
     //Delete os arquivos temporarios, se não houver, descreva no console
@@ -341,49 +341,56 @@ export async function CreatePdf(duty: any) {
 
 export async function sendPdf(request: FastifyRequest, reply: FastifyReply) {
   try {
-    await pdfCreationPromise; 
+    await pdfCreationPromise
 
     if (!archpath) {
-      return reply.status(500).send({ message: 'Global archpath variable is not set.' });
+      return reply
+        .status(500)
+        .send({ message: 'Global archpath variable is not set.' })
     }
 
     const pdfBuffer = await readFile(archpath).catch((err) => {
-      if (err.code === 'ENOENT') { 
-        return reply.status(404).send({ message: 'File not found' });
+      if (err.code === 'ENOENT') {
+        return reply.status(404).send({ message: 'File not found' })
       } else {
-        throw err; 
+        throw err
       }
-    });
+    })
 
     // Compress the PDF buffer using gzip
     const compressedBuffer = await new Promise((resolve, reject) => {
       zlib.gzip(pdfBuffer, (err, result) => {
         if (err) {
-          reject(err);
+          reject(err)
         } else {
-          resolve(result);
+          resolve(result)
         }
-      });
-    }); 
+      })
+    })
 
     // Calculate the checksum of the compressed data
-    const hash = crypto.createHash('sha256');
-    hash.update(compressedBuffer);
-    const checksum = hash.digest('hex');
+    const hash = crypto.createHash('sha256')
+    hash.update(compressedBuffer)
+    const checksum = hash.digest('hex')
 
     // Set headers
-    reply.header('Content-Encoding', 'gzip'); // Indicate gzip compression
-    reply.header('X-Filename', archpath.split('/').pop());
-    reply.header('Content-Type', 'application/pdf; charset=utf-8');
-    reply.header('Content-Disposition', `attachment; filename="${archpath.split('/').pop()}"`);
-    reply.header('Content-Length', compressedBuffer.length.toString());
-    reply.header('X-Checksum-SHA256', checksum);
-    reply.header('Access-Control-Expose-Headers', 'X-Filename, Content-Length, X-Checksum-SHA256'); 
+    reply.header('Content-Encoding', 'gzip') // Indicate gzip compression
+    reply.header('X-Filename', archpath.split('/').pop())
+    reply.header('Content-Type', 'application/pdf; charset=utf-8')
+    reply.header(
+      'Content-Disposition',
+      `attachment; filename="${archpath.split('/').pop()}"`,
+    )
+    reply.header('Content-Length', compressedBuffer.length.toString())
+    reply.header('X-Checksum-SHA256', checksum)
+    reply.header(
+      'Access-Control-Expose-Headers',
+      'X-Filename, Content-Length, X-Checksum-SHA256',
+    )
 
-    return reply.code(200).send(compressedBuffer); 
-
+    return reply.code(200).send(compressedBuffer)
   } catch (error) {
-    console.error("Error sending PDF:", error);
-    reply.status(500).send({ message: 'Failed to send PDF.' });
+    console.error('Error sending PDF:', error)
+    reply.status(500).send({ message: 'Failed to send PDF.' })
   }
 }
