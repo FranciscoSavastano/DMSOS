@@ -3,12 +3,14 @@ import fs from 'fs'
 import path from 'path'
 import moment from 'moment-timezone'
 import * as crypto from 'crypto'; 
+import * as zlib from 'zlib';
 import { prisma } from '@/lib/prisma'
 import { FastifyRequest, FastifyReply } from 'fastify'
 import { time } from 'console'
 import { readFile } from 'fs/promises'
 import { aR } from 'vitest/dist/reporters-MmQN-57K'
 import { finished } from 'stream'
+import { gzip } from 'zlib';
 var canwrite = false
 var PDFtable = require('pdfkit-table')
 
@@ -338,28 +340,48 @@ export async function CreatePdf(duty: any) {
 }
 
 export async function sendPdf(request: FastifyRequest, reply: FastifyReply) {
-  await pdfCreationPromise;
   try {
+    await pdfCreationPromise; 
+
     if (!archpath) {
       return reply.status(500).send({ message: 'Global archpath variable is not set.' });
     }
-    if (!fs.existsSync(archpath)) {
-      return reply.status(404).send({ message: 'File not found' });
-    }
-    const pdfBuffer = await readFile(archpath);
 
-    // Calculate the checksum (SHA-256 in this example)
+    const pdfBuffer = await readFile(archpath).catch((err) => {
+      if (err.code === 'ENOENT') { 
+        return reply.status(404).send({ message: 'File not found' });
+      } else {
+        throw err; 
+      }
+    });
+
+    // Compress the PDF buffer using gzip
+    const compressedBuffer = await new Promise((resolve, reject) => {
+      zlib.gzip(pdfBuffer, (err, result) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(result);
+        }
+      });
+    }); 
+
+    // Calculate the checksum of the compressed data
     const hash = crypto.createHash('sha256');
-    hash.update(pdfBuffer);
+    hash.update(compressedBuffer);
     const checksum = hash.digest('hex');
 
+    // Set headers
+    reply.header('Content-Encoding', 'gzip'); // Indicate gzip compression
     reply.header('X-Filename', archpath.split('/').pop());
     reply.header('Content-Type', 'application/pdf; charset=utf-8');
     reply.header('Content-Disposition', `attachment; filename="${archpath.split('/').pop()}"`);
-    reply.header('Content-Length', pdfBuffer.length.toString());
-    reply.header('X-Checksum-SHA256', checksum); // Add checksum header
+    reply.header('Content-Length', compressedBuffer.length.toString());
+    reply.header('X-Checksum-SHA256', checksum);
     reply.header('Access-Control-Expose-Headers', 'X-Filename, Content-Length, X-Checksum-SHA256'); 
-    return reply.code(200).send(pdfBuffer);
+
+    return reply.code(200).send(compressedBuffer); 
+
   } catch (error) {
     console.error("Error sending PDF:", error);
     reply.status(500).send({ message: 'Failed to send PDF.' });
