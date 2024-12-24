@@ -5,7 +5,7 @@ import moment from 'moment-timezone'
 import * as crypto from 'crypto'
 import * as zlib from 'zlib'
 import { prisma } from '@/lib/prisma'
-import { FastifyRequest, FastifyReply } from 'fastify'
+import { FastifyRequest, FastifyReply, FastifyPluginAsync } from 'fastify'
 import { time } from 'console'
 import { readFile } from 'fs/promises'
 import { aR } from 'vitest/dist/reporters-MmQN-57K'
@@ -340,57 +340,32 @@ export async function CreatePdf(duty: any) {
 }
 
 export async function sendPdf(request: FastifyRequest, reply: FastifyReply) {
+  await pdfCreationPromise
   try {
-    await pdfCreationPromise
-
     if (!archpath) {
       return reply
         .status(500)
-        .send({ message: 'Global archpath variable is not set.' })
+        .send({ message: 'Global archpath variable is not set.' });
     }
-
-    const pdfBuffer = await readFile(archpath).catch((err) => {
+    console.log("ok")
+    // Check for file existence 
+    try {
+      await fs.promises.access(archpath, fs.promises.constants.R_OK); 
+    } catch (err) {
       if (err.code === 'ENOENT') {
-        return reply.status(404).send({ message: 'File not found' })
+        console.log("404")
+        return reply.status(404).send({ message: 'File not found' });
       } else {
-        throw err
+        throw err;
       }
-    })
+    }
+    console.log(archpath.split('/').pop())
+    // Send the file 
+    const newfilepath = archpath.split('/').pop()
+    return reply.download(newfilepath); 
 
-    // Compress the PDF buffer using gzip
-    const compressedBuffer = await new Promise((resolve, reject) => {
-      zlib.gzip(pdfBuffer, (err, result) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve(result)
-        }
-      })
-    })
-
-    // Calculate the checksum of the compressed data
-    const hash = crypto.createHash('sha256')
-    hash.update(compressedBuffer)
-    const checksum = hash.digest('hex')
-
-    // Set headers
-    reply.header('Content-Encoding', 'gzip') // Indicate gzip compression
-    reply.header('X-Filename', archpath.split('/').pop())
-    reply.header('Content-Type', 'application/pdf; charset=utf-8')
-    reply.header(
-      'Content-Disposition',
-      `attachment; filename="${archpath.split('/').pop()}"`,
-    )
-    reply.header('Content-Length', compressedBuffer.length.toString())
-    reply.header('X-Checksum-SHA256', checksum)
-    reply.header(
-      'Access-Control-Expose-Headers',
-      'X-Filename, Content-Length, X-Checksum-SHA256',
-    )
-
-    return reply.code(200).send(compressedBuffer)
   } catch (error) {
-    console.error('Error sending PDF:', error)
-    reply.status(500).send({ message: 'Failed to send PDF.' })
+    console.error('Error sending PDF:', error);
+    reply.status(500).send({ message: 'Failed to send PDF.' });
   }
 }

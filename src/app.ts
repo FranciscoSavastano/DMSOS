@@ -6,14 +6,15 @@ import fastifyJwt from '@fastify/jwt'
 import fastifyCookie from '@fastify/cookie'
 import multipart from '@fastify/multipart'
 import cors from '@fastify/cors'
-
+import { join } from 'path'; 
+import '@fastify/static';
+import {fastifyStatic} from '@fastify/static'
 export const app = fastify()
-
 const allowedOrigins = [
   'http://127.0.0.1:5500', // For local development
   'http://192.168.10.246',
   'http://192.168.10.246:80',
-  'http://dmsys.app.ci',
+  'http://dmsys.app.ci', //local microtik ip mapping
 ]
 
 app.register(cors, {
@@ -26,7 +27,11 @@ app.register(cors, {
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true,
-  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie', 'X-Filename'], // Add any custom headers your frontend sends
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie', 'X-Filename', 'Content-Disposition'], // Add any custom headers your frontend sends
+})
+app.register(fastifyStatic, {
+  root: join(__dirname, '/gendocs/'),
+  prefix: '/statico/'
 })
 
 app.register(fastifyJwt, {
@@ -42,7 +47,6 @@ app.register(fastifyJwt, {
 app.register(multipart)
 app.register(fastifyCookie)
 app.register(appRoutes)
-
 app.setErrorHandler((error, _, reply) => {
   if (error instanceof ZodError) {
     return reply
@@ -64,5 +68,5 @@ app.listen({ port: 3333, host: '0.0.0.0' }, (err, address) => {
     console.error(err)
     process.exit(1)
   }
-  console.log(`Server listening at ${address}`)
+  console.log(`Server ouvindo em ${address}`)
 })
