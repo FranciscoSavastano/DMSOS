@@ -27,7 +27,7 @@ app.register(cors, {
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true,
-  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie', 'X-Filename', 'Content-Disposition'], // Add any custom headers your frontend sends
+  allowedHeaders: ['c','Content-Type', 'Authorization', 'Cookie'], // Add any custom headers your frontend sends
 })
 app.register(fastifyStatic, {
   root: join(__dirname, '/gendocs/'),

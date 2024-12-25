@@ -33,7 +33,6 @@ export function getElapsedTime(): number {
 
 export async function initWrite(request: FastifyRequest, reply: FastifyReply) {
   const tempFilePath = path.join(__dirname, 'temp_anexpath.txt')
-
   if (!request.headers['content-type'].startsWith('multipart/form-data')) {
     console.log(request.headers['content-type'])
     return reply.status(400).send({ message: 'Invalid content type' })
@@ -48,7 +47,7 @@ export async function initWrite(request: FastifyRequest, reply: FastifyReply) {
     }
 
     // Check if the timeout occurred
-    if (Date.now() - startTime >= 900) {
+    if (Date.now() - startTime >= 1500) {
       console.log('Timeout occurred.')
       fs.unlinkSync('./src/utils/temp_anexpath_desc.txt')
       fs.unlinkSync('./src/utils/temp_anexpath.txt')
@@ -359,10 +358,9 @@ export async function sendPdf(request: FastifyRequest, reply: FastifyReply) {
         throw err;
       }
     }
-    console.log(archpath.split('/').pop())
     // Send the file 
     const newfilepath = archpath.split('/').pop()
-    return reply.download(newfilepath); 
+    return reply.download(newfilepath).header('Access-Control-Expose-Headers', 'Content-Disposition')
 
   } catch (error) {
     console.error('Error sending PDF:', error);
