@@ -1,5 +1,7 @@
 import { CustomerAlreadyExistsError } from '@/use-cases/errors/customer-already-exists'
+import { InvalidCpf } from '@/use-cases/errors/invalid-cpf'
 import { UserAlreadyExistsError } from '@/use-cases/errors/user-already-exists'
+import { UserCpfAlreadyExistsError } from '@/use-cases/errors/user-cpf-already-exists'
 import { makeRegisterCustUseCase } from '@/use-cases/factories/make-register-cust-use-case'
 import { makeRegisterTecUseCase } from '@/use-cases/factories/make-register-tec-use-case'
 import { type FastifyRequest, type FastifyReply } from 'fastify'
@@ -15,8 +17,9 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
       user_role: z.string(),
     })
     .parse(request.body)
-
-  const { nome, email, cpf, password, user_role } = registerBodySchema
+  
+  const { nome, email, cpf : cpfunflit, password, user_role } = registerBodySchema
+  const cpf = cpfunflit.replace(/[^0-9]/g, '');
   if (user_role != 'Cliente') {
     try {
       const registerUserCase = makeRegisterTecUseCase()
@@ -31,8 +34,14 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
 
       return await reply.status(201).send(user)
     } catch (err: unknown) {
-      if (err instanceof CustomerAlreadyExistsError) {
+      if (err instanceof UserAlreadyExistsError) {
         return await reply.status(400).send({ message: err.message })
+      }
+      if (err instanceof UserCpfAlreadyExistsError) {
+        return await reply.status(400).send({ message: err.message })
+      }
+      if (err instanceof InvalidCpf) {
+        return await reply.status(400).send({ message: err.message})
       }
 
       throw err
@@ -51,9 +60,6 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
 
       return await reply.status(201).send(user)
     } catch (err: unknown) {
-      if (err instanceof UserAlreadyExistsError) {
-        return await reply.status(400).send({ message: err.message })
-      }
       if (err instanceof CustomerAlreadyExistsError) {
         return await reply.status(400).send({ message: err.message })
       }

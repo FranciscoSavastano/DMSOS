@@ -15,6 +15,14 @@ export class PrismaCustomerRepository implements CustomerRepository {
 
     return user
   }
+  async findByCnpj(cnpj: string) {
+    const user = await prisma.cliente.findUnique({
+      where: {
+        cnpj,
+      },
+    })
+    return user
+  }
 
   async create(data: Prisma.ClienteCreateInput) {
     const user = await prisma.cliente.create({

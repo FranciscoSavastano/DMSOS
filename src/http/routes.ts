@@ -31,7 +31,7 @@ export async function appRoutes(app: FastifyInstance) {
 
   app.delete('/users/delete', deleteUser)
 
-  app.get('/users/getnames', fetchUserNames)
+  app.get('/users/getnames/:user_role', fetchUserNames)
 
   //Plantao
   app.post('/duty', createDuty)

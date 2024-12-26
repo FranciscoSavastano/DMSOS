@@ -23,7 +23,8 @@ export interface IMakeAdmin {
 export interface UsersRepository {
   findByEmail: (email: string) => Promise<User | null>
   findById: (id: string) => Promise<User | null>
-  create: (data: Prisma.UserCreateInput) => Promise<User>
+  findByCpf: (cpf: string) => Promise<User | null>
+  create: (data: Prisma.UserCreateInput) => Promise<User | null>
   read: (id: string) => Promise<User | null>
   readAllUsers: () => Promise<User[]>
   update: (data: IUpdateUser) => Promise<User | null>

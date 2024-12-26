@@ -15,12 +15,15 @@ export async function fetchUserNames(
     })
     .parse(request.headers)
 
-  const readAllDutyHeadersSchema = z
+  const readUserParamSchema = z
     .object({
-      authorization: z.string(),
+      user_role: z.string()
     })
-    .parse(request.headers)
-  const { authorization: bearerAuth } = readAllDutyHeadersSchema
+    .parse(request.params)
+
+
+  const { authorization: bearerAuth } = readUserHeadersSchema
+  const { user_role } = readUserParamSchema
   const token = bearerAuth.split(' ')[1]
 
   try {
@@ -35,6 +38,7 @@ export async function fetchUserNames(
         Authorization: `Bearer ${token}`,
       },
     })
+
     const users = response.data.user.users
     // Extraia os dados desejados da response completa
     const filteredUsers = users.map((user) => ({
@@ -43,8 +47,12 @@ export async function fetchUserNames(
       cpf: user.cpf,
       user_role: user.user_role,
     }))
+    const filteredUsersByRole = filteredUsers.filter(
+      (user) => user.user_role === user_role 
+    );
+    
 
-    return filteredUsers
+    return filteredUsersByRole
   } catch (error) {
     console.error('Error fetching user data:', error)
     return error

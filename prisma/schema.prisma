@@ -19,7 +19,7 @@ generator dbml {
 }
 
 model User {
-  cpf                   String
+  cpf                   String    @unique
   id                    String    @default(uuid()) @id
   nome                  String    
   email                 String    @unique
@@ -29,7 +29,7 @@ model User {
   last_login            DateTime?
   created_at            DateTime  @default(now())
   updated_at            DateTime  @updatedAt
-  user_role             String    @default("None")
+  user_role             String    
   AuthenticationAudit AuthenticationAudit[]
   OS                  OS[]
   plantao             Plantao[]
@@ -44,7 +44,7 @@ model Cliente {
   email           String      @unique
   password_digest String      
   endereco        String      @default("")
-  cnpj            String
+  cnpj            String      @unique
   tentativas_de_login   Int       @default(0)
   last_login            DateTime?
   created_at            DateTime  @default(now())

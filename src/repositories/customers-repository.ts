@@ -6,6 +6,7 @@ export interface IChangePassword {
 }
 
 export interface CustomerRepository {
+  findByCnpj: (cnpj: string) => Promise<Cliente | null>
   findByEmail: (email: string) => Promise<Cliente | null>
   create: (data: Prisma.ClienteCreateInput) => Promise<Cliente>
   setLastLogin: (id: string) => Promise<void>

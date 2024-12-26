@@ -3,7 +3,7 @@
 //// ------------------------------------------------------
 
 Table users {
-  cpf String [not null]
+  cpf String [unique, not null]
   id String [pk]
   nome String [not null]
   email String [unique, not null]
@@ -13,7 +13,7 @@ Table users {
   last_login DateTime
   created_at DateTime [default: `now()`, not null]
   updated_at DateTime [not null]
-  user_role String [not null, default: 'None']
+  user_role String [not null]
   AuthenticationAudit authentication_audit [not null]
   OS OS [not null]
   plantao plantoes [not null]
@@ -27,7 +27,7 @@ Table clientes {
   email String [unique, not null]
   password_digest String [not null]
   endereco String [not null, default: '']
-  cnpj String [not null]
+  cnpj String [unique, not null]
   tentativas_de_login Int [not null, default: 0]
   last_login DateTime
   created_at DateTime [default: `now()`, not null]
