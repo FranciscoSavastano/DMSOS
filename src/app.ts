@@ -31,7 +31,7 @@ app.register(cors, {
 })
 console.log(__dirname)
 app.register(fastifyStatic, {
-  root: join(__dirname, '/gendocs/'),
+  root: join(__dirname, 'src/gendocs/'),
   prefix: '/statico/',
 })
 

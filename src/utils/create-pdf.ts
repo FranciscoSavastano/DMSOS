@@ -11,7 +11,7 @@ import { readFile } from 'fs/promises'
 import { aR } from 'vitest/dist/reporters-MmQN-57K'
 import { finished } from 'stream'
 import { gzip } from 'zlib'
-import { v4 as uuidv4 } from 'uuid'; // For generating unique temporary file names
+import { v4 as uuidv4 } from 'uuid' // For generating unique temporary file names
 
 var canwrite = false
 var PDFtable = require('pdfkit-table')
@@ -36,63 +36,63 @@ export function getElapsedTime(): number {
 }
 
 // In-memory data storage (alternative to files)
-let uploadedFileData: string[] = []; // Array to store Base64 strings
-let descriptions: string[] = []; // Array to store descriptions
-let lockAcquired = false; 
+let uploadedFileData: string[] = [] // Array to store Base64 strings
+let descriptions: string[] = [] // Array to store descriptions
+let lockAcquired = false
 
 export async function initWrite(request: FastifyRequest, reply: FastifyReply) {
   if (lockAcquired) {
     return reply
-    .code(429) 
-    .header('Retry-After', '1') 
-    .send({ message: 'Outro upload em progresso, seu pedido está em fila' }); 
-  }  
+      .code(429)
+      .header('Retry-After', '1')
+      .send({ message: 'Outro upload em progresso, seu pedido está em fila' })
+  }
 
-  lockAcquired = true; 
-  const contentType = request.headers['content-type'];
+  lockAcquired = true
+  const contentType = request.headers['content-type']
 
   if (!contentType?.startsWith('multipart/form-data')) {
-    return reply.status(400).send({ message: 'Invalid content type' });
+    return reply.status(400).send({ message: 'Invalid content type' })
   }
 
   // Check if a previous upload is in progress
   if (uploadedFileData.length > 0) {
-    const startTime = Date.now();
-    let wait = true;
+    const startTime = Date.now()
+    let wait = true
 
     while (wait && Date.now() - startTime < 900) {
       // Wait for up to 900ms
-      console.log('Waiting for previous upload to complete...');
+      console.log('Waiting for previous upload to complete...')
     }
 
     if (Date.now() - startTime >= 1500) {
-      console.log('Timeout occurred. Clearing previous data.');
-      uploadedFileData = [];
+      console.log('Timeout occurred. Clearing previous data.')
+      uploadedFileData = []
     }
   }
 
-  const files = request.files();
+  const files = request.files()
 
   for await (const file of files) {
     const buffer = await new Promise<Buffer>((resolve, reject) => {
-      const chunks = [];
-      file.file.on('data', (chunk) => chunks.push(chunk));
-      file.file.on('end', () => resolve(Buffer.concat(chunks)));
-      file.file.on('error', reject);
-    });
+      const chunks = []
+      file.file.on('data', (chunk) => chunks.push(chunk))
+      file.file.on('end', () => resolve(Buffer.concat(chunks)))
+      file.file.on('error', reject)
+    })
 
-    const base64Image = buffer.toString('base64');
-    uploadedFileData.push(base64Image);
+    const base64Image = buffer.toString('base64')
+    uploadedFileData.push(base64Image)
   }
-  return reply.send({ message: 'Files uploaded successfully' });
+  return reply.send({ message: 'Files uploaded successfully' })
 }
 
 export async function writeDesc(request: FastifyRequest, reply: FastifyReply) {
-  descriptions = request.body.descriptions; // Store descriptions in memory
-  
+  descriptions = request.body.descriptions // Store descriptions in memory
+
   return reply
     .status(200)
-    .send({ message: 'Descriptions received successfully' });
+    .send({ message: 'Descriptions received successfully' })
 }
 
 function determinePeriod(created_at: Date): string {
@@ -120,7 +120,6 @@ function formatDateForFilename(createdAt: Date): string {
 }
 
 export async function CreatePdf(duty: any) {
-
   pdfCreationPromise = new Promise(async (resolve) => {
     const users = duty.operadoresNome
     const data = duty.created_at
@@ -219,11 +218,11 @@ export async function CreatePdf(duty: any) {
       .fontSize(15)
       .fill('#001233')
       .text(objectivetext, 100, 200, { lineGap: 10 })
-    if(!uploadedFileData) {
-      console.log("Nao existem imagens")
+    if (!uploadedFileData) {
+      console.log('Nao existem imagens')
     }
-    if(!descriptions) {
-      console.log("Nao exitem descrições")
+    if (!descriptions) {
+      console.log('Nao exitem descrições')
     }
     if (uploadedFileData) {
       doc.addPage()
@@ -232,9 +231,9 @@ export async function CreatePdf(duty: any) {
         .fill('#001233')
         .text('RELATORIO FOTOGRAFICO', 40, 30, { align: 'center' })
 
-        const base64Images = uploadedFileData; 
-        const imagesdescription = descriptions; 
-        
+      const base64Images = uploadedFileData
+      const imagesdescription = descriptions
+
       // Calculate the maximum number of images per row based on page width
       const imageWidth = 90
       const imageMargin = 20
@@ -319,15 +318,15 @@ export async function CreatePdf(duty: any) {
       })
     }
     if (!fs.existsSync('./src/gendocs')) {
-      fs.mkdirSync('./src/gendocs', { recursive: true }); 
+      fs.mkdirSync('./src/gendocs', { recursive: true })
     }
     await generatePdf(doc, filePath)
     doc.end()
 
     archpath = `./src/gendocs/Relatorio ${contract} ${filedate} ${dutyid}.pdf`
     //Delete os arquivos temporarios, se não houver, descreva no console
-    uploadedFileData = [];
-    descriptions = [];
+    uploadedFileData = []
+    descriptions = []
     resolve()
   })
 }
@@ -352,7 +351,7 @@ export async function sendPdf(request: FastifyRequest, reply: FastifyReply) {
     }
     // Send the file
     const newfilepath = archpath.split('/').pop()
-    lockAcquired = false; 
+    lockAcquired = false
     return reply
       .download(newfilepath)
       .header('Access-Control-Expose-Headers', 'Content-Disposition')
