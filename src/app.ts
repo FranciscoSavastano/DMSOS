@@ -29,7 +29,7 @@ app.register(cors, {
   credentials: true,
   allowedHeaders: ['c', 'Content-Type', 'Authorization', 'Cookie'], // Add any custom headers your frontend sends
 })
-console.log(__dirname)
+console.log(__dirname + '/gendocs/')
 app.register(fastifyStatic, {
   root: join(__dirname, 'src/gendocs/'),
   prefix: '/statico/',
