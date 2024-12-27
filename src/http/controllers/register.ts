@@ -47,24 +47,6 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
       throw err
     }
   } else {
-    try {
-      const cnpj = cpf
-      const registerCustomerCase = makeRegisterCustUseCase()
-
-      const { user } = await registerCustomerCase.execute({
-        nome,
-        cnpj,
-        email,
-        password,
-      })
-
-      return await reply.status(201).send(user)
-    } catch (err: unknown) {
-      if (err instanceof CustomerAlreadyExistsError) {
-        return await reply.status(400).send({ message: err.message })
-      }
-
-      throw err
-    }
+    
   }
 }

@@ -17,13 +17,16 @@ import { createOcurrenceType } from './controllers/ocurrence_types'
 import { fetchUserNames } from './controllers/read-all-user-type'
 import { CreatePdf, initWrite, sendPdf, test, writeDesc } from '@/utils/create-pdf'
 import { readAllUserDuty } from './controllers/read-all-user-duties'
+import { registerCust } from './controllers/register-cust'
 
 export async function appRoutes(app: FastifyInstance) {
   //Users
 
   app.post('/users', register)
 
-  app.post('/users/read', readUser)
+  app.post('/clientes', registerCust)
+
+  app.post('/users/read/:id', readUser)
 
   app.get('/users/readAll', readAllUser)
 

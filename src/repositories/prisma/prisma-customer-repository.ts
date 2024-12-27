@@ -1,35 +1,36 @@
 import { prisma } from '@/lib/prisma'
-import type { Prisma } from '@prisma/client'
+import type { Cliente, Prisma } from '@prisma/client'
 import type {
   IChangePassword,
   CustomerRepository,
+  IUpdateCust,
 } from '../customers-repository'
 
 export class PrismaCustomerRepository implements CustomerRepository {
   async findByEmail(email: string) {
-    const user = await prisma.cliente.findUnique({
+    const cust = await prisma.cliente.findUnique({
       where: {
         email,
       },
     })
 
-    return user
+    return cust
   }
   async findByCnpj(cnpj: string) {
-    const user = await prisma.cliente.findUnique({
+    const cust = await prisma.cliente.findUnique({
       where: {
         cnpj,
       },
     })
-    return user
+    return cust
   }
 
   async create(data: Prisma.ClienteCreateInput) {
-    const user = await prisma.cliente.create({
+    const cust = await prisma.cliente.create({
       data,
     })
 
-    return user
+    return cust
   }
 
   async setLastLogin(id: string) {
@@ -43,14 +44,43 @@ export class PrismaCustomerRepository implements CustomerRepository {
     })
   }
 
+  async read(id: string) {
+    const cust = await prisma.cliente.findUnique({
+      where: {
+        id,
+      },
+    })
+    return cust
+  }
+
+  async readAllCusts(): Promise<Cliente[]> {
+    const custs = await prisma.cliente.findMany()
+    return custs
+  }
+
+  async update({ id, data }: IUpdateCust) {
+    const cust = await prisma.cliente.update({
+      where: { id },
+      data,
+    })
+    return cust
+  }
+
+  async deleteCust(id: string) {
+    const cust = await prisma.cliente.delete({
+      where: { id },
+    })
+    return true
+  }
+
   async changePassword({ email, password_digest }: IChangePassword) {
-    const user = await prisma.cliente.update({
+    const cust = await prisma.cliente.update({
       where: { email },
       data: {
         password_digest,
       },
     })
 
-    return user
+    return cust
   }
 }
