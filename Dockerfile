@@ -9,7 +9,7 @@ RUN apk add --no-cache openssl
 COPY . .
 
 # Change ownership of the /app directory to the node user
-RUN chown -R node:node ./src
+RUN chown -R node:node ./home
 
 USER node 
 
