@@ -39,62 +39,76 @@ export function getElapsedTime(): number {
 let uploadedFileData: string[] = [] // Array to store Base64 strings
 let descriptions: string[] = [] // Array to store descriptions
 let lockAcquired = false
-
-export async function initWrite(request: FastifyRequest, reply: FastifyReply) {
+let uploadPromise : Promise<unknown>
+let descriptionPromise : Promise<unknown>
+export async function initWrite(request: FastifyRequest, reply: FastifyReply): Promise<void> {
   if (lockAcquired) {
     return reply
       .code(429)
       .header('Retry-After', '1')
-      .send({ message: 'Outro upload em progresso, seu pedido está em fila' })
+      .send({ message: 'Outro upload em progresso, seu pedido está em fila' });
   }
 
-  lockAcquired = true
-  const contentType = request.headers['content-type']
+  lockAcquired = true;
+
+  const contentType = request.headers['content-type'];
 
   if (!contentType?.startsWith('multipart/form-data')) {
-    return reply.status(400).send({ message: 'Invalid content type' })
+    return reply.status(400).send({ message: 'Invalid content type' });
   }
 
   // Check if a previous upload is in progress
   if (uploadedFileData.length > 0) {
-    const startTime = Date.now()
-    let wait = true
+    const startTime = Date.now();
+    let wait = true;
 
     while (wait && Date.now() - startTime < 900) {
       // Wait for up to 900ms
-      console.log('Waiting for previous upload to complete...')
+      console.log('Waiting for previous upload to complete...');
     }
 
     if (Date.now() - startTime >= 1500) {
-      console.log('Timeout occurred. Clearing previous data.')
-      uploadedFileData = []
-      descriptions = []
+      console.log('Timeout occurred. Clearing previous data.');
+      uploadedFileData = [];
     }
   }
 
-  const files = request.files()
+  const files = request.files();
 
-  for await (const file of files) {
-    const buffer = await new Promise<Buffer>((resolve, reject) => {
-      const chunks = []
-      file.file.on('data', (chunk) => chunks.push(chunk))
-      file.file.on('end', () => resolve(Buffer.concat(chunks)))
-      file.file.on('error', reject)
-    })
+  uploadPromise = new Promise<void>(async (resolve, reject) => {
+    try {
+      for await (const file of files) {
+        const buffer = await new Promise<Buffer>((resolve, reject) => {
+          const chunks = [];
+          file.file.on('data', (chunk) => chunks.push(chunk));
+          file.file.on('end', () => resolve(Buffer.concat(chunks)));
+          file.file.on('error', reject);
+        });
 
-    const base64Image = buffer.toString('base64')
-    uploadedFileData.push(base64Image)
-  }
-  console.log(uploadedFileData)
-  return reply.send({ message: 'Files uploaded successfully' })
+        const base64Image = buffer.toString('base64');
+        uploadedFileData.push(base64Image);
+      }
+      console.log(uploadedFileData);
+      resolve(); // Resolve the promise when upload is complete
+    } catch (error) {
+      reject(error); // Reject the promise if an error occurs
+    }
+  });
+
+  await uploadPromise; // Wait for the upload to finish
+
+  lockAcquired = false;
+  return reply.send({ message: 'Files uploaded successfully' });
 }
-
 export async function writeDesc(request: FastifyRequest, reply: FastifyReply) {
-  descriptions = request.body.descriptions // Store descriptions in memory
-  console.log(descriptions)
+  descWritePromise = new Promise<void>(async (resolve, reject) => {
+    descriptions = request.body.descriptions // Store descriptions in memory
+    console.log(descriptions)
+  await descWritePromise
   return reply
-    .status(200)
-    .send({ message: 'Descriptions received successfully' })
+      .status(200)
+      .send({ message: 'Descriptions received successfully' })
+  })
 }
 
 function determinePeriod(created_at: Date): string {
@@ -122,6 +136,8 @@ function formatDateForFilename(createdAt: Date): string {
 }
 
 export async function CreatePdf(duty: any) {
+  await uploadPromise
+  await descWritePromise
   pdfCreationPromise = new Promise(async (resolve) => {
     const users = duty.operadoresNome
     const data = duty.created_at
