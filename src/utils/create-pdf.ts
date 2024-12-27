@@ -85,12 +85,13 @@ export async function initWrite(request: FastifyRequest, reply: FastifyReply) {
     const base64Image = buffer.toString('base64')
     uploadedFileData.push(base64Image)
   }
+  console.log(uploadedFileData)
   return reply.send({ message: 'Files uploaded successfully' })
 }
 
 export async function writeDesc(request: FastifyRequest, reply: FastifyReply) {
   descriptions = request.body.descriptions // Store descriptions in memory
-
+  console.log(descriptions)
   return reply
     .status(200)
     .send({ message: 'Descriptions received successfully' })
@@ -235,6 +236,7 @@ export async function CreatePdf(duty: any) {
       const base64Images = uploadedFileData
       const imagesdescription = descriptions
       console.log(descriptions)
+    
       // Calculate the maximum number of images per row based on page width
       const imageWidth = 90
       const imageMargin = 20
