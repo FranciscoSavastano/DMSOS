@@ -68,6 +68,7 @@ export async function initWrite(request: FastifyRequest, reply: FastifyReply) {
     if (Date.now() - startTime >= 1500) {
       console.log('Timeout occurred. Clearing previous data.')
       uploadedFileData = []
+      descriptions = []
     }
   }
 
@@ -233,7 +234,7 @@ export async function CreatePdf(duty: any) {
 
       const base64Images = uploadedFileData
       const imagesdescription = descriptions
-
+      console.log(descriptions)
       // Calculate the maximum number of images per row based on page width
       const imageWidth = 90
       const imageMargin = 20
