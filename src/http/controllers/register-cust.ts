@@ -17,7 +17,7 @@ export async function registerCust(
       email: z.string().email(),
       endereco: z.string(),
       cnpj: z.string(),
-      password: z.string().optional()
+      password: z.string().optional(),
     })
     .parse(request.body)
   const {
@@ -40,7 +40,7 @@ export async function registerCust(
       email,
       endereco,
       cnpj,
-      password
+      password,
     })
 
     return await reply.status(201).send(user)
@@ -52,10 +52,9 @@ export async function registerCust(
       return await reply.status(400).send({ message: err.message })
     }
     if (err instanceof InvalidCpf) {
-      return await reply.status(400).send({ message: err.message})
+      return await reply.status(400).send({ message: err.message })
     }
     console.log(err)
     throw err
   }
 }
-

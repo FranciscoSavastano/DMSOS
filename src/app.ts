@@ -6,9 +6,9 @@ import fastifyJwt from '@fastify/jwt'
 import fastifyCookie from '@fastify/cookie'
 import multipart from '@fastify/multipart'
 import cors from '@fastify/cors'
-import { join } from 'path'; 
-import '@fastify/static';
-import {fastifyStatic} from '@fastify/static'
+import { join } from 'path'
+import '@fastify/static'
+import { fastifyStatic } from '@fastify/static'
 export const app = fastify()
 const allowedOrigins = [
   'http://127.0.0.1:5500', // For local development
@@ -27,11 +27,11 @@ app.register(cors, {
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true,
-  allowedHeaders: ['c','Content-Type', 'Authorization', 'Cookie'], // Add any custom headers your frontend sends
+  allowedHeaders: ['c', 'Content-Type', 'Authorization', 'Cookie'], // Add any custom headers your frontend sends
 })
 app.register(fastifyStatic, {
   root: join(__dirname, '/gendocs/'),
-  prefix: '/statico/'
+  prefix: '/statico/',
 })
 
 app.register(fastifyJwt, {

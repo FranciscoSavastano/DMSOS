@@ -1,6 +1,5 @@
 export class InvalidCpf extends Error {
-    constructor() {
-      super('CPF Invalido')
-    }
+  constructor() {
+    super('CPF Invalido')
   }
-  
+}

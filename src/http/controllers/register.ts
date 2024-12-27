@@ -17,9 +17,15 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
       user_role: z.string(),
     })
     .parse(request.body)
-  
-  const { nome, email, cpf : cpfunflit, password, user_role } = registerBodySchema
-  const cpf = cpfunflit.replace(/[^0-9]/g, '');
+
+  const {
+    nome,
+    email,
+    cpf: cpfunflit,
+    password,
+    user_role,
+  } = registerBodySchema
+  const cpf = cpfunflit.replace(/[^0-9]/g, '')
   if (user_role != 'Cliente') {
     try {
       const registerUserCase = makeRegisterTecUseCase()
@@ -41,12 +47,11 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
         return await reply.status(400).send({ message: err.message })
       }
       if (err instanceof InvalidCpf) {
-        return await reply.status(400).send({ message: err.message})
+        return await reply.status(400).send({ message: err.message })
       }
 
       throw err
     }
   } else {
-    
   }
 }

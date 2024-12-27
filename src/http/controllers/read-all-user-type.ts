@@ -17,10 +17,9 @@ export async function fetchUserNames(
 
   const readUserParamSchema = z
     .object({
-      user_role: z.string()
+      user_role: z.string(),
     })
     .parse(request.params)
-
 
   const { authorization: bearerAuth } = readUserHeadersSchema
   const { user_role } = readUserParamSchema
@@ -48,9 +47,8 @@ export async function fetchUserNames(
       user_role: user.user_role,
     }))
     const filteredUsersByRole = filteredUsers.filter(
-      (user) => user.user_role === user_role 
-    );
-    
+      (user) => user.user_role === user_role,
+    )
 
     return filteredUsersByRole
   } catch (error) {

@@ -15,7 +15,13 @@ import { updateDuty } from './controllers/update-duty'
 import { deleteDuty } from './controllers/delete-duty'
 import { createOcurrenceType } from './controllers/ocurrence_types'
 import { fetchUserNames } from './controllers/read-all-user-type'
-import { CreatePdf, initWrite, sendPdf, test, writeDesc } from '@/utils/create-pdf'
+import {
+  CreatePdf,
+  initWrite,
+  sendPdf,
+  test,
+  writeDesc,
+} from '@/utils/create-pdf'
 import { readAllUserDuty } from './controllers/read-all-user-duties'
 import { registerCust } from './controllers/register-cust'
 import { readAllCust } from './controllers/read-all-customers'
@@ -70,5 +76,4 @@ export async function appRoutes(app: FastifyInstance) {
   app.post('/writeDescriptions', writeDesc)
 
   app.get('/download', sendPdf)
-
 }

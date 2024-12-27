@@ -343,25 +343,25 @@ export async function sendPdf(request: FastifyRequest, reply: FastifyReply) {
     if (!archpath) {
       return reply
         .status(500)
-        .send({ message: 'Global archpath variable is not set.' });
+        .send({ message: 'Global archpath variable is not set.' })
     }
-    // Check for file existence 
+    // Check for file existence
     try {
-      await fs.promises.access(archpath, fs.promises.constants.R_OK); 
+      await fs.promises.access(archpath, fs.promises.constants.R_OK)
     } catch (err) {
       if (err.code === 'ENOENT') {
-        
-        return reply.status(404).send({ message: 'File not found' });
+        return reply.status(404).send({ message: 'File not found' })
       } else {
-        throw err;
+        throw err
       }
     }
-    // Send the file 
+    // Send the file
     const newfilepath = archpath.split('/').pop()
-    return reply.download(newfilepath).header('Access-Control-Expose-Headers', 'Content-Disposition')
-
+    return reply
+      .download(newfilepath)
+      .header('Access-Control-Expose-Headers', 'Content-Disposition')
   } catch (error) {
-    console.error('Error sending PDF:', error);
-    reply.status(500).send({ message: 'Failed to send PDF.' });
+    console.error('Error sending PDF:', error)
+    reply.status(500).send({ message: 'Failed to send PDF.' })
   }
 }

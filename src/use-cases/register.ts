@@ -56,29 +56,29 @@ export class RegisterUseCase {
     }
 
     //Calcular o primeiro digito validador do cpf
-    let sum = 0;
+    let sum = 0
     for (let i = 0; i < 9; i++) {
-      sum += parseInt(cpf.charAt(i)) * (10 - i);
+      sum += parseInt(cpf.charAt(i)) * (10 - i)
     }
-    let remainder = (sum * 10) % 11;
+    let remainder = (sum * 10) % 11
     if (remainder === 10 || remainder === 11) {
-      remainder = 0;
+      remainder = 0
     }
     if (remainder !== parseInt(cpf.charAt(9))) {
-      throw new InvalidCpf();
+      throw new InvalidCpf()
     }
 
     // Calcular o segundo digito validador
-    sum = 0;
+    sum = 0
     for (let i = 0; i < 10; i++) {
-      sum += parseInt(cpf.charAt(i)) * (11 - i);
+      sum += parseInt(cpf.charAt(i)) * (11 - i)
     }
-    remainder = (sum * 10) % 11;
+    remainder = (sum * 10) % 11
     if (remainder === 10 || remainder === 11) {
-      remainder = 0;
+      remainder = 0
     }
     if (remainder !== parseInt(cpf.charAt(10))) {
-      throw new InvalidCpf();
+      throw new InvalidCpf()
     }
 
     const passwordDigest = await hash(password, 10)
@@ -110,55 +110,53 @@ export class RegisterCustUseCase {
     const userWithSameEmail = await this.customerRepository.findByEmail(email)
     const userWithSameCnpj = await this.customerRepository.findByCnpj(cnpj)
     if (userWithSameEmail != null) {
-
       throw new CustomerAlreadyExistsError()
     }
     if (userWithSameCnpj != null) {
-
-      throw new CustomerCnpjAlreadyExistsError() 
+      throw new CustomerCnpjAlreadyExistsError()
     }
 
-    cnpj = cnpj.replace(/\D+/g, '');
+    cnpj = cnpj.replace(/\D+/g, '')
 
     // Verifica se o CNPJ possui 14 dígitos
     if (cnpj.length !== 14) {
-      throw new InvalidCnpj();
+      throw new InvalidCnpj()
     }
 
-  // Verifica se o CNPJ é composto apenas por números iguais
-  if (/^(\d)\1{13}$/.test(cnpj)) {
-    throw new InvalidCnpj();
-  }
+    // Verifica se o CNPJ é composto apenas por números iguais
+    if (/^(\d)\1{13}$/.test(cnpj)) {
+      throw new InvalidCnpj()
+    }
 
     // Calcula o primeiro dígito verificador
-    let sum = 0;
-    const weights1 = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+    let sum = 0
+    const weights1 = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
     for (let i = 0; i < 12; i++) {
-      sum += parseInt(cnpj.charAt(i)) * weights1[i];
+      sum += parseInt(cnpj.charAt(i)) * weights1[i]
     }
-    let remainder = (sum * 10) % 11;
+    let remainder = (sum * 10) % 11
     if (remainder === 10 || remainder === 11) {
-      remainder = 0;
+      remainder = 0
     }
     if (remainder !== parseInt(cnpj.charAt(12))) {
-      throw new InvalidCnpj();
+      throw new InvalidCnpj()
     }
 
     // Calcula o segundo dígito verificador
-    sum = 0;
-    const weights2 = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+    sum = 0
+    const weights2 = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
     for (let i = 0; i < 13; i++) {
-      sum += parseInt(cnpj.charAt(i)) * weights2[i];
+      sum += parseInt(cnpj.charAt(i)) * weights2[i]
     }
-    remainder = (sum * 10) % 11;
+    remainder = (sum * 10) % 11
     if (remainder === 10 || remainder === 11) {
-      remainder = 0;
+      remainder = 0
     }
     if (remainder !== parseInt(cnpj.charAt(13))) {
-      throw new InvalidCnpj();
+      throw new InvalidCnpj()
     }
-    
-    const password = "mudar@2024"
+
+    const password = 'mudar@2024'
     const passwordDigest = await hash(password, 10)
 
     const user = await this.customerRepository.create({

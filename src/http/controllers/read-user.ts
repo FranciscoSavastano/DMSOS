@@ -13,13 +13,13 @@ export async function readUser(request: FastifyRequest, reply: FastifyReply) {
 
   const readUserParamSchema = z
     .object({
-      id: z.string()
+      id: z.string(),
     })
     .parse(request.params)
-    const { id } = readUserParamSchema
-    const { authorization: bearerAuth } = readUserHeadersSchema
-    
-    console.log(id)
+  const { id } = readUserParamSchema
+  const { authorization: bearerAuth } = readUserHeadersSchema
+
+  console.log(id)
   try {
     const readUserUseCase = makeReadUserUseCase()
     const user = await readUserUseCase.execute({ id, bearerAuth })
