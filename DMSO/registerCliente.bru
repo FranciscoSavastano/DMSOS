@@ -1,0 +1,22 @@
+meta {
+  name: registerCliente
+  type: http
+  seq: 21
+}
+
+post {
+  url: 127.0.0.1:3333/clientes
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "nome": "Associação do Centro Metropolitano",   
+    "responsavel": "Marcelo",
+    "telefone": "21936184109",
+    "email": "francisco.pereira@dmsys.com.br",      
+    "endereco": "Av.Jose Wilker, 600, BL4 Sala 000",
+    "cnpj": "71.081.013/0001-80"
+  }
+}

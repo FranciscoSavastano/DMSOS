@@ -27,7 +27,7 @@ export interface IMakeAdmin {
 export interface CustomerRepository {
   findByCnpj: (cnpj: string) => Promise<Cliente | null>
   findByEmail: (email: string) => Promise<Cliente | null>
-  create: (data: Prisma.ClienteCreateInput) => Promise<Cliente>
+  create: (data: Prisma.ClienteCreateInput) => Promise<Cliente | null>
   read: (id: string) => Promise<Cliente | null>
   readAllCusts: () => Promise<Cliente[]>
   update: (data: IUpdateCust) => Promise<Cliente | null>

@@ -34,7 +34,6 @@ export function getElapsedTime(): number {
 export async function initWrite(request: FastifyRequest, reply: FastifyReply) {
   const tempFilePath = path.join(__dirname, 'temp_anexpath.txt')
   if (!request.headers['content-type'].startsWith('multipart/form-data')) {
-    console.log(request.headers['content-type'])
     return reply.status(400).send({ message: 'Invalid content type' })
   }
 
@@ -346,13 +345,12 @@ export async function sendPdf(request: FastifyRequest, reply: FastifyReply) {
         .status(500)
         .send({ message: 'Global archpath variable is not set.' });
     }
-    console.log("ok")
     // Check for file existence 
     try {
       await fs.promises.access(archpath, fs.promises.constants.R_OK); 
     } catch (err) {
       if (err.code === 'ENOENT') {
-        console.log("404")
+        
         return reply.status(404).send({ message: 'File not found' });
       } else {
         throw err;

@@ -18,6 +18,7 @@ import { fetchUserNames } from './controllers/read-all-user-type'
 import { CreatePdf, initWrite, sendPdf, test, writeDesc } from '@/utils/create-pdf'
 import { readAllUserDuty } from './controllers/read-all-user-duties'
 import { registerCust } from './controllers/register-cust'
+import { readAllCust } from './controllers/read-all-customers'
 
 export async function appRoutes(app: FastifyInstance) {
   //Users
@@ -25,6 +26,8 @@ export async function appRoutes(app: FastifyInstance) {
   app.post('/users', register)
 
   app.post('/clientes', registerCust)
+
+  app.post('/clientes/readAll', readAllCust)
 
   app.post('/users/read/:id', readUser)
 

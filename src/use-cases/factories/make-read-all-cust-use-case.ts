@@ -1,8 +1,8 @@
-import { PrismaCustsRepository } from '@/repositories/prisma/prisma-custs-repository'
+import { PrismaCustomerRepository } from '@/repositories/prisma/prisma-customer-repository'
 import { ReadAllCustUseCase } from './read-all-cust'
 
 export function makeReadAllCustUseCase() {
-  const custsRepository = new PrismaCustsRepository()
+  const custsRepository = new PrismaCustomerRepository()
   const readAllCustUseCase = new ReadAllCustUseCase(custsRepository)
 
   return readAllCustUseCase

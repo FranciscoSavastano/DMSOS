@@ -42,7 +42,7 @@ model Cliente {
   responsavel     String      @default("")
   telefone        String      @default("")
   email           String      @unique
-  password_digest String      
+  password_digest String      @default("")
   endereco        String      @default("")
   cnpj            String      @unique
   tentativas_de_login   Int       @default(0)

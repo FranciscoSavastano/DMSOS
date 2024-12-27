@@ -25,7 +25,7 @@ Table clientes {
   responsavel String [not null, default: '']
   telefone String [not null, default: '']
   email String [unique, not null]
-  password_digest String [not null]
+  password_digest String [not null, default: '']
   endereco String [not null, default: '']
   cnpj String [unique, not null]
   tentativas_de_login Int [not null, default: 0]
