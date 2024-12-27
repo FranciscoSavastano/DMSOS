@@ -352,6 +352,7 @@ export async function sendPdf(request: FastifyRequest, reply: FastifyReply) {
     // Send the file
     const newfilepath = archpath.split('/').pop()
     lockAcquired = false
+    console.log(newfilepath)
     return reply
       .download(newfilepath)
       .header('Access-Control-Expose-Headers', 'Content-Disposition')
