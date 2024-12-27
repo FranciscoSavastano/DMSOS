@@ -11,10 +11,14 @@ import { readFile } from 'fs/promises'
 import { aR } from 'vitest/dist/reporters-MmQN-57K'
 import { finished } from 'stream'
 import { gzip } from 'zlib'
+import { v4 as uuidv4 } from 'uuid'; // For generating unique temporary file names
+
 var canwrite = false
 var PDFtable = require('pdfkit-table')
 
 let pdfCreationPromise: Promise<unknown>
+let imageWritePromise: Promise<unknown>
+let descWritePromise: Promise<unknown>
 var archpath = ''
 let startTime: number
 var wait = false
@@ -31,66 +35,66 @@ export function getElapsedTime(): number {
   return Date.now() - startTime
 }
 
+// In-memory data storage (alternative to files)
+let uploadedFileData: string[] = []; // Array to store Base64 strings
+let descriptions: string[] = []; // Array to store descriptions
+let lockAcquired = false; 
+
 export async function initWrite(request: FastifyRequest, reply: FastifyReply) {
-  const tempFilePath = path.join(__dirname, 'temp_anexpath.txt')
-  if (!request.headers['content-type'].startsWith('multipart/form-data')) {
-    return reply.status(400).send({ message: 'Invalid content type' })
+  if (lockAcquired) {
+    return reply
+    .code(429) 
+    .header('Retry-After', '1') 
+    .send({ message: 'Outro upload em progresso, seu pedido está em fila' }); 
+  }  
+
+  lockAcquired = true; 
+  const contentType = request.headers['content-type'];
+
+  if (!contentType?.startsWith('multipart/form-data')) {
+    return reply.status(400).send({ message: 'Invalid content type' });
   }
 
-  if (fs.existsSync(tempFilePath)) {
-    const startTime = Date.now()
-    wait = true
+  // Check if a previous upload is in progress
+  if (uploadedFileData.length > 0) {
+    const startTime = Date.now();
+    let wait = true;
+
     while (wait && Date.now() - startTime < 900) {
       // Wait for up to 900ms
-      console.log('Waiting...')
+      console.log('Waiting for previous upload to complete...');
     }
 
-    // Check if the timeout occurred
     if (Date.now() - startTime >= 1500) {
-      console.log('Timeout occurred.')
-      fs.unlinkSync('./src/utils/temp_anexpath_desc.txt')
-      fs.unlinkSync('./src/utils/temp_anexpath.txt')
-    } else {
-      // If the file disappeared within the timeout, proceed
-      console.log('File removed within timeout.')
+      console.log('Timeout occurred. Clearing previous data.');
+      uploadedFileData = [];
     }
   }
-  const files = request.files()
 
-  const fileData = []
+  const files = request.files();
+
   for await (const file of files) {
     const buffer = await new Promise<Buffer>((resolve, reject) => {
-      const chunks = []
-      file.file.on('data', (chunk) => chunks.push(chunk))
-      file.file.on('end', () => resolve(Buffer.concat(chunks)))
-      file.file.on('error', reject)
-    })
+      const chunks = [];
+      file.file.on('data', (chunk) => chunks.push(chunk));
+      file.file.on('end', () => resolve(Buffer.concat(chunks)));
+      file.file.on('error', reject);
+    });
 
-    const base64Image = buffer.toString('base64')
-    fileData.push(base64Image) // Store only the Base64 string
+    const base64Image = buffer.toString('base64');
+    uploadedFileData.push(base64Image);
   }
-
-  // Write the file data to the temporary file
-  fs.writeFileSync(tempFilePath, fileData.join('\n'))
-  canwrite = true
-  return reply.send({ message: 'Files uploaded successfully' })
+  return reply.send({ message: 'Files uploaded successfully' });
 }
 
 export async function writeDesc(request: FastifyRequest, reply: FastifyReply) {
-  const tempFilePath = path.join(__dirname, 'temp_anexpath_desc.txt')
-  const descriptions = request.body.descriptions // Assuming descriptions are sent as an array in the request body
-
-  try {
-    fs.writeFileSync(tempFilePath, descriptions.join('\n'))
-
-    return reply
-      .status(200)
-      .send({ message: 'Descriptions written successfully' })
-  } catch (error) {
-    console.error('Error writing to file:', error)
-    return reply.status(500).send({ message: 'Internal desc server error' })
-  }
+  descriptions = request.body.descriptions; // Store descriptions in memory
+  
+  return reply
+    .status(200)
+    .send({ message: 'Descriptions received successfully' });
 }
+
 function determinePeriod(created_at: Date): string {
   const momenthour = moment(created_at)
   const createdAt = momenthour.tz('America/Sao_Paulo')
@@ -116,6 +120,7 @@ function formatDateForFilename(createdAt: Date): string {
 }
 
 export async function CreatePdf(duty: any) {
+
   pdfCreationPromise = new Promise(async (resolve) => {
     const users = duty.operadoresNome
     const data = duty.created_at
@@ -133,16 +138,10 @@ export async function CreatePdf(duty: any) {
         newPmHorario: formattedDate,
       }
     })
-    var anexpath
     const dataformatada = formatarData(duty.created_at)
     const periodo = determinePeriod(duty.created_at)
     const tempDescFilePath = path.join(__dirname, 'temp_anexpath_desc.txt')
     const tempFilePath = path.join(__dirname, 'temp_anexpath.txt')
-    if (fs.existsSync(tempFilePath)) {
-      anexpath = fs.readFileSync(tempFilePath, 'utf-8').split('\n')
-    } else {
-      anexpath = false
-    }
     async function getImage() {
       const images = {
         comercialImage: './src/utils/pdf-img/com-image.png',
@@ -220,22 +219,22 @@ export async function CreatePdf(duty: any) {
       .fontSize(15)
       .fill('#001233')
       .text(objectivetext, 100, 200, { lineGap: 10 })
-
-    if (anexpath != false) {
+    if(!uploadedFileData) {
+      console.log("Nao existem imagens")
+    }
+    if(!descriptions) {
+      console.log("Nao exitem descrições")
+    }
+    if (uploadedFileData) {
       doc.addPage()
       doc
         .fontSize(32)
         .fill('#001233')
         .text('RELATORIO FOTOGRAFICO', 40, 30, { align: 'center' })
 
-      const base64Images = fs
-        .readFileSync('./src/utils/temp_anexpath.txt', 'utf-8')
-        .split('\n')
-
-      const imagesdescription = fs
-        .readFileSync('./src/utils/temp_anexpath_desc.txt', 'utf-8')
-        .split('\n')
-
+        const base64Images = uploadedFileData; 
+        const imagesdescription = descriptions; 
+        
       // Calculate the maximum number of images per row based on page width
       const imageWidth = 90
       const imageMargin = 20
@@ -319,20 +318,16 @@ export async function CreatePdf(duty: any) {
         doc.end()
       })
     }
+    if (!fs.existsSync('./src/gendocs')) {
+      fs.mkdirSync('./src/gendocs', { recursive: true }); 
+    }
     await generatePdf(doc, filePath)
     doc.end()
+
     archpath = `./src/gendocs/Relatorio ${contract} ${filedate} ${dutyid}.pdf`
     //Delete os arquivos temporarios, se não houver, descreva no console
-    try {
-      fs.unlinkSync(tempFilePath)
-    } catch (err) {
-      console.log('Não existem imagens')
-    }
-    try {
-      fs.unlinkSync(tempDescFilePath)
-    } catch (err) {
-      console.log('Não existem descrições')
-    }
+    uploadedFileData = [];
+    descriptions = [];
     resolve()
   })
 }
@@ -357,6 +352,7 @@ export async function sendPdf(request: FastifyRequest, reply: FastifyReply) {
     }
     // Send the file
     const newfilepath = archpath.split('/').pop()
+    lockAcquired = false; 
     return reply
       .download(newfilepath)
       .header('Access-Control-Expose-Headers', 'Content-Disposition')

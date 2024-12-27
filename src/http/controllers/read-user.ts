@@ -19,7 +19,6 @@ export async function readUser(request: FastifyRequest, reply: FastifyReply) {
   const { id } = readUserParamSchema
   const { authorization: bearerAuth } = readUserHeadersSchema
 
-  console.log(id)
   try {
     const readUserUseCase = makeReadUserUseCase()
     const user = await readUserUseCase.execute({ id, bearerAuth })
