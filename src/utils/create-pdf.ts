@@ -19,7 +19,7 @@ var PDFtable = require('pdfkit-table')
 let pdfCreationPromise: Promise<unknown>
 let imageWritePromise: Promise<unknown>
 let descWritePromise: Promise<unknown>
-var archpath = ''
+let archpath : string
 let startTime: number
 var wait = false
 var created = false
@@ -41,6 +41,7 @@ let descriptions: string[] = [] // Array to store descriptions
 let lockAcquired = false
 let uploadPromise : Promise<unknown>
 let descriptionPromise : Promise<unknown>
+let state = 0
 export async function initWrite(request: FastifyRequest, reply: FastifyReply): Promise<void> {
   if (lockAcquired) {
     return reply
@@ -48,7 +49,7 @@ export async function initWrite(request: FastifyRequest, reply: FastifyReply): P
       .header('Retry-After', '1')
       .send({ message: 'Outro upload em progresso, seu pedido está em fila' });
   }
-
+  state++ // deve ser 1
   lockAcquired = true;
 
   const contentType = request.headers['content-type'];
@@ -96,15 +97,17 @@ export async function initWrite(request: FastifyRequest, reply: FastifyReply): P
   });
 
   await uploadPromise; // Wait for the upload to finish
-
+  state++ // deve ser 2
   lockAcquired = false;
   return reply.send({ message: 'Files uploaded successfully' });
 }
 export async function writeDesc(request: FastifyRequest, reply: FastifyReply) {
+  state++ // deve ser 3
   descWritePromise = new Promise<void>(async (resolve, reject) => {
     descriptions = request.body.descriptions // Store descriptions in memory
-    console.log(descriptions)
+    resolve()
   await descWritePromise
+  state++ // deve ser 4
   return reply
       .status(200)
       .send({ message: 'Descriptions received successfully' })
@@ -138,6 +141,11 @@ function formatDateForFilename(createdAt: Date): string {
 export async function CreatePdf(duty: any) {
   await uploadPromise
   await descWritePromise
+  if(state > 0) {
+    while(state < 4) {
+      console.log(`wait step ${state}`)
+    }
+  }
   pdfCreationPromise = new Promise(async (resolve) => {
     const users = duty.operadoresNome
     const data = duty.created_at
@@ -343,11 +351,8 @@ export async function CreatePdf(duty: any) {
     
     await generatePdf(doc, filePath)
     doc.end()
-
     archpath = `${gendocsPath}/Relatorio ${contract} ${filedate} ${dutyid}.pdf`
     //Delete os arquivos temporarios, se não houver, descreva no console
-    uploadedFileData = []
-    descriptions = []
     resolve()
   })
 }
@@ -356,6 +361,13 @@ export async function sendPdf(request: FastifyRequest, reply: FastifyReply) {
   await pdfCreationPromise
   try {
     if (!archpath) {
+      while(!archpath) {
+        
+        if(!uploadedFileData) {
+          break
+        }
+        
+      }
       return reply
         .status(500)
         .send({ message: 'Global archpath variable is not set.' })
@@ -373,6 +385,8 @@ export async function sendPdf(request: FastifyRequest, reply: FastifyReply) {
     // Send the file
     const newfilepath = archpath.split('/').pop()
     lockAcquired = false
+    uploadedFileData = []
+    descriptions = []
     return reply
       .download(newfilepath)
       .header('Access-Control-Expose-Headers', 'Content-Disposition')
