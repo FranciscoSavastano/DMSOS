@@ -2,14 +2,14 @@ FROM node:18-alpine
 
 WORKDIR /app
 
+USER node
+RUN chown -R node:node /app
 
 COPY package*.json ./
 RUN npm install
 RUN apk add --no-cache openssl
 
 COPY . .
-USER node
-RUN chown -R node:node /app
 
 EXPOSE 3333
 
