@@ -308,7 +308,11 @@ export async function CreatePdf(duty: any) {
     //Finalize o arquivo e salve na pasta
     const filedate = formatDateForFilename(data)
     console.log('Criado')
-    const filePath = `./src/gendocs/Relatorio ${contract} ${filedate} ${dutyid}.pdf`
+    const gendocsPath = path.join(__dirname, '/', 'gendocs');
+    if (!fs.existsSync(gendocsPath)) {
+      fs.mkdirSync(gendocsPath, { recursive: true })
+    }
+    const filePath = `${gendocsPath}/Relatorio ${contract} ${filedate} ${dutyid}.pdf`
     const generatePdf = async (doc, filePath): Promise<void> => {
       return new Promise<void>((resolve, reject) => {
         doc.pipe(fs.createWriteStream(filePath))
@@ -317,13 +321,11 @@ export async function CreatePdf(duty: any) {
         doc.end()
       })
     }
-    if (!fs.existsSync('./src/gendocs')) {
-      fs.mkdirSync('./src/gendocs', { recursive: true })
-    }
+    
     await generatePdf(doc, filePath)
     doc.end()
 
-    archpath = `./src/gendocs/Relatorio ${contract} ${filedate} ${dutyid}.pdf`
+    archpath = `${gendocsPath}/Relatorio ${contract} ${filedate} ${dutyid}.pdf`
     //Delete os arquivos temporarios, se não houver, descreva no console
     uploadedFileData = []
     descriptions = []
@@ -352,8 +354,6 @@ export async function sendPdf(request: FastifyRequest, reply: FastifyReply) {
     // Send the file
     const newfilepath = archpath.split('/').pop()
     lockAcquired = false
-    console.log(archpath)
-    console.log(__dirname + newfilepath)
     return reply
       .download(newfilepath)
       .header('Access-Control-Expose-Headers', 'Content-Disposition')
