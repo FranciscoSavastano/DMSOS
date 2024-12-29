@@ -6,5 +6,6 @@
     "editor.defaultFormatter": "Prisma.prisma",
     "editor.formatOnSave": true,
     "editor.formatOnSaveMode": "file"
-  }
+  },
+  "liveServer.settings.port": 5501
 }

@@ -78,7 +78,9 @@ export async function initWrite(request: FastifyRequest, reply: FastifyReply): P
 
   uploadPromise = new Promise<void>(async (resolve, reject) => {
     try {
+      let index = 0
       for await (const file of files) {
+        console.log(index)
         const buffer = await new Promise<Buffer>((resolve, reject) => {
           const chunks = [];
           file.file.on('data', (chunk) => chunks.push(chunk));
@@ -88,8 +90,8 @@ export async function initWrite(request: FastifyRequest, reply: FastifyReply): P
 
         const base64Image = buffer.toString('base64');
         uploadedFileData.push(base64Image);
+        index += 1
       }
-      console.log(uploadedFileData);
       resolve(); // Resolve the promise when upload is complete
     } catch (error) {
       reject(error); // Reject the promise if an error occurs
@@ -259,7 +261,7 @@ export async function CreatePdf(duty: any) {
 
       const base64Images = uploadedFileData
       const imagesdescription = descriptions
-      console.log(descriptions)
+      
     
       // Calculate the maximum number of images per row based on page width
       const imageWidth = 90
