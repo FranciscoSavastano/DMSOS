@@ -150,6 +150,10 @@ export async function CreatePdf(duty: any) {
   }
   pdfCreationPromise = new Promise(async (resolve) => {
     const users = duty.operadoresNome
+    const filteredUsers = users.map((fullName) => {
+      const nameParts = fullName.split(' ');
+      return `${nameParts[0]} ${nameParts[nameParts.length - 1]}`; 
+    });
     const data = duty.created_at
     const contract = duty.contrato
     const dutyid = duty.id
@@ -169,6 +173,7 @@ export async function CreatePdf(duty: any) {
     const periodo = determinePeriod(duty.created_at)
     const tempDescFilePath = path.join(__dirname, 'temp_anexpath_desc.txt')
     const tempFilePath = path.join(__dirname, 'temp_anexpath.txt')
+    
     async function getImage() {
       const images = {
         comercialImage: './src/utils/pdf-img/com-image.png',
@@ -214,7 +219,7 @@ export async function CreatePdf(duty: any) {
     doc
       .fontSize(infoFontSize)
       .fill('#000000') // Adjust text color
-      .text(`OPERADOR: ${users} PERÍODO: ${periodo}`, 0, 700)
+      .text(`OPERADOR: ${filteredUsers}\n\nPERÍODO: ${periodo}`, 0, 700)
 
     // Add the simple logo
     doc.image(simpleLogoPath, 400, 650, { fit: [200, 200] }) // Maintain logo aspect ratio

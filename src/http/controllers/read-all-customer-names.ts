@@ -5,7 +5,7 @@ import { verify } from 'jsonwebtoken'
 import env from '@/config/env'
 import { InvalidJwtTokenError } from '@/use-cases/errors/invalid-jwt-token-error'
 
-export async function fetchUserNames(
+export async function fetchCustomerNames(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
@@ -14,15 +14,15 @@ export async function fetchUserNames(
       authorization: z.string(),
     })
     .parse(request.headers)
-
-  const readUserParamSchema = z
+    const readUserParamSchema = z
     .object({
-      user_role: z.string(),
+      cftv: z.string(),
     })
     .parse(request.params)
 
+
   const { authorization: bearerAuth } = readUserHeadersSchema
-  const { user_role } = readUserParamSchema
+  const { cftv } = readUserParamSchema
   const token = bearerAuth.split(' ')[1]
 
   try {
@@ -32,29 +32,30 @@ export async function fetchUserNames(
   }
   try {
     // use axios para gerar uma request interna
-    const response = await axios.get('http://127.0.0.1:3333/users/readAll', {
+    const response = await axios.get('http://127.0.0.1:3333/clientes/readAll', {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     })
 
-    const users = response.data.user.users
+    const users = response.data.cust.custs
     // Extraia os dados desejados da response completa
-    const filteredUsers = users.map((user) => ({
+    const filteredCustomers = users.map((user) => ({
       id: user.id,
       nome: user.nome,
-      cpf: user.cpf,
-      user_role: user.user_role,
+      cnpj: user.cnpj,
+      email: user.email,
+      responsavel: user.responsavel,
+      has_cftv: user.has_cftv
     }))
-    if(user_role) {
-      const filteredUsersByRole = filteredUsers.filter(
-        (user) => user.user_role === user_role,
-      )
-      return filteredUsersByRole
-    }
-    return filteredUsers
-
-    
+    if(cftv === 'true') {
+        const filteredCustomersByType = filteredCustomers.filter(
+        (user) => user.has_cftv,
+        )
+        
+        return filteredCustomersByType
+      }    
+    return filteredCustomers
   } catch (error) {
     console.error('Error fetching user data:', error)
     return error

@@ -18,6 +18,7 @@ export async function registerCust(
       endereco: z.string(),
       cnpj: z.string(),
       password: z.string().optional(),
+      has_cftv: z.boolean().optional(),
     })
     .parse(request.body)
   const {
@@ -28,6 +29,7 @@ export async function registerCust(
     endereco,
     cnpj: cnpjunflit,
     password,
+    has_cftv,
   } = registerBodySchema
 
   try {
@@ -41,6 +43,7 @@ export async function registerCust(
       endereco,
       cnpj,
       password,
+      has_cftv,
     })
 
     return await reply.status(201).send(user)

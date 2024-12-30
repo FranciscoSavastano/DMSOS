@@ -19,12 +19,12 @@ import {
   CreatePdf,
   initWrite,
   sendPdf,
-  test,
   writeDesc,
 } from '@/utils/create-pdf'
 import { readAllUserDuty } from './controllers/read-all-user-duties'
 import { registerCust } from './controllers/register-cust'
 import { readAllCust } from './controllers/read-all-customers'
+import { fetchCustomerNames } from './controllers/read-all-customer-names'
 
 export async function appRoutes(app: FastifyInstance) {
   //Users
@@ -33,7 +33,9 @@ export async function appRoutes(app: FastifyInstance) {
 
   app.post('/clientes', registerCust)
 
-  app.post('/clientes/readAll', readAllCust)
+  app.get('/clientes/readAll', readAllCust)
+
+  app.get('/clientes/getnames/:cftv', fetchCustomerNames)
 
   app.post('/users/read/:id', readUser)
 

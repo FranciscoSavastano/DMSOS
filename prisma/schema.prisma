@@ -46,6 +46,7 @@ model Cliente {
   endereco        String      @default("")
   cnpj            String      @unique
   tentativas_de_login   Int       @default(0)
+  has_cftv        Boolean     @default(false)
   last_login            DateTime?
   created_at            DateTime  @default(now())
   updated_at            DateTime  @updatedAt
