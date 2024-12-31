@@ -106,7 +106,7 @@ export class RegisterCustUseCase {
     email,
     endereco,
     cnpj,
-    has_cftv
+    has_cftv,
   }: RegisterUseCaseCustRequest): Promise<RegisterUseCaseCustResponse> {
     const userWithSameEmail = await this.customerRepository.findByEmail(email)
     const userWithSameCnpj = await this.customerRepository.findByCnpj(cnpj)

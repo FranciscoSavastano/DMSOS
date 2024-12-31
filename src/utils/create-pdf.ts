@@ -2,16 +2,8 @@ import pdfkit from 'pdfkit-table'
 import fs from 'fs'
 import path from 'path'
 import moment from 'moment-timezone'
-import * as crypto from 'crypto'
-import * as zlib from 'zlib'
 import { prisma } from '@/lib/prisma'
 import { FastifyRequest, FastifyReply, FastifyPluginAsync } from 'fastify'
-import { time } from 'console'
-import { readFile } from 'fs/promises'
-import { aR } from 'vitest/dist/reporters-MmQN-57K'
-import { finished } from 'stream'
-import { gzip } from 'zlib'
-import { v4 as uuidv4 } from 'uuid' // For generating unique temporary file names
 
 var canwrite = false
 var PDFtable = require('pdfkit-table')
@@ -19,7 +11,7 @@ var PDFtable = require('pdfkit-table')
 let pdfCreationPromise: Promise<unknown>
 let imageWritePromise: Promise<unknown>
 let descWritePromise: Promise<unknown>
-let archpath : string
+let archpath: string
 let startTime: number
 var wait = false
 var created = false
@@ -39,42 +31,45 @@ export function getElapsedTime(): number {
 let uploadedFileData: string[] = [] // Array to store Base64 strings
 let descriptions: string[] = [] // Array to store descriptions
 let lockAcquired = false
-let uploadPromise : Promise<unknown>
-let descriptionPromise : Promise<unknown>
+let uploadPromise: Promise<unknown>
+let descriptionPromise: Promise<unknown>
 let state = 0
-export async function initWrite(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+export async function initWrite(
+  request: FastifyRequest,
+  reply: FastifyReply,
+): Promise<void> {
   if (lockAcquired) {
     return reply
       .code(429)
       .header('Retry-After', '1')
-      .send({ message: 'Outro upload em progresso, seu pedido está em fila' });
+      .send({ message: 'Outro upload em progresso, seu pedido está em fila' })
   }
   state++ // deve ser 1
-  lockAcquired = true;
+  lockAcquired = true
 
-  const contentType = request.headers['content-type'];
+  const contentType = request.headers['content-type']
 
   if (!contentType?.startsWith('multipart/form-data')) {
-    return reply.status(400).send({ message: 'Invalid content type' });
+    return reply.status(400).send({ message: 'Invalid content type' })
   }
 
   // Check if a previous upload is in progress
   if (uploadedFileData.length > 0) {
-    const startTime = Date.now();
-    let wait = true;
+    const startTime = Date.now()
+    let wait = true
 
     while (wait && Date.now() - startTime < 900) {
       // Wait for up to 900ms
-      console.log('Waiting for previous upload to complete...');
+      console.log('Waiting for previous upload to complete...')
     }
 
     if (Date.now() - startTime >= 1500) {
-      console.log('Timeout occurred. Clearing previous data.');
-      uploadedFileData = [];
+      console.log('Timeout occurred. Clearing previous data.')
+      uploadedFileData = []
     }
   }
 
-  const files = request.files();
+  const files = request.files()
 
   uploadPromise = new Promise<void>(async (resolve, reject) => {
     try {
@@ -82,35 +77,35 @@ export async function initWrite(request: FastifyRequest, reply: FastifyReply): P
       for await (const file of files) {
         console.log(index)
         const buffer = await new Promise<Buffer>((resolve, reject) => {
-          const chunks = [];
-          file.file.on('data', (chunk) => chunks.push(chunk));
-          file.file.on('end', () => resolve(Buffer.concat(chunks)));
-          file.file.on('error', reject);
-        });
+          const chunks = []
+          file.file.on('data', (chunk) => chunks.push(chunk))
+          file.file.on('end', () => resolve(Buffer.concat(chunks)))
+          file.file.on('error', reject)
+        })
 
-        const base64Image = buffer.toString('base64');
-        uploadedFileData.push(base64Image);
+        const base64Image = buffer.toString('base64')
+        uploadedFileData.push(base64Image)
         index += 1
       }
-      resolve(); // Resolve the promise when upload is complete
+      resolve() // Resolve the promise when upload is complete
     } catch (error) {
-      reject(error); // Reject the promise if an error occurs
+      reject(error) // Reject the promise if an error occurs
     }
-  });
+  })
 
-  await uploadPromise; // Wait for the upload to finish
+  await uploadPromise // Wait for the upload to finish
   state++ // deve ser 2
-  lockAcquired = false;
-  return reply.send({ message: 'Files uploaded successfully' });
+  lockAcquired = false
+  return reply.send({ message: 'Files uploaded successfully' })
 }
 export async function writeDesc(request: FastifyRequest, reply: FastifyReply) {
   state++ // deve ser 3
   descWritePromise = new Promise<void>(async (resolve, reject) => {
     descriptions = request.body.descriptions // Store descriptions in memory
     resolve()
-  await descWritePromise
-  state++ // deve ser 4
-  return reply
+    await descWritePromise
+    state++ // deve ser 4
+    return reply
       .status(200)
       .send({ message: 'Descriptions received successfully' })
   })
@@ -143,17 +138,17 @@ function formatDateForFilename(createdAt: Date): string {
 export async function CreatePdf(duty: any) {
   await uploadPromise
   await descWritePromise
-  if(state > 0) {
-    while(state < 4) {
+  if (state > 0) {
+    while (state < 4) {
       console.log(`wait step ${state}`)
     }
   }
   pdfCreationPromise = new Promise(async (resolve) => {
     const users = duty.operadoresNome
     const filteredUsers = users.map((fullName) => {
-      const nameParts = fullName.split(' ');
-      return `${nameParts[0]} ${nameParts[nameParts.length - 1]}`; 
-    });
+      const nameParts = fullName.split(' ')
+      return `${nameParts[0]} ${nameParts[nameParts.length - 1]}`
+    })
     const data = duty.created_at
     const contract = duty.contrato
     const dutyid = duty.id
@@ -173,7 +168,7 @@ export async function CreatePdf(duty: any) {
     const periodo = determinePeriod(duty.created_at)
     const tempDescFilePath = path.join(__dirname, 'temp_anexpath_desc.txt')
     const tempFilePath = path.join(__dirname, 'temp_anexpath.txt')
-    
+
     async function getImage() {
       const images = {
         comercialImage: './src/utils/pdf-img/com-image.png',
@@ -262,12 +257,11 @@ export async function CreatePdf(duty: any) {
       doc
         .fontSize(32)
         .fill('#001233')
-        .text('RELATORIO FOTOGRAFICO', 40, 30, { align: 'center' })
+        .text('RELATÓRIO FOTOGRÁFICO', 40, 30, { align: 'center' })
 
       const base64Images = uploadedFileData
       const imagesdescription = descriptions
-      
-    
+
       // Calculate the maximum number of images per row based on page width
       const imageWidth = 90
       const imageMargin = 20
@@ -280,6 +274,8 @@ export async function CreatePdf(duty: any) {
         const imageBuffer = Buffer.from(base64Image, 'base64')
         const imagedesc = imagesdescription[index]
         // Add the image to the PDF
+
+        
         doc.image(imageBuffer, x, y, { width: 150, height: 150 })
         doc.rect(x, y + 150, 150, 70).fill('#007bff') // Adjust the color as needed
         // Add text within the rectangle
@@ -299,7 +295,7 @@ export async function CreatePdf(duty: any) {
           doc
             .fontSize(32)
             .fill('#001233')
-            .text('RELATORIO FOTOGRAFICO', 40, 30, { align: 'center' })
+            .text('RELATÓRIO FOTOGRÁFICO', 40, 30, { align: 'center' })
           x = imageMargin
           y = imageWidth
         }
@@ -338,14 +334,21 @@ export async function CreatePdf(duty: any) {
     doc.rect(0, doc.y, doc.page.width, 50).fill('#fff')
     doc.y += 50 // Adjust the y-coordinate to account for the added space
     doc.fontSize(13).fill('black').text(duty.consideracoes, { align: 'center' })
-
+    doc.fontSize(8).text(`ID ÚNICO: ${duty.id}`, 440, 800, {
+      align: 'right',
+      height: 50,
+      width: 120,
+    })
+    
     //Finalize o arquivo e salve na pasta
     const filedate = formatDateForFilename(data)
     console.log('Criado')
-    const gendocsPath = path.join(__dirname, '/', 'gendocs');
+    //Se não houver pasta crie uma recursivamente
+    const gendocsPath = path.join(__dirname, '/', 'gendocs')
     if (!fs.existsSync(gendocsPath)) {
       fs.mkdirSync(gendocsPath, { recursive: true })
     }
+    //Salve o arquivo com um nome dinamico
     const filePath = `${gendocsPath}/Relatorio ${contract} ${filedate} ${dutyid}.pdf`
     const generatePdf = async (doc, filePath): Promise<void> => {
       return new Promise<void>((resolve, reject) => {
@@ -355,7 +358,7 @@ export async function CreatePdf(duty: any) {
         doc.end()
       })
     }
-    
+
     await generatePdf(doc, filePath)
     doc.end()
     archpath = `${gendocsPath}/Relatorio ${contract} ${filedate} ${dutyid}.pdf`
@@ -368,12 +371,10 @@ export async function sendPdf(request: FastifyRequest, reply: FastifyReply) {
   await pdfCreationPromise
   try {
     if (!archpath) {
-      while(!archpath) {
-        
-        if(!uploadedFileData) {
+      while (!archpath) {
+        if (!uploadedFileData) {
           break
         }
-        
       }
       return reply
         .status(500)

@@ -14,12 +14,11 @@ export async function fetchCustomerNames(
       authorization: z.string(),
     })
     .parse(request.headers)
-    const readUserParamSchema = z
+  const readUserParamSchema = z
     .object({
       cftv: z.string(),
     })
     .parse(request.params)
-
 
   const { authorization: bearerAuth } = readUserHeadersSchema
   const { cftv } = readUserParamSchema
@@ -46,15 +45,15 @@ export async function fetchCustomerNames(
       cnpj: user.cnpj,
       email: user.email,
       responsavel: user.responsavel,
-      has_cftv: user.has_cftv
+      has_cftv: user.has_cftv,
     }))
-    if(cftv === 'true') {
-        const filteredCustomersByType = filteredCustomers.filter(
+    if (cftv === 'true') {
+      const filteredCustomersByType = filteredCustomers.filter(
         (user) => user.has_cftv,
-        )
-        
-        return filteredCustomersByType
-      }    
+      )
+
+      return filteredCustomersByType
+    }
     return filteredCustomers
   } catch (error) {
     console.error('Error fetching user data:', error)

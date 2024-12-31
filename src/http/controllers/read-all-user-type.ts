@@ -46,15 +46,13 @@ export async function fetchUserNames(
       cpf: user.cpf,
       user_role: user.user_role,
     }))
-    if(user_role) {
+    if (user_role) {
       const filteredUsersByRole = filteredUsers.filter(
         (user) => user.user_role === user_role,
       )
       return filteredUsersByRole
     }
     return filteredUsers
-
-    
   } catch (error) {
     console.error('Error fetching user data:', error)
     return error
