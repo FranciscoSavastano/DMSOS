@@ -20,6 +20,7 @@ import { readAllUserDuty } from './controllers/read-all-user-duties'
 import { registerCust } from './controllers/register-cust'
 import { readAllCust } from './controllers/read-all-customers'
 import { fetchCustomerNames } from './controllers/read-all-customer-names'
+import { gptCorrection } from './controllers/gpt-helper'
 
 export async function appRoutes(app: FastifyInstance) {
   //Users
@@ -73,4 +74,6 @@ export async function appRoutes(app: FastifyInstance) {
   app.post('/writeDescriptions', writeDesc)
 
   app.get('/download', sendPdf)
+
+  app.get('/gpthelper', gptCorrection)
 }
