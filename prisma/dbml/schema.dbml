@@ -34,6 +34,7 @@ Table clientes {
   created_at DateTime [default: `now()`, not null]
   updated_at DateTime [not null]
   equipamento Equipamento [not null]
+  tipo_ocorrencias Ocurrence_type [not null]
 }
 
 Table authentication_audit {
@@ -89,19 +90,22 @@ Table ocorrencias {
   id Int [pk, increment]
   plantao_id Int [not null]
   plantao plantoes [not null]
-  ocurrence_type String[] [not null]
+  ocurrence_type String [not null, default: 'Padrao']
   descricao String
-  pm_horario DateTime
-  pm_local String
-  pm_observacao String
-  pm_acao String
+  horario DateTime
+  termino DateTime
+  local String
+  observacao String
+  acao String
+  responsavel String
 }
 
 Table Ocurrence_type {
   id Int [pk, increment]
   type String [not null]
   subtypes String[] [not null]
-  contract String [not null]
+  contract_id String [not null]
+  contract clientes [not null]
 }
 
 Table marcas {
@@ -150,6 +154,8 @@ Ref: authentication_audit.user_id > users.id [delete: Cascade]
 Ref: OS.tecnico_id > users.id [delete: Cascade]
 
 Ref: ocorrencias.plantao_id > plantoes.id [delete: Cascade]
+
+Ref: Ocurrence_type.contract_id > clientes.id
 
 Ref: Equipamento.marca_nome > marcas.marca
 

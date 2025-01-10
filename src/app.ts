@@ -15,7 +15,7 @@ const allowedOrigins = [
   'http://192.168.10.246',
   'http://192.168.10.246:80',
   'http://dmsys.app.ci',
-  'http://dmsysci01.ddns.me' //local microtik ip mapping
+  'https://dmsysci01.ddns.me' //local microtik ip mapping
 ]
 
 app.register(cors, {

@@ -8,10 +8,12 @@ import { string, z } from 'zod'
 export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
   const occurrenceSchema = z.object({
     ocorrencia_desc: z.string().optional().default(''),
-    ocorrencia_pm_horario: z.string().datetime().optional(),
-    ocorrencia_pm_local: z.string().optional(),
-    ocorrencia_pm_observacao: z.string().optional(),
-    ocorrencia_pm_acao: z.string().optional(),
+    ocorrencia_horario: z.string().datetime().optional(),
+    ocorrencia_termino: z.string().datetime().optional(),
+    ocorrencia_local: z.string().optional(),
+    ocorrencia_responsavel: z.string().optional(),
+    ocorrencia_observacao: z.string().optional(),
+    ocorrencia_acao: z.string().optional(),
   })
   const registerBodySchema = z
     .object({
@@ -26,6 +28,7 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
       ocurrence: z.array(occurrenceSchema).optional(),
     })
     .parse(request.body)
+  
   const {
     operador,
     operadoresNome,
@@ -38,6 +41,7 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
   } = registerBodySchema
   try {
     const registerDutyCase = makeCreateDutyUseCase()
+
     const { duty, ocurrences } = await registerDutyCase.execute({
       operador,
       operadoresNome,

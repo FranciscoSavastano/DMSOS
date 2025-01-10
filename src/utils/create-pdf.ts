@@ -158,10 +158,12 @@ export async function CreatePdf(duty: any) {
       },
     })
     const ocurrence = ocurrences.map((ocurrence) => {
-      const formattedDate = moment.utc(ocurrence.pm_horario).format('HH:mm')
+      const formattedDateStart = moment.utc(ocurrence.horario).format('HH:mm')
+      const formattedDateEnd = moment.utc(ocurrence.termino).format('HH:mm')
       return {
         ...ocurrence,
-        newPmHorario: formattedDate,
+        newHorario: formattedDateStart,
+        newTermino: formattedDateEnd,
       }
     })
     const dataformatada = formatarData(duty.created_at)
@@ -302,29 +304,59 @@ export async function CreatePdf(duty: any) {
       })
     }
     //POLICIA MILITAR
-    if (ocurrence) {
-      doc.addPage()
-      doc
-        .fontSize(32)
-        .fill('#001233')
-        .text('POLICIA MILITAR', { align: 'center' })
-      const table: {
-        title: string
-        headers: string[]
-        rows: string[][]
-      } = {
-        title: 'OCORRENCIAS',
-        headers: ['HORÁRIO', 'LOCAL', 'OBSERVAÇÃO'],
-        rows: ocurrence.map((ocurrence) => [
-          ocurrence.newPmHorario || '',
-          ocurrence.pm_local || '',
-          ocurrence.pm_observacao || '',
-        ]),
+    if(contract === "Lead Americas"){
+      if (ocurrence) {
+        doc.addPage()
+        doc
+          .fontSize(32)
+          .fill('#001233')
+          .text('RONDAS', { align: 'center' })
+        const table: {
+          title: string
+          headers: string[]
+          rows: string[][]
+        } = {
+          title: 'RONDA',
+          headers: ['HORÁRIO INICIO', 'HORÁRIO TERMINO', 'LOCAL', 'RESPONSÁVEL', 'OBSERVAÇÃO'],
+          rows: ocurrence.map((ocurrence) => [
+            ocurrence.newHorario || '',
+            ocurrence.newTermino || '',
+            ocurrence.local || '',
+            ocurrence.responsavel || '',
+            ocurrence.observacao || '',
+          ]),
+        }
+        await doc.table(table, {
+          width: 500, // Adjust the width as needed
+          // Other table options, like font size, colors, etc.
+        })
       }
-      await doc.table(table, {
-        width: 500, // Adjust the width as needed
-        // Other table options, like font size, colors, etc.
-      })
+    }
+    else {
+      if (ocurrence) {
+        doc.addPage()
+        doc
+          .fontSize(32)
+          .fill('#001233')
+          .text('POLICIA MILITAR', { align: 'center' })
+        const table: {
+          title: string
+          headers: string[]
+          rows: string[][]
+        } = {
+          title: 'OCORRENCIAS',
+          headers: ['HORÁRIO', 'LOCAL', 'OBSERVAÇÃO'],
+          rows: ocurrence.map((ocurrence) => [
+            ocurrence.newHorario || '',
+            ocurrence.local || '',
+            ocurrence.observacao || '',
+          ]),
+        }
+        await doc.table(table, {
+          width: 500, // Adjust the width as needed
+          // Other table options, like font size, colors, etc.
+        })
+      }
     }
     doc.addPage()
     doc

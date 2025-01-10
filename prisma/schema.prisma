@@ -51,6 +51,7 @@ model Cliente {
   created_at            DateTime  @default(now())
   updated_at            DateTime  @updatedAt
   equipamento Equipamento[]
+  tipo_ocorrencias Ocurrence_types[]
   @@map("clientes")
 }
 
@@ -113,12 +114,14 @@ model Ocorrencia {
   id                    Int         @id @default(autoincrement())
   plantao_id            Int
   plantao               Plantao     @relation(fields: [plantao_id], references: [id], onDelete: Cascade)
-  ocurrence_type        String[]
+  ocurrence_type        String      @default("Padrao")
   descricao             String?      
-  pm_horario            DateTime?    
-  pm_local              String?     
-  pm_observacao         String?     
-  pm_acao               String?
+  horario            DateTime?
+  termino            DateTime?    
+  local              String?     
+  observacao         String?     
+  acao               String?
+  responsavel        String?
   @@map("ocorrencias")
 }
 
@@ -126,7 +129,8 @@ model Ocurrence_types {
   id              Int           @default(autoincrement()) @id
   type            String
   subtypes        String[]
-  contract        String        
+  contract_id     String
+  contract        Cliente   @relation(fields: [contract_id], references: [id])        
   @@map("Ocurrence_type")
 }
 

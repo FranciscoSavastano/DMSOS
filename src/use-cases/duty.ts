@@ -13,11 +13,13 @@ interface RegisterUseCaseRequest {
 }
 interface Ocorrencia {
   descricao: string | null
-  pm_horario: Date | null
-  pm_local: string | null
-  pm_observacao: string | null
+  horario: Date | null
+  termino: Date | null
+  local: string | null
+  responsavel: string | null
+  observacao: string | null
   ocurrence_type: string[] | OcorrenciaCreateocurrence_typeInput | undefined
-  pm_acao: string | null
+  acao: string | null
 }
 interface RegisterUseCaseResponse {
   duty: Plantao
@@ -60,10 +62,12 @@ export class CreateDutyUseCase {
         },
 
         descricao: ocorrencia.ocorrencia_desc,
-        pm_horario: ocorrencia.ocorrencia_pm_horario,
-        pm_local: ocorrencia.ocorrencia_pm_local,
-        pm_observacao: ocorrencia.ocorrencia_pm_observacao,
-        pm_acao: ocorrencia.ocorrencia_pm_acao,
+        horario: ocorrencia.ocorrencia_horario,
+        termino: ocorrencia.ocorrencia_termino,
+        local: ocorrencia.ocorrencia_local,
+        responsavel: ocorrencia.ocorrencia_responsavel,
+        observacao: ocorrencia.ocorrencia_observacao,
+        acao: ocorrencia.ocorrencia_acao,
         ocurrence_type: ocorrencia.ocorrencia_ocurrence_type,
       })
 
