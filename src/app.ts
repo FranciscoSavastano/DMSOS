@@ -38,11 +38,11 @@ app.register(fastifyStatic, {
 app.register(fastifyJwt, {
   secret: process.env.JWT_SECRET,
   cookie: {
-    cookieName: 'refreshToken',
+    cookieName: 'Authorization',
     signed: false,
   },
   sign: {
-    expiresIn: '5m',
+    expiresIn: '30m',
   },
 })
 app.register(multipart)

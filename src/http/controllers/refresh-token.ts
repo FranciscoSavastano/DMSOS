@@ -4,6 +4,7 @@ export async function refreshToken(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
+  console.log(request.cookies)
   await request.jwtVerify({ onlyCookie: true })
 
   const accessToken = await reply.jwtSign(
@@ -28,7 +29,7 @@ export async function refreshToken(
   return await reply
     .setCookie('refreshToken', refreshToken, {
       path: '/',
-      secure: true,
+      secure: false,
       sameSite: true,
       httpOnly: true,
     })

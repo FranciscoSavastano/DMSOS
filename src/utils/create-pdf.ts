@@ -4,6 +4,7 @@ import path from 'path'
 import moment from 'moment-timezone'
 import { prisma } from '@/lib/prisma'
 import { FastifyRequest, FastifyReply, FastifyPluginAsync } from 'fastify'
+import { Ocorrencia } from '@prisma/client'
 
 var canwrite = false
 var PDFtable = require('pdfkit-table')
@@ -248,13 +249,14 @@ export async function CreatePdf(duty: any) {
       .fontSize(15)
       .fill('#001233')
       .text(objectivetext, 100, 200, { lineGap: 10 })
-    if (!uploadedFileData) {
+    if (uploadedFileData.length == 0) {
       console.log('Nao existem imagens')
     }
-    if (!descriptions) {
+    if (descriptions.length == 0) {
       console.log('Nao exitem descrições')
     }
-    if (uploadedFileData) {
+    
+    if (uploadedFileData.length > 0) {
       doc.addPage()
       doc
         .fontSize(32)
@@ -318,7 +320,7 @@ export async function CreatePdf(duty: any) {
         } = {
           title: 'RONDA',
           headers: ['HORÁRIO INICIO', 'HORÁRIO TERMINO', 'LOCAL', 'RESPONSÁVEL', 'OBSERVAÇÃO'],
-          rows: ocurrence.map((ocurrence) => [
+          rows: ocurrence.map((ocurrence : Ocorrencia) => [
             ocurrence.newHorario || '',
             ocurrence.newTermino || '',
             ocurrence.local || '',
