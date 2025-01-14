@@ -94,6 +94,7 @@ Table ocorrencias {
   descricao String
   horario DateTime
   termino DateTime
+  data DateTime
   local String
   observacao String
   acao String

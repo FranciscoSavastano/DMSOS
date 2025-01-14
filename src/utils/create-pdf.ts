@@ -161,13 +161,16 @@ export async function CreatePdf(duty: any) {
     const ocurrence = ocurrences.map((ocurrence) => {
       const formattedDateStart = moment.utc(ocurrence.horario).format('HH:mm')
       const formattedDateEnd = moment.utc(ocurrence.termino).format('HH:mm')
+      const formattedData = moment.utc(ocurrence.data).format('DD/MM/YYYY')
       return {
         ...ocurrence,
         newHorario: formattedDateStart,
         newTermino: formattedDateEnd,
+        newData: formattedData,
       }
     })
     const dataformatada = formatarData(duty.created_at)
+
     const periodo = determinePeriod(duty.created_at)
     const tempDescFilePath = path.join(__dirname, 'temp_anexpath_desc.txt')
     const tempFilePath = path.join(__dirname, 'temp_anexpath.txt')
@@ -255,7 +258,7 @@ export async function CreatePdf(duty: any) {
     if (descriptions.length == 0) {
       console.log('Nao exitem descrições')
     }
-    
+
     if (uploadedFileData.length > 0) {
       doc.addPage()
       doc
@@ -279,7 +282,6 @@ export async function CreatePdf(duty: any) {
         const imagedesc = imagesdescription[index]
         // Add the image to the PDF
 
-        
         doc.image(imageBuffer, x, y, { width: 150, height: 150 })
         doc.rect(x, y + 150, 150, 70).fill('#007bff') // Adjust the color as needed
         // Add text within the rectangle
@@ -306,35 +308,75 @@ export async function CreatePdf(duty: any) {
       })
     }
     //POLICIA MILITAR
-    if(contract === "Lead Americas"){
-      if (ocurrence) {
+    if (contract === 'Lead Américas') {
+      const rondasTable: {
+        title: string
+        headers: string[]
+        rows: string[][]
+      } = {
+        title: 'RONDA',
+        headers: [
+          'HORÁRIO INICIO',
+          'HORÁRIO TERMINO',
+          'LOCAL',
+          'RESPONSÁVEL',
+          'OBSERVAÇÃO',
+        ],
+        rows: [],
+      }
+
+      const limpezaTable: {
+        title: string
+        headers: string[]
+        rows: string[][]
+      } = {
+        title: 'LIMPEZA',
+        headers: ['HORÁRIO', 'LOCAL', 'DATA'],
+        rows: [],
+      }
+
+      for (const occurrence of ocurrence) {
+        if (occurrence.ocurrence_type === 'Limpeza') {
+          limpezaTable.rows.push([
+            occurrence.newHorario || '',
+            occurrence.local || '',
+            occurrence.newData || '',
+          ])
+        } else {
+          rondasTable.rows.push([
+            occurrence.newHorario || '',
+            occurrence.newTermino || '',
+            occurrence.local || '',
+            occurrence.responsavel || '',
+            occurrence.observacao || '',
+          ])
+        }
+      }
+
+      if (rondasTable.rows.length > 0) {
         doc.addPage()
         doc
           .fontSize(32)
           .fill('#001233')
-          .text('RONDAS', { align: 'center' })
-        const table: {
-          title: string
-          headers: string[]
-          rows: string[][]
-        } = {
-          title: 'RONDA',
-          headers: ['HORÁRIO INICIO', 'HORÁRIO TERMINO', 'LOCAL', 'RESPONSÁVEL', 'OBSERVAÇÃO'],
-          rows: ocurrence.map((ocurrence : Ocorrencia) => [
-            ocurrence.newHorario || '',
-            ocurrence.newTermino || '',
-            ocurrence.local || '',
-            ocurrence.responsavel || '',
-            ocurrence.observacao || '',
-          ]),
-        }
-        await doc.table(table, {
-          width: 500, // Adjust the width as needed
-          // Other table options, like font size, colors, etc.
+          .text('RONDAS NO EMPREENDIMENTO', { align: 'center' })
+        await doc.table(rondasTable, {
+          width: 500,
+          // Other table options
         })
       }
-    }
-    else {
+
+      if (limpezaTable.rows.length > 0) {
+        doc.addPage()
+        doc
+          .fontSize(32)
+          .fill('#001233')
+          .text('LIMPEZA E CONSERVAÇÃO', { align: 'center' })
+        await doc.table(limpezaTable, {
+          width: 500,
+          // Other table options
+        })
+      }
+    } else {
       if (ocurrence) {
         doc.addPage()
         doc
