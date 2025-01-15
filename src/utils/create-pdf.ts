@@ -415,7 +415,7 @@ export async function CreatePdf(duty: any) {
       height: 50,
       width: 120,
     })
-    
+
     //Finalize o arquivo e salve na pasta
     const filedate = formatDateForFilename(data)
     console.log('Criado')

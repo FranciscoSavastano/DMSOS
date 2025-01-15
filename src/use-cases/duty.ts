@@ -62,7 +62,7 @@ export class CreateDutyUseCase {
             id: duty.id,
           },
         },
-        
+
         descricao: ocorrencia.ocorrencia_desc,
         horario: ocorrencia.ocorrencia_horario,
         termino: ocorrencia.ocorrencia_termino,

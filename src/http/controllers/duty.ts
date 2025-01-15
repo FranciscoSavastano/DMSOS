@@ -17,7 +17,7 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
     ocorrencia_tipo: z.string().optional(),
     ocorrencia_data: z.string().datetime().optional(),
   })
-  
+
   const registerBodySchema = z
     .object({
       operador: z.string(),
@@ -31,7 +31,7 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
       ocurrence: z.array(occurrenceSchema).optional(),
     })
     .parse(request.body)
-  
+
   const {
     operador,
     operadoresNome,
@@ -53,6 +53,7 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
       horario_rf,
       ocurrence,
       consideracoes,
+      additionalInfo,
     })
     CreatePdf(duty)
     return await reply.status(201).send({ duty, ocurrences })
