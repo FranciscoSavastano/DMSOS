@@ -10,6 +10,7 @@ interface RegisterUseCaseRequest {
   contrato: string
   imagens: unknown
   ocurrence: Ocorrencia[]
+  informacoes_adicionais: string[]
 }
 interface Ocorrencia {
   descricao: string | null
@@ -38,6 +39,7 @@ export class CreateDutyUseCase {
     contrato,
     ocurrence,
     consideracoes,
+    informacoes_adicionais,
   }: RegisterUseCaseRequest): Promise<RegisterUseCaseResponse> {
     const ocurrences = []
     const duty = await this.dutyRepository.create({

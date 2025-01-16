@@ -98,6 +98,7 @@ model Plantao {
   horario_rf            DateTime
   contrato              String
   ocorrencia            Ocorrencia[]
+  informacoes_adicionais String[]
   consideracoes         String      @default("")
   created_at            DateTime    @default(now())
   updated_at            DateTime    @updatedAt
