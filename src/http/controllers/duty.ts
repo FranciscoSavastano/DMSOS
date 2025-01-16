@@ -29,7 +29,7 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
       horario_rf: z.string().datetime(),
       imagens: z.any(),
       ocurrence: z.array(occurrenceSchema).optional(),
-      informacoes_adicionais: z.string().array()
+      informacoes_adicionais: z.string().array(),
     })
     .parse(request.body)
 
@@ -55,7 +55,7 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
       horario_rf,
       ocurrence,
       consideracoes,
-      informacoes_adicionais
+      informacoes_adicionais,
     })
     CreatePdf(duty)
     return await reply.status(201).send({ duty, ocurrences })
