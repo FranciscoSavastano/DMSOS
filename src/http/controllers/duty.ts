@@ -14,7 +14,10 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
     ocorrencia_responsavel: z.string().optional(),
     ocorrencia_observacao: z.string().optional(),
     ocorrencia_acao: z.string().optional(),
+    ocorrencia_tipo: z.string().optional(),
+    ocorrencia_data: z.string().datetime().optional(),
   })
+
   const registerBodySchema = z
     .object({
       operador: z.string(),
@@ -29,7 +32,7 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
       informacoes_adicionais: z.string().array()
     })
     .parse(request.body)
-  
+
   const {
     operador,
     operadoresNome,
@@ -43,7 +46,6 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
   } = registerBodySchema
   try {
     const registerDutyCase = makeCreateDutyUseCase()
-
     const { duty, ocurrences } = await registerDutyCase.execute({
       operador,
       operadoresNome,

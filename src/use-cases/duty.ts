@@ -13,6 +13,7 @@ interface RegisterUseCaseRequest {
   informacoes_adicionais: string[]
 }
 interface Ocorrencia {
+  data: Date | null
   descricao: string | null
   horario: Date | null
   termino: Date | null
@@ -56,6 +57,7 @@ export class CreateDutyUseCase {
       consideracoes,
     })
     for (const ocorrencia of ocurrence) {
+      console.log(ocorrencia.data)
       const newOccurrence = await this.dutyRepository.createOcurrence({
         plantao: {
           connect: {
@@ -70,7 +72,8 @@ export class CreateDutyUseCase {
         responsavel: ocorrencia.ocorrencia_responsavel,
         observacao: ocorrencia.ocorrencia_observacao,
         acao: ocorrencia.ocorrencia_acao,
-        ocurrence_type: ocorrencia.ocorrencia_ocurrence_type,
+        ocurrence_type: ocorrencia.ocorrencia_tipo,
+        data: ocorrencia.data,
       })
 
       ocurrences.push(newOccurrence)

@@ -31,8 +31,8 @@ export async function sendEmail({
     text: message,
     html,
   }
-  console.log("Sending")
+  console.log('Sending')
   const email = await transporter.sendMail(emailOptions)
   console.log(email)
-  return 
+  return
 }

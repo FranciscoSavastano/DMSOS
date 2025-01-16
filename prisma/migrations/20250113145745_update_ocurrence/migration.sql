@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "ocorrencias" ADD COLUMN     "data" TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP;

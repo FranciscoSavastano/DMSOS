@@ -118,7 +118,8 @@ model Ocorrencia {
   ocurrence_type        String      @default("Padrao")
   descricao             String?      
   horario            DateTime?
-  termino            DateTime?    
+  termino            DateTime?
+  data               DateTime?  
   local              String?     
   observacao         String?     
   acao               String?
