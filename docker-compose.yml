@@ -1,9 +1,7 @@
-
-
 services:
   db:
     image: bitnami/postgresql:16
-    restart: always
+    restart: on-failure:10
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -17,6 +15,7 @@ services:
     build: .
     depends_on:
       - db
+    restart: on-failure:10
     environment:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/backend
       # Other environment variables
@@ -26,4 +25,3 @@ services:
 volumes:
   db:
     driver: local
-    
