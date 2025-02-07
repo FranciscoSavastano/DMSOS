@@ -26,6 +26,7 @@ model User {
   password_digest       String
   is_admin              Boolean   @default(false)
   tentativas_de_login   Int       @default(0)
+  is_new              Boolean     @default(true)
   last_login            DateTime?
   created_at            DateTime  @default(now())
   updated_at            DateTime  @updatedAt
@@ -45,6 +46,7 @@ model Cliente {
   password_digest String      @default("")
   endereco        String      @default("")
   cnpj            String      @unique
+  is_new          Boolean     @default(true)
   tentativas_de_login   Int       @default(0)
   has_cftv        Boolean     @default(false)
   last_login            DateTime?

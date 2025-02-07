@@ -4,8 +4,10 @@ import path from 'path'
 import moment from 'moment-timezone'
 import { prisma } from '@/lib/prisma'
 import { FastifyRequest, FastifyReply, FastifyPluginAsync } from 'fastify'
+import { fastifyMultipart } from '@fastify/multipart'
 import { Ocorrencia } from '@prisma/client'
-
+import { FastifyMultipartRequest } from '@fastify/multipart'
+import { test } from 'vitest'
 var canwrite = false
 var PDFtable = require('pdfkit-table')
 
@@ -14,6 +16,7 @@ let imageWritePromise: Promise<unknown>
 let descWritePromise: Promise<unknown>
 let archpath: string
 let startTime: number
+let unionTableEntries = []
 var wait = false
 var created = false
 export function startWait(): number {
@@ -35,6 +38,7 @@ let lockAcquired = false
 let uploadPromise: Promise<unknown>
 let descriptionPromise: Promise<unknown>
 let state = 0
+
 export async function initWrite(
   request: FastifyRequest,
   reply: FastifyReply,
@@ -76,7 +80,6 @@ export async function initWrite(
     try {
       let index = 0
       for await (const file of files) {
-        console.log(index)
         const buffer = await new Promise<Buffer>((resolve, reject) => {
           const chunks = []
           file.file.on('data', (chunk) => chunks.push(chunk))
@@ -98,6 +101,59 @@ export async function initWrite(
   state++ // deve ser 2
   lockAcquired = false
   return reply.send({ message: 'Files uploaded successfully' })
+}
+
+export async function writeRondasUnion(
+  request: FastifyMultipartRequest,
+  reply: FastifyReply,
+) {
+  try {
+    const parts = await request.files()
+
+    const unionTableEntries: any[] = []
+
+    for await (const part of parts) {
+      if (part.file) {
+        const { fieldname, filename, mimetype, data } = part
+        console.log(part.fields['observation[0]'].value)
+        const imageRegex = /images\[\d+\]\[\d+\]/
+        console.log(data)
+        console.log(imageRegex.test(fieldname))
+        if (imageRegex.test(fieldname)) {
+          const matches = fieldname.match(/images\[\d+\]\[\d+\]/)
+          const rowIndex = parseInt(matches[1])
+
+          const imageIndex = parseInt(matches[2])
+
+          if (!unionTableEntries[rowIndex]) {
+            unionTableEntries[rowIndex] = {
+              time: part.fields['time[0]'].value,
+              bloco: part.fields['bloco[0]'].value,
+              observation: part.fields['observation[0]'].value,
+              images: [],
+            }
+          }
+
+          unionTableEntries[rowIndex].images.push({
+            filename: filename,
+            mimetype: mimetype,
+            data: data.toString('base64'),
+          })
+        }
+      }
+      console.log(unionTableEntries)
+    }
+
+    // Handle unionTableEntries (e.g., store in database, generate PDF)
+    // ...
+
+    return reply
+      .status(201)
+      .send({ message: 'Rondas Union data processed successfully.' })
+  } catch (error) {
+    console.error('Error processing Rondas Union data:', error)
+    return reply.status(500).send({ message: 'Internal server error.' })
+  }
 }
 export async function writeDesc(request: FastifyRequest, reply: FastifyReply) {
   state++ // deve ser 3

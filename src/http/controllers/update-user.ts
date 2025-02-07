@@ -10,6 +10,7 @@ export async function updateUser(request: FastifyRequest, reply: FastifyReply) {
       id: z.string(),
       nome: z.string().optional(),
       cpf: z.string().optional(),
+      password: z.string().optional(),
       is_admin: z.boolean().optional(),
       user_role: z.string().optional(),
     })
