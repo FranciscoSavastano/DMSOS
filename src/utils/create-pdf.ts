@@ -108,48 +108,58 @@ export async function writeRondasUnion(
   reply: FastifyReply,
 ) {
   try {
-    const parts = await request.files()
+    const parts = await request.parts()
 
-    const unionTableEntries: any[] = []
+    const formData: Record<string, any> = {}
+    const images: any[] = []
 
     for await (const part of parts) {
-      if (part.file) {
-        const { fieldname, filename, mimetype, data } = part
-        console.log(part.fields['observation[0]'].value)
-        const imageRegex = /images\[\d+\]\[\d+\]/
-        console.log(data)
-        console.log(imageRegex.test(fieldname))
-        if (imageRegex.test(fieldname)) {
-          const matches = fieldname.match(/images\[\d+\]\[\d+\]/)
-          const rowIndex = parseInt(matches[1])
-
-          const imageIndex = parseInt(matches[2])
-
-          if (!unionTableEntries[rowIndex]) {
-            unionTableEntries[rowIndex] = {
-              time: part.fields['time[0]'].value,
-              bloco: part.fields['bloco[0]'].value,
-              observation: part.fields['observation[0]'].value,
-              images: [],
+      if (part.type === 'file') {
+        // Handle file parts
+        const buffer = await part.toBuffer()
+        images.push({
+          filename: part.filename,
+          mimetype: part.mimetype,
+          data: buffer.toString('base64'),
+        })
+      } else {
+        // Handle field parts
+        const key = part.fieldname
+        const value = part.value
+        if (
+          key.startsWith('time[') ||
+          key.startsWith('bloco[') ||
+          key.startsWith('observation[')
+        ) {
+          const match = key.match(/\[(\d+)\]/)
+          if (match) {
+            const index = parseInt(match[1])
+            const fieldName = key.split('[')[0]
+            if (!formData[index]) {
+              formData[index] = {}
             }
+            formData[index][fieldName] = value
           }
-
-          unionTableEntries[rowIndex].images.push({
-            filename: filename,
-            mimetype: mimetype,
-            data: data.toString('base64'),
-          })
         }
       }
-      console.log(unionTableEntries)
     }
 
-    // Handle unionTableEntries (e.g., store in database, generate PDF)
-    // ...
+    // Combine form data and images
+    unionTableEntries = Object.entries(formData).map(
+      ([index, data]: [string, any]) => ({
+        time: data.time,
+        bloco: data.bloco,
+        observation: data.observation,
+        images: images,
+      }),
+    )
 
-    return reply
-      .status(201)
-      .send({ message: 'Rondas Union data processed successfully.' })
+    console.log('Processed entries:', unionTableEntries)
+
+    return reply.status(201).send({
+      message: 'Rondas Union data processed successfully.',
+      data: unionTableEntries,
+    })
   } catch (error) {
     console.error('Error processing Rondas Union data:', error)
     return reply.status(500).send({ message: 'Internal server error.' })
@@ -303,7 +313,7 @@ export async function CreatePdf(duty: any) {
     doc.image(images.bordercover, 0, 122, { width: 90, height: 720 })
     const objectivetext =
       'Este documento tem por objetivo apresentar, documentar e registrar todas as ocorrências, posturas e anomalias na operação diária do condomínio analisadas através do monitoramento das câmeras de vigilância (CFTV).'
-    doc.fontSize(32).fill('#001233').text('OBJETIVO', { align: 'center' })
+    doc.fontSize(28).fill('#001233').text('OBJETIVO', { align: 'center' })
     doc
       .fontSize(15)
       .fill('#001233')
@@ -318,7 +328,7 @@ export async function CreatePdf(duty: any) {
     if (uploadedFileData.length > 0) {
       doc.addPage()
       doc
-        .fontSize(32)
+        .fontSize(28)
         .fill('#001233')
         .text('RELATÓRIO FOTOGRÁFICO', 40, 30, { align: 'center' })
 
@@ -355,7 +365,7 @@ export async function CreatePdf(duty: any) {
         if ((index + 1) % 9 === 0) {
           doc.addPage()
           doc
-            .fontSize(32)
+            .fontSize(28)
             .fill('#001233')
             .text('RELATÓRIO FOTOGRÁFICO', 40, 30, { align: 'center' })
           x = imageMargin
@@ -412,7 +422,7 @@ export async function CreatePdf(duty: any) {
       if (rondasTable.rows.length > 0) {
         doc.addPage()
         doc
-          .fontSize(32)
+          .fontSize(28)
           .fill('#001233')
           .text('RONDAS NO EMPREENDIMENTO', { align: 'center' })
         await doc.table(rondasTable, {
@@ -424,7 +434,7 @@ export async function CreatePdf(duty: any) {
       if (limpezaTable.rows.length > 0) {
         doc.addPage()
         doc
-          .fontSize(32)
+          .fontSize(28)
           .fill('#001233')
           .text('LIMPEZA E CONSERVAÇÃO', { align: 'center' })
         await doc.table(limpezaTable, {
@@ -432,35 +442,150 @@ export async function CreatePdf(duty: any) {
           // Other table options
         })
       }
-    } else {
-      if (ocurrence) {
-        doc.addPage()
-        doc
-          .fontSize(32)
-          .fill('#001233')
-          .text('POLICIA MILITAR', { align: 'center' })
-        const table: {
-          title: string
-          headers: string[]
-          rows: string[][]
-        } = {
-          title: 'OCORRENCIAS',
-          headers: ['HORÁRIO', 'LOCAL', 'OBSERVAÇÃO'],
-          rows: ocurrence.map((ocurrence) => [
-            ocurrence.newHorario || '',
-            ocurrence.local || '',
-            ocurrence.observacao || '',
-          ]),
+    }
+
+    if (contract === 'Union Square') {
+      // Constants for layout
+      const imageMargin = 20
+      const imageWidth = 90
+
+      // Group entries by bloco
+      const entriesByBloco = unionTableEntries.reduce((acc, entry) => {
+        const blocoKey = entry.bloco
+        if (!acc[blocoKey]) {
+          acc[blocoKey] = []
         }
-        await doc.table(table, {
-          width: 500, // Adjust the width as needed
-          // Other table options, like font size, colors, etc.
-        })
+        acc[blocoKey].push(entry)
+        return acc
+      }, {})
+
+      // Sort entries by time within each bloco
+      Object.values(entriesByBloco).forEach((entries) => {
+        entries.sort(
+          (a, b) => new Date(a.time).getTime() - new Date(b.time).getTime(),
+        )
+      })
+
+      // Process each bloco
+      let isFirstPage = true
+      for (const [bloco, entries] of Object.entries(entriesByBloco)) {
+        // Get bloco number from the string (e.g., "bloco1" -> "1")
+        const blocoNumber = bloco.replace(/\D/g, '')
+
+        let imagelength = 0
+        // Add new page (except for first page)
+        for (const entry of entries) {
+          imagelength += entry.images.length
+        }   
+        if(imagelength > 0){
+        doc.addPage()
+
+        // Initialize positioning for images
+        let x = imageMargin
+        let y = imageWidth
+
+        // Add page title
+        doc
+          .fontSize(28)
+          .fill('#001233')
+          .text(`RELATORIO FOTOGRAFICO BL${blocoNumber}`, 40, 30, {
+            align: 'center',
+          })
+
+        // Process all images from entries
+        let imageIndex = 0
+
+        for (const entry of entries) {
+          if (entry.images && entry.images.length > 0) {
+            for (const image of entry.images) {
+              // Create image description
+              
+              let timeStr = entry.time.toString()
+              timeStr = timeStr.split("Z")
+              let imageDesc
+              if(entry.observation){
+              imageDesc = `${timeStr[0]}: ${entry.observation}`
+              }
+              else{
+                imageDesc = timeStr[0]
+              }
+
+              // Check if we need a new page
+              if (imageIndex > 0 && imageIndex % 9 === 0) {
+                doc.addPage()
+                doc
+                  .fontSize(28)
+                  .fill('#001233')
+                  .text(`RELATORIO FOTOGRAFICO BL${blocoNumber}`, 40, 30, {
+                    align: 'center',
+                  })
+                x = imageMargin
+                y = imageWidth
+              }
+
+              try {
+                // Convert base64 to Buffer
+                const imageBuffer = Buffer.from(image.data, 'base64')
+
+                // Add image
+                doc.image(imageBuffer, x, y, { width: 150, height: 150 })
+
+                // Add blue rectangle with description
+                doc.rect(x, y + 150, 150, 70).fill('#007bff')
+
+                // Add description text
+                doc
+                  .fontSize(10)
+                  .fill('#fff')
+                  .text(imageDesc, x + 5, y + 155, { width: 140 })
+
+                // Update positioning
+                x += 200
+
+                // Move to next row if needed
+                if (imageIndex !== 0 && (imageIndex + 1) % 3 === 0) {
+                  x = imageMargin
+                  y += 230
+                }
+
+                imageIndex++
+              } catch (error) {
+                console.error('Error adding image to PDF:', error)
+                continue
+              }
+            }
+          }
+        }
+        }
       }
+    }
+    if (contract === 'Centro Metropolitano') {
+      doc.addPage()
+      doc
+        .fontSize(28)
+        .fill('#001233')
+        .text('POLICIA MILITAR', { align: 'center' })
+      const table: {
+        title: string
+        headers: string[]
+        rows: string[][]
+      } = {
+        title: 'OCORRENCIAS',
+        headers: ['HORÁRIO', 'LOCAL', 'OBSERVAÇÃO'],
+        rows: ocurrence.map((ocurrence) => [
+          ocurrence.newHorario || '',
+          ocurrence.local || '',
+          ocurrence.observacao || '',
+        ]),
+      }
+      await doc.table(table, {
+        width: 500, // Adjust the width as needed
+        // Other table options, like font size, colors, etc.
+      })
     }
     doc.addPage()
     doc
-      .fontSize(32)
+      .fontSize(28)
       .fill('#001233')
       .text('CONSIDERACOES FINAIS', { align: 'center' })
     doc.rect(0, doc.y, doc.page.width, 50).fill('#fff')
@@ -490,7 +615,7 @@ export async function CreatePdf(duty: any) {
         doc.end()
       })
     }
-
+    unionTableEntries = []
     await generatePdf(doc, filePath)
     doc.end()
     archpath = `${gendocsPath}/Relatorio ${contract} ${filedate} ${dutyid}.pdf`
