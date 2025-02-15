@@ -21,11 +21,11 @@ export async function refreshToken(
     {
       sign: {
         sub: (request.user as { sub: string }).sub,
-        expiresIn: '7d',
       },
+      decoratorName: 'refreshToken', // This allows different settings
+      expiresIn: '12h'
     },
   )
-
   return await reply
     .setCookie('refreshToken', refreshToken, {
       path: '/',

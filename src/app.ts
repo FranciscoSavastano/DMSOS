@@ -42,8 +42,9 @@ app.register(fastifyJwt, {
     signed: false,
   },
   sign: {
-    expiresIn: '30m',
+    expiresIn: '12h', // Default for access tokens
   },
+  decode: { complete: true },
 })
 app.register(multipart)
 app.register(fastifyCookie)

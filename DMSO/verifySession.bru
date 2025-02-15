@@ -1,0 +1,15 @@
+meta {
+  name: verifySession
+  type: http
+  seq: 27
+}
+
+get {
+  url: 127.0.0.1:3333/sessions/verify
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMTA1NDYzZC0wM2FhLTRjNWYtYjRkMC1lYWNjYWQ4NDcyNzkiLCJpYXQiOjE3Mzk1NDY1MzEsImV4cCI6MTczOTU1MDEzMX0.k4XdH9SKe1cQc2r8xB9YD7utd1oswiFwVABKNpSz9lc
+}

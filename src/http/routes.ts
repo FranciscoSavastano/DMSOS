@@ -27,6 +27,7 @@ import { registerCust } from './controllers/register-cust'
 import { readAllCust } from './controllers/read-all-customers'
 import { fetchCustomerNames } from './controllers/read-all-customer-names'
 import { gptCorrection } from './controllers/gpt-helper'
+import { verifySession } from './controllers/verify-session'
 
 export async function appRoutes(app: FastifyInstance) {
   //Users
@@ -84,4 +85,6 @@ export async function appRoutes(app: FastifyInstance) {
   app.get('/download', sendPdf)
 
   app.get('/gpthelper', gptCorrection)
+
+  app.get('/sessions/verify', verifySession)
 }

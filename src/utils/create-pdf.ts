@@ -559,6 +559,7 @@ export async function CreatePdf(duty: any) {
         }
       }
     }
+    
     if (contract === 'Centro Metropolitano') {
       doc.addPage()
       doc
