@@ -23,7 +23,7 @@ export async function refreshToken(
         sub: (request.user as { sub: string }).sub,
       },
       decoratorName: 'refreshToken', // This allows different settings
-      expiresIn: '12h'
+      expiresIn: '12h',
     },
   )
   return await reply

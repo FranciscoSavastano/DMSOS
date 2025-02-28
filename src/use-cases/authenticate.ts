@@ -1,4 +1,5 @@
 import type { UsersRepository } from '@/repositories/users-repository'
+import type { CustomerRepository } from '@/repositories/customers-repository'
 import type { User } from '@prisma/client'
 import { InvalidCredentialsError } from './errors/invalid-credentials-error'
 import { compare } from 'bcryptjs'
@@ -20,6 +21,7 @@ export class AuthenticateUseCase {
   constructor(
     private readonly usersRepository: UsersRepository,
     private readonly authenticationAuditRepository: AuthenticationAuditRepository,
+    private readonly custRepository: CustomerRepository,
   ) {}
 
   async execute({
@@ -29,8 +31,11 @@ export class AuthenticateUseCase {
     ipAddress,
     remotePort,
   }: AuthenticateUseCaseRequest): Promise<AuthenticateUseCaseResponse> {
-    const user = await this.usersRepository.findByEmail(email)
-
+    let user
+    user = await this.usersRepository.findByEmail(email)
+    if(!user){
+      user = await this.custRepository.findByEmail(email)
+    }
     const auditAuthenticateObject = {
       browser: browser ?? null,
       ip_address: ipAddress ?? null,

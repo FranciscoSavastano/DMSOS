@@ -8,11 +8,7 @@ interface VerifySessionUseCaseRequest {
 }
 
 export class VerifySessionUseCase {
-
-  async execute({
-    bearerAuth,
-
-  }: VerifySessionUseCaseRequest): Promise<any> {
+  async execute({ bearerAuth }: VerifySessionUseCaseRequest): Promise<any> {
     const token = bearerAuth.split(' ')[1]
     let token_payload: { sub: string }
 
@@ -22,6 +18,5 @@ export class VerifySessionUseCase {
     } catch (error) {
       throw new InvalidJwtTokenError()
     }
-    }
-    
+  }
 }

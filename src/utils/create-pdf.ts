@@ -476,90 +476,89 @@ export async function CreatePdf(duty: any) {
         // Add new page (except for first page)
         for (const entry of entries) {
           imagelength += entry.images.length
-        }   
-        if(imagelength > 0){
-        doc.addPage()
+        }
+        if (imagelength > 0) {
+          doc.addPage()
 
-        // Initialize positioning for images
-        let x = imageMargin
-        let y = imageWidth
+          // Initialize positioning for images
+          let x = imageMargin
+          let y = imageWidth
 
-        // Add page title
-        doc
-          .fontSize(28)
-          .fill('#001233')
-          .text(`RELATORIO FOTOGRAFICO BL${blocoNumber}`, 40, 30, {
-            align: 'center',
-          })
+          // Add page title
+          doc
+            .fontSize(28)
+            .fill('#001233')
+            .text(`RELATORIO FOTOGRAFICO BL${blocoNumber}`, 40, 30, {
+              align: 'center',
+            })
 
-        // Process all images from entries
-        let imageIndex = 0
+          // Process all images from entries
+          let imageIndex = 0
 
-        for (const entry of entries) {
-          if (entry.images && entry.images.length > 0) {
-            for (const image of entry.images) {
-              // Create image description
-              
-              let timeStr = entry.time.toString()
-              timeStr = timeStr.split("Z")
-              let imageDesc
-              if(entry.observation){
-              imageDesc = `${timeStr[0]}: ${entry.observation}`
-              }
-              else{
-                imageDesc = timeStr[0]
-              }
+          for (const entry of entries) {
+            if (entry.images && entry.images.length > 0) {
+              for (const image of entry.images) {
+                // Create image description
 
-              // Check if we need a new page
-              if (imageIndex > 0 && imageIndex % 9 === 0) {
-                doc.addPage()
-                doc
-                  .fontSize(28)
-                  .fill('#001233')
-                  .text(`RELATORIO FOTOGRAFICO BL${blocoNumber}`, 40, 30, {
-                    align: 'center',
-                  })
-                x = imageMargin
-                y = imageWidth
-              }
-
-              try {
-                // Convert base64 to Buffer
-                const imageBuffer = Buffer.from(image.data, 'base64')
-
-                // Add image
-                doc.image(imageBuffer, x, y, { width: 150, height: 150 })
-
-                // Add blue rectangle with description
-                doc.rect(x, y + 150, 150, 70).fill('#007bff')
-
-                // Add description text
-                doc
-                  .fontSize(10)
-                  .fill('#fff')
-                  .text(imageDesc, x + 5, y + 155, { width: 140 })
-
-                // Update positioning
-                x += 200
-
-                // Move to next row if needed
-                if (imageIndex !== 0 && (imageIndex + 1) % 3 === 0) {
-                  x = imageMargin
-                  y += 230
+                let timeStr = entry.time.toString()
+                timeStr = timeStr.split('Z')
+                let imageDesc
+                if (entry.observation) {
+                  imageDesc = `${timeStr[0]}: ${entry.observation}`
+                } else {
+                  imageDesc = timeStr[0]
                 }
 
-                imageIndex++
-              } catch (error) {
-                console.error('Error adding image to PDF:', error)
-                continue
+                // Check if we need a new page
+                if (imageIndex > 0 && imageIndex % 9 === 0) {
+                  doc.addPage()
+                  doc
+                    .fontSize(28)
+                    .fill('#001233')
+                    .text(`RELATORIO FOTOGRAFICO BL${blocoNumber}`, 40, 30, {
+                      align: 'center',
+                    })
+                  x = imageMargin
+                  y = imageWidth
+                }
+
+                try {
+                  // Convert base64 to Buffer
+                  const imageBuffer = Buffer.from(image.data, 'base64')
+
+                  // Add image
+                  doc.image(imageBuffer, x, y, { width: 150, height: 150 })
+
+                  // Add blue rectangle with description
+                  doc.rect(x, y + 150, 150, 70).fill('#007bff')
+
+                  // Add description text
+                  doc
+                    .fontSize(10)
+                    .fill('#fff')
+                    .text(imageDesc, x + 5, y + 155, { width: 140 })
+
+                  // Update positioning
+                  x += 200
+
+                  // Move to next row if needed
+                  if (imageIndex !== 0 && (imageIndex + 1) % 3 === 0) {
+                    x = imageMargin
+                    y += 230
+                  }
+
+                  imageIndex++
+                } catch (error) {
+                  console.error('Error adding image to PDF:', error)
+                  continue
+                }
               }
             }
           }
         }
-        }
       }
     }
-    
+
     if (contract === 'Centro Metropolitano') {
       doc.addPage()
       doc

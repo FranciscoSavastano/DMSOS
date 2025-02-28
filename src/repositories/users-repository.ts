@@ -5,6 +5,7 @@ export interface IUpdateUser {
   id: string
   data: {
     cpf?: string
+    password_digest: string
     nome?: string
     is_admin?: boolean
     user_role?: string

@@ -74,7 +74,7 @@ Table plantoes {
   horario_rf DateTime [not null]
   contrato String [not null]
   ocorrencia ocorrencias [not null]
-  informacoes_adicionais String[] [not null]
+  informacoes_adicionais Json[] [not null]
   consideracoes String [not null, default: '']
   created_at DateTime [default: `now()`, not null]
   updated_at DateTime [not null]

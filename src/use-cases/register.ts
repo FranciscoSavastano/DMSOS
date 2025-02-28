@@ -10,6 +10,7 @@ import { invalid } from 'moment-timezone'
 import { InvalidCpf } from './errors/invalid-cpf'
 import { InvalidCnpj } from './errors/invalid-cnpj'
 import { NOMEM } from 'dns'
+import { PrismaUsersRepository } from '@/repositories/prisma/prisma-users-repository'
 
 interface RegisterUseCaseRequest {
   nome: string
@@ -98,7 +99,10 @@ export class RegisterUseCase {
 }
 
 export class RegisterCustUseCase {
-  constructor(private readonly customerRepository: CustomerRepository) {}
+  constructor(
+    private readonly customerRepository: CustomerRepository,
+  ) {}
+
   async execute({
     nome,
     responsavel,
@@ -108,11 +112,17 @@ export class RegisterCustUseCase {
     cnpj,
     has_cftv,
   }: RegisterUseCaseCustRequest): Promise<RegisterUseCaseCustResponse> {
-    const userWithSameEmail = await this.customerRepository.findByEmail(email)
+    const custWithSameEmail = await this.customerRepository.findByEmail(email)
     const userWithSameCnpj = await this.customerRepository.findByCnpj(cnpj)
-    if (userWithSameEmail != null) {
+
+    if (custWithSameEmail != null) {
       throw new CustomerAlreadyExistsError()
     }
+
+    //if (userWithSameEmail != null) {
+    //  throw new UserAlreadyExistsError()
+    //}
+
     if (userWithSameCnpj != null) {
       throw new CustomerCnpjAlreadyExistsError()
     }
@@ -170,6 +180,7 @@ export class RegisterCustUseCase {
       password_digest: passwordDigest,
       has_cftv,
     })
+    
     return {
       user,
     }
