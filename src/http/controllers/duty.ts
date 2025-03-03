@@ -29,7 +29,7 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
       horario_rf: z.string().datetime(),
       imagens: z.any(),
       ocurrence: z.array(occurrenceSchema).optional(),
-      informacoes_adicionais: z.string().array().optional(),
+      informacoes_adicionais: z.any().optional()
     })
     .parse(request.body)
 

@@ -55,6 +55,7 @@ export class CreateDutyUseCase {
       horario_rf,
       contrato,
       consideracoes,
+      informacoes_adicionais,
     })
     for (const ocorrencia of ocurrence) {
       
