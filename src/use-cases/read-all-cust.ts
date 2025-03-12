@@ -1,6 +1,6 @@
 import { verify } from 'jsonwebtoken'
 import env from '@/config/env'
-import { InvalidJwtTokenError } from '../errors/invalid-jwt-token-error'
+import { InvalidJwtTokenError } from './errors/invalid-jwt-token-error'
 import type { CustsRepository } from '@/repositories/custs-repository'
 import type { Cust } from '@prisma/client'
 

@@ -15,6 +15,7 @@ let pdfCreationPromise: Promise<unknown>
 let imageWritePromise: Promise<unknown>
 let descWritePromise: Promise<unknown>
 let archpath: string
+let altarchpath: string
 let startTime: number
 let unionTableEntries = []
 var wait = false
@@ -218,6 +219,8 @@ export async function CreatePdf(duty: any) {
     })
     const data = duty.created_at
     const contract = duty.contrato
+    const addinfo = duty.informacoes_adicionais
+    console.log(addinfo)
     const dutyid = duty.id
     const ocurrences = await prisma.ocorrencia.findMany({
       where: {
@@ -432,7 +435,7 @@ export async function CreatePdf(duty: any) {
       }
 
       if (limpezaTable.rows.length > 0) {
-        doc.addPage()
+        doc.moveDown(15)
         doc
           .fontSize(28)
           .fill('#001233')
@@ -443,6 +446,27 @@ export async function CreatePdf(duty: any) {
         })
       }
     }
+    const elevadorTable: {
+      title: string
+      headers: string[]
+      rows: string[][]
+    } = {
+      title: 'CHECKLIST ELEVADORES',
+      headers: ['ELEVADOR', 'BLOCO', 'CLASSE', 'STATUS', 'INTERFONE', 'CÂMERAS', 'OBSERVAÇÃO'],
+      rows: [],
+    }
+    for (const elevador of addinfo) {
+      elevadorTable.rows.push([elevador])
+      console.log(elevador)
+    }
+    doc.addPage()
+    doc
+          .fontSize(28)
+          .fill('#001233')
+          .text('LIMPEZA E CONSERVAÇÃO', { align: 'center' })
+    await doc.table(elevadorTable, {
+      width: 500,
+    })
 
     if (contract === 'Union Square') {
       // Constants for layout
@@ -607,6 +631,7 @@ export async function CreatePdf(duty: any) {
     }
     //Salve o arquivo com um nome dinamico
     const filePath = `${gendocsPath}/Relatorio ${contract} ${filedate} ${dutyid}.pdf`
+    altarchpath = `/src/utils/gendocs/Relatorio ${contract} ${filedate} ${dutyid}.pdf`
     const generatePdf = async (doc, filePath): Promise<void> => {
       return new Promise<void>((resolve, reject) => {
         doc.pipe(fs.createWriteStream(filePath))
@@ -619,6 +644,7 @@ export async function CreatePdf(duty: any) {
     await generatePdf(doc, filePath)
     doc.end()
     archpath = `${gendocsPath}/Relatorio ${contract} ${filedate} ${dutyid}.pdf`
+    
     //Delete os arquivos temporarios, se não houver, descreva no console
     resolve()
   })
@@ -648,10 +674,11 @@ export async function sendPdf(request: FastifyRequest, reply: FastifyReply) {
       }
     }
     // Send the file
-    const newfilepath = archpath.split('/').pop()
+    let newfilepath = archpath.split('/').pop()
     lockAcquired = false
     uploadedFileData = []
     descriptions = []
+
     return reply
       .download(newfilepath)
       .header('Access-Control-Expose-Headers', 'Content-Disposition')

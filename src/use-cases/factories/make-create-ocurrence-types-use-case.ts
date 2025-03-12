@@ -1,4 +1,4 @@
-import { CreateOcurrenceTypeUseCase } from './create-ocurrency-types'
+import { CreateOcurrenceTypeUseCase } from '../create-ocurrency-types'
 import { PrismaOcurrenceTypeRepository } from '@/repositories/prisma/prisma-ocurrence-type-repository'
 
 export function makeCreateOcurrenceTypeUseCase() {

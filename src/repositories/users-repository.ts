@@ -1,5 +1,5 @@
 import type { Prisma, User } from '@prisma/client'
-import { Nullable } from 'vitest'
+
 
 export interface IUpdateUser {
   id: string

@@ -1,5 +1,5 @@
 import { PrismaDutyRepository } from '@/repositories/prisma/prisma-duty-repository'
-import { ReadDutyUseCase } from './read-duty'
+import { ReadDutyUseCase } from '../read-duty'
 
 export function makeReadDutyUseCase() {
   const dutyRepository = new PrismaDutyRepository()

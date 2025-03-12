@@ -1,8 +1,8 @@
 import { verify } from 'jsonwebtoken'
 import env from '@/config/env'
-import { InvalidJwtTokenError } from '../errors/invalid-jwt-token-error'
-import { UserEmailNotFoundError } from '../errors/user-email-not-found-error'
-import { UserIdNotFoundError } from '../errors/user-id-not-found-error'
+import { InvalidJwtTokenError } from './errors/invalid-jwt-token-error'
+import { UserEmailNotFoundError } from './errors/user-email-not-found-error'
+import { UserIdNotFoundError } from './errors/user-id-not-found-error'
 import { type UsersRepository } from '@/repositories/users-repository'
 
 interface DeleteUserUseCaseRequest {

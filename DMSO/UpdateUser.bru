@@ -5,7 +5,18 @@ meta {
 }
 
 patch {
-  url: 127.0.0.1:3333/update
+  url: 127.0.0.1:3333/users/update
   body: json
-  auth: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyZmYwZjYzMy1hNTliLTQ0MTctYTUyMS04MTM2ZDk1ZWNiMWMiLCJpYXQiOjE3NDE3OTY2NDksImV4cCI6MTc0MTgxMTA0OX0._xXwIvOe5ETjjutkPs6ItR4ntU1t3uJYkK13Q-WgapQ
+}
+
+body:json {
+  {
+    "email": "francisco.pereira@dmsys.com.br",
+    "password": "Brisa220"
+  }
 }

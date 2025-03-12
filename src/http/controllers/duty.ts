@@ -21,7 +21,7 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
   const registerBodySchema = z
     .object({
       operador: z.string(),
-      operadoresNome: z.string().array(),
+      operadoresNomes: z.string().array(),
       data_inicio: z.string().datetime(),
       data_fim: z.string().datetime(),
       contrato: z.string(),
@@ -29,13 +29,13 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
       horario_rf: z.string().datetime(),
       imagens: z.any(),
       ocurrence: z.array(occurrenceSchema).optional(),
-      informacoes_adicionais: z.any().optional()
+      informacoes_adicionais: z.any().optional(),
     })
     .parse(request.body)
 
   const {
     operador,
-    operadoresNome,
+    operadoresNomes,
     data_inicio,
     data_fim,
     contrato,
@@ -48,7 +48,7 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
     const registerDutyCase = makeCreateDutyUseCase()
     const { duty, ocurrences } = await registerDutyCase.execute({
       operador,
-      operadoresNome,
+      operadoresNomes,
       data_inicio,
       data_fim,
       contrato,

@@ -99,9 +99,7 @@ export class RegisterUseCase {
 }
 
 export class RegisterCustUseCase {
-  constructor(
-    private readonly customerRepository: CustomerRepository,
-  ) {}
+  constructor(private readonly customerRepository: CustomerRepository) {}
 
   async execute({
     nome,
@@ -110,7 +108,7 @@ export class RegisterCustUseCase {
     email,
     endereco,
     cnpj,
-    has_cftv,
+    services,
   }: RegisterUseCaseCustRequest): Promise<RegisterUseCaseCustResponse> {
     const custWithSameEmail = await this.customerRepository.findByEmail(email)
     const userWithSameCnpj = await this.customerRepository.findByCnpj(cnpj)
@@ -178,9 +176,9 @@ export class RegisterCustUseCase {
       email,
       cnpj,
       password_digest: passwordDigest,
-      has_cftv,
+      services,
     })
-    
+
     return {
       user,
     }

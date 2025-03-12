@@ -2,8 +2,8 @@ import { verify } from 'jsonwebtoken'
 import env from '@/config/env'
 import type { UsersRepository } from '@/repositories/users-repository'
 import type { User } from '@prisma/client'
-import { InvalidJwtTokenError } from '../errors/invalid-jwt-token-error'
-import { UserEmailNotFoundError } from '../errors/user-email-not-found-error'
+import { InvalidJwtTokenError } from './errors/invalid-jwt-token-error'
+import { UserEmailNotFoundError } from './errors/user-email-not-found-error'
 import { hash } from 'bcryptjs'
 
 interface UpdateUseCaseRequest {
@@ -32,7 +32,7 @@ export class UpdateUserUseCase {
   }: UpdateUseCaseRequest): Promise<UpdateUseCaseResponse> {
     const token = bearerAuth.split(' ')[1]
     let token_payload: { sub: string }
-    
+
     try {
       token_payload = verify(token, env.JWT_SECRET) as { sub: string }
     } catch (error) {
@@ -46,7 +46,7 @@ export class UpdateUserUseCase {
       is_admin,
       user_role,
     }
-    
+
     // Only add password_digest if password is provided
     if (password) {
       updateData.password_digest = await hash(password, 10)

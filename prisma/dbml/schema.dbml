@@ -32,6 +32,7 @@ Table clientes {
   is_new Boolean [not null, default: true]
   tentativas_de_login Int [not null, default: 0]
   has_cftv Boolean [not null, default: false]
+  services String[] [not null]
   last_login DateTime
   created_at DateTime [default: `now()`, not null]
   updated_at DateTime [not null]

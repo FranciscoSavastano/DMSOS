@@ -1,9 +1,9 @@
 import { verify } from 'jsonwebtoken'
 import env from '@/config/env'
 import type { DutyRepository } from '@/repositories/duties-repository'
-import { InvalidJwtTokenError } from '../errors/invalid-jwt-token-error'
+import { InvalidJwtTokenError } from './errors/invalid-jwt-token-error'
 import type { Plantao } from '@prisma/client'
-import { DutyIdNotFoundError } from '../errors/duty-id-not-found-error'
+import { DutyIdNotFoundError } from './errors/duty-id-not-found-error'
 
 interface ReadDutyUseCaseRequest {
   bearerAuth: string

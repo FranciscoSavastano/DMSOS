@@ -1,6 +1,6 @@
 import { verify } from 'jsonwebtoken'
 import env from '@/config/env'
-import { InvalidJwtTokenError } from '../errors/invalid-jwt-token-error'
+import { InvalidJwtTokenError } from './errors/invalid-jwt-token-error'
 import type { DutyRepository } from '@/repositories/duties-repository'
 import type { Plantao } from '@prisma/client'
 

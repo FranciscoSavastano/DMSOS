@@ -1,8 +1,8 @@
 import { verify } from 'jsonwebtoken'
 import env from '@/config/env'
-import { InvalidJwtTokenError } from '../errors/invalid-jwt-token-error'
-import { UserEmailNotFoundError } from '../errors/user-email-not-found-error'
-import { DutyIdNotFoundError } from '../errors/duty-id-not-found-error'
+import { InvalidJwtTokenError } from './errors/invalid-jwt-token-error'
+import { UserEmailNotFoundError } from './errors/user-email-not-found-error'
+import { DutyIdNotFoundError } from './errors/duty-id-not-found-error'
 import { type DutyRepository } from '@/repositories/duties-repository'
 
 interface DeleteDutyUseCaseRequest {

@@ -23,7 +23,6 @@ export class AuthenticateUseCase {
     private readonly authenticationAuditRepository: AuthenticationAuditRepository,
     private readonly custRepository: CustomerRepository,
   ) {}
-
   async execute({
     email,
     password,
@@ -33,8 +32,14 @@ export class AuthenticateUseCase {
   }: AuthenticateUseCaseRequest): Promise<AuthenticateUseCaseResponse> {
     let user
     user = await this.usersRepository.findByEmail(email)
-    if(!user){
+    console.log(user)
+    if (!user) {
       user = await this.custRepository.findByEmail(email)
+    }
+    if(user === null) {
+      return {
+        user,
+      }
     }
     const auditAuthenticateObject = {
       browser: browser ?? null,

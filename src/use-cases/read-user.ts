@@ -1,9 +1,9 @@
 import { verify } from 'jsonwebtoken'
 import env from '@/config/env'
 import type { UsersRepository } from '@/repositories/users-repository'
-import { InvalidJwtTokenError } from '../errors/invalid-jwt-token-error'
+import { InvalidJwtTokenError } from './errors/invalid-jwt-token-error'
 import type { User } from '@prisma/client'
-import { UserIdNotFoundError } from '../errors/user-id-not-found-error'
+import { UserIdNotFoundError } from './errors/user-id-not-found-error'
 
 interface ReadUserUseCaseRequest {
   bearerAuth: string

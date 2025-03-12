@@ -2,8 +2,8 @@ import { verify } from 'jsonwebtoken'
 import env from '@/config/env'
 import type { DutyRepository } from '@/repositories/duties-repository'
 import type { Plantao } from '@prisma/client'
-import { InvalidJwtTokenError } from '../errors/invalid-jwt-token-error'
-import { UserEmailNotFoundError } from '../errors/user-email-not-found-error'
+import { InvalidJwtTokenError } from './errors/invalid-jwt-token-error'
+import { UserEmailNotFoundError } from './errors/user-email-not-found-error'
 
 interface UpdateUseCaseRequest {
   bearerAuth: string

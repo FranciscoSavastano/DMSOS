@@ -38,20 +38,22 @@ export async function fetchCustomerNames(
     })
 
     const users = response.data.cust.custs
-    // Extraia os dados desejados da response completa
+    // Extract desired data from complete response
     const filteredCustomers = users.map((user) => ({
       id: user.id,
       nome: user.nome,
       cnpj: user.cnpj,
       email: user.email,
       responsavel: user.responsavel,
-      has_cftv: user.has_cftv,
+      services: user.services || [], // Ensure services is always an array
     }))
+    
     if (cftv === 'true') {
+      // Filter customers that have "Monitoramento" in their services array
       const filteredCustomersByType = filteredCustomers.filter(
-        (user) => user.has_cftv,
+        (user) => Array.isArray(user.services) && user.services.includes("Monitoramento")
       )
-
+      console.log(filteredCustomersByType)
       return filteredCustomersByType
     }
     return filteredCustomers

@@ -3,7 +3,7 @@ import type { Cliente, Ocorrencia, Plantao } from '@prisma/client'
 
 interface RegisterUseCaseRequest {
   operador: string
-  operadoresNome: string[]
+  operadoresNomes: string[]
   data_inicio: string
   data_fim: string
   horario_rf: string
@@ -33,7 +33,7 @@ export class CreateDutyUseCase {
 
   async execute({
     operador,
-    operadoresNome,
+    operadoresNomes,
     data_inicio,
     data_fim,
     horario_rf,
@@ -43,13 +43,19 @@ export class CreateDutyUseCase {
     informacoes_adicionais,
   }: RegisterUseCaseRequest): Promise<RegisterUseCaseResponse> {
     const ocurrences = []
+    const operadoresNomeFilter: string[] = []
+    operadoresNomes.forEach(operador => {
+      if(operador != "") {
+        operadoresNomeFilter.push(operador)
+      }
+    })
     const duty = await this.dutyRepository.create({
       operadores: {
         connect: {
           id: operador,
         },
       },
-      operadoresNome,
+      operadoresNome : operadoresNomeFilter,
       data_inicio,
       data_fim,
       horario_rf,
@@ -58,7 +64,6 @@ export class CreateDutyUseCase {
       informacoes_adicionais,
     })
     for (const ocorrencia of ocurrence) {
-      
       const newOccurrence = await this.dutyRepository.createOcurrence({
         plantao: {
           connect: {
