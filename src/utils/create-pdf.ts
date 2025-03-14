@@ -12,14 +12,11 @@ var canwrite = false
 var PDFtable = require('pdfkit-table')
 
 let pdfCreationPromise: Promise<unknown>
-let imageWritePromise: Promise<unknown>
 let descWritePromise: Promise<unknown>
 let archpath: string
-let altarchpath: string
 let startTime: number
 let unionTableEntries = []
-var wait = false
-var created = false
+
 export function startWait(): number {
   startTime = Date.now()
   return startTime
@@ -452,7 +449,15 @@ export async function CreatePdf(duty: any) {
       rows: string[][]
     } = {
       title: 'CHECKLIST ELEVADORES',
-      headers: ['ELEVADOR', 'BLOCO', 'CLASSE', 'STATUS', 'INTERFONE', 'CÂMERAS', 'OBSERVAÇÃO'],
+      headers: [
+        'ELEVADOR',
+        'BLOCO',
+        'CLASSE',
+        'STATUS',
+        'INTERFONE',
+        'CÂMERAS',
+        'OBSERVAÇÃO',
+      ],
       rows: [],
     }
     for (const elevador of addinfo) {
@@ -461,9 +466,9 @@ export async function CreatePdf(duty: any) {
     }
     doc.addPage()
     doc
-          .fontSize(28)
-          .fill('#001233')
-          .text('LIMPEZA E CONSERVAÇÃO', { align: 'center' })
+      .fontSize(28)
+      .fill('#001233')
+      .text('LIMPEZA E CONSERVAÇÃO', { align: 'center' })
     await doc.table(elevadorTable, {
       width: 500,
     })
@@ -644,7 +649,7 @@ export async function CreatePdf(duty: any) {
     await generatePdf(doc, filePath)
     doc.end()
     archpath = `${gendocsPath}/Relatorio ${contract} ${filedate} ${dutyid}.pdf`
-    
+
     //Delete os arquivos temporarios, se não houver, descreva no console
     resolve()
   })

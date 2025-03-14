@@ -44,8 +44,8 @@ export class CreateDutyUseCase {
   }: RegisterUseCaseRequest): Promise<RegisterUseCaseResponse> {
     const ocurrences = []
     const operadoresNomeFilter: string[] = []
-    operadoresNomes.forEach(operador => {
-      if(operador != "") {
+    operadoresNomes.forEach((operador) => {
+      if (operador != '') {
         operadoresNomeFilter.push(operador)
       }
     })
@@ -55,7 +55,7 @@ export class CreateDutyUseCase {
           id: operador,
         },
       },
-      operadoresNome : operadoresNomeFilter,
+      operadoresNome: operadoresNomeFilter,
       data_inicio,
       data_fim,
       horario_rf,

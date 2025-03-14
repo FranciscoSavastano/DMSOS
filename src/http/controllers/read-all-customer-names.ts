@@ -47,11 +47,13 @@ export async function fetchCustomerNames(
       responsavel: user.responsavel,
       services: user.services || [], // Ensure services is always an array
     }))
-    
+
     if (cftv === 'true') {
       // Filter customers that have "Monitoramento" in their services array
       const filteredCustomersByType = filteredCustomers.filter(
-        (user) => Array.isArray(user.services) && user.services.includes("Monitoramento")
+        (user) =>
+          Array.isArray(user.services) &&
+          user.services.includes('Monitoramento'),
       )
       console.log(filteredCustomersByType)
       return filteredCustomersByType

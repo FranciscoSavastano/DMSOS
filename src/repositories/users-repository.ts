@@ -1,6 +1,5 @@
 import type { Prisma, User } from '@prisma/client'
 
-
 export interface IUpdateUser {
   id: string
   data: {

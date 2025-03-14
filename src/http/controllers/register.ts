@@ -37,7 +37,7 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
         password,
         user_role,
       })
-      
+
       return await reply.status(201).send(user)
     } catch (err: unknown) {
       if (err instanceof UserAlreadyExistsError) {

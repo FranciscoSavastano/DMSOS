@@ -36,7 +36,7 @@ export class AuthenticateUseCase {
     if (!user) {
       user = await this.custRepository.findByEmail(email)
     }
-    if(user === null) {
+    if (user === null) {
       return {
         user,
       }
