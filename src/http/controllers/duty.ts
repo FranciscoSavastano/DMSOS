@@ -24,7 +24,7 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
       operadoresNomes: z.string().array(),
       data_inicio: z.string().datetime(),
       data_fim: z.string().datetime(),
-      contrato: z.string(),
+      contrato: z.string().min(1),
       consideracoes: z.string(),
       horario_rf: z.string().datetime(),
       imagens: z.any(),

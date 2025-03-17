@@ -461,8 +461,26 @@ export async function CreatePdf(duty: any) {
       rows: [],
     }
     for (const elevador of addinfo) {
-      elevadorTable.rows.push([elevador])
-      console.log(elevador)
+      if(elevador.observacao === "") {
+        elevador.observacao = "-"
+      }
+
+      if(!elevador.interfone) {
+        elevador.interfone = "-"
+      }
+      if(!elevador.cameras) {
+        elevador.cameras = "-"
+      }
+      elevador.elevador
+      elevadorTable.rows.push([
+        elevador.elevador,    // ELEVADOR
+        elevador.bloco,       // BLOCO
+        elevador.classe,      // CLASSE
+        elevador.status,      // STATUS
+        elevador.interfone,   // INTERFONE
+        elevador.cameras,     // CÂMERAS
+        elevador.observacao   // OBSERVAÇÃO
+      ]);
     }
     doc.addPage()
     doc
@@ -636,7 +654,6 @@ export async function CreatePdf(duty: any) {
     }
     //Salve o arquivo com um nome dinamico
     const filePath = `${gendocsPath}/Relatorio ${contract} ${filedate} ${dutyid}.pdf`
-    altarchpath = `/src/utils/gendocs/Relatorio ${contract} ${filedate} ${dutyid}.pdf`
     const generatePdf = async (doc, filePath): Promise<void> => {
       return new Promise<void>((resolve, reject) => {
         doc.pipe(fs.createWriteStream(filePath))
