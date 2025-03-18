@@ -443,11 +443,7 @@ export async function CreatePdf(duty: any) {
         })
       }
     }
-    const elevadorTable: {
-      title: string
-      headers: string[]
-      rows: string[][]
-    } = {
+    const elevadorTable = {
       title: 'CHECKLIST ELEVADORES',
       headers: [
         'ELEVADOR',
@@ -459,38 +455,103 @@ export async function CreatePdf(duty: any) {
         'OBSERVAÇÃO',
       ],
       rows: [],
-    }
+      prepareHeader: () => doc.font('Helvetica-Bold'),
+      prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
+        doc.font('Helvetica');
+        if (indexColumn >= 3 && indexColumn <= 5) {
+          const value = row[indexColumn];
+          if (value === 'Operante') {
+            doc.fill('#00af50'); // Green
+          } else if (value === 'Inoperante') {
+            doc.fill('#ff0000'); // Red
+          } else if (value === 'none' || value === '-') {
+            doc.fill('#808080'); // Grey
+          } else {
+            doc.fill('#000000'); // Black (default)
+          }
+          doc.rect(rectCell.x, rectCell.y, rectCell.width, rectCell.height).fillAndStroke(); // Apply fill and stroke
+          doc.fill('#000000'); // Reset fill to black for text
+        } else {
+          doc.fill('#000000'); // Black (default)
+          doc.rect(rectCell.x, rectCell.y, rectCell.width, rectCell.height).stroke(); // Apply Stroke
+        }
+        if (indexRow > 0 && row[1] !== elevadorTable.rows[indexRow - 1][1]) {
+          doc.rect(rectRow.x, rectRow.y - 2, rectRow.width, 2).fill('#bcd5ed'); // Blue separator
+        }
+      },
+    };
+    
+    const blockElevatorCounts = {};
+    
     for (const elevador of addinfo) {
-      if(elevador.observacao === "") {
-        elevador.observacao = "-"
+      if (elevador.observacao === '') {
+        elevador.observacao = '-';
       }
-
-      if(!elevador.interfone) {
-        elevador.interfone = "-"
+      if (!elevador.interfone) {
+        elevador.interfone = '-';
       }
-      if(!elevador.cameras) {
-        elevador.cameras = "-"
+      if (!elevador.cameras) {
+        elevador.cameras = '-';
       }
-      elevador.elevador
+    
       elevadorTable.rows.push([
-        elevador.elevador,    // ELEVADOR
-        elevador.bloco,       // BLOCO
-        elevador.classe,      // CLASSE
-        elevador.status,      // STATUS
-        elevador.interfone,   // INTERFONE
-        elevador.cameras,     // CÂMERAS
-        elevador.observacao   // OBSERVAÇÃO
+        elevador.elevador,
+        elevador.bloco,
+        elevador.classe,
+        elevador.status,
+        elevador.interfone,
+        elevador.cameras,
+        elevador.observacao,
       ]);
+    
+      if (elevador.status === 'Operante') {
+        blockElevatorCounts[elevador.bloco] =
+          (blockElevatorCounts[elevador.bloco] || 0) + 1;
+      }
     }
-    doc.addPage()
-    doc
-      .fontSize(28)
-      .fill('#001233')
-      .text('LIMPEZA E CONSERVAÇÃO', { align: 'center' })
+    
+    doc.addPage();
+    doc.fontSize(28).fill('#001233').text('CHECKLIST ELEVADORES', { align: 'center' });
+    
     await doc.table(elevadorTable, {
       width: 500,
-    })
-
+    });
+    
+    // Bar chart
+    const chartX = 50;
+    const chartY = doc.y + 50; // Use doc.y after the table
+    const barWidth = 30;
+    const barSpacing = 10;
+    const chartHeight = 200;
+    const maxValue = Math.max(...Object.values(blockElevatorCounts));
+    
+    doc.fontSize(12).fill('#000000').text('Elevadores Operantes por Bloco', chartX, chartY - 30);
+    
+    let currentX = chartX;
+    for (const block in blockElevatorCounts) {
+      const count = blockElevatorCounts[block];
+      const barHeight = (count / maxValue) * chartHeight;
+      let barColor = '#00af50'; // Default to green
+    
+      if (addinfo.some(elevador => elevador.bloco === block && elevador.status !== 'Operante')) {
+        barColor = '#00af50'; // Keep green if at least one is operante.
+      }
+    
+      doc.rect(currentX, chartY + chartHeight - barHeight, barWidth, barHeight).fill(barColor);
+      doc
+        .fontSize(10)
+        .fill('#000000')
+        .text(block, currentX, chartY + chartHeight + 5, { width: barWidth, align: 'center' });
+      doc
+        .fontSize(10)
+        .fill('#000000')
+        .text(count.toString(), currentX, chartY + chartHeight - barHeight - 15, {
+          width: barWidth,
+          align: 'center',
+        });
+    
+      currentX += barWidth + barSpacing;
+    }
     if (contract === 'Union Square') {
       // Constants for layout
       const imageMargin = 20
