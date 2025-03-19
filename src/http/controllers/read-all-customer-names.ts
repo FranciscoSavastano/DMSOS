@@ -55,7 +55,7 @@ export async function fetchCustomerNames(
           Array.isArray(user.services) &&
           user.services.includes('Monitoramento'),
       )
-      console.log(filteredCustomersByType)
+    
       return filteredCustomersByType
     }
     return filteredCustomers

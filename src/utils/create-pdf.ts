@@ -217,17 +217,20 @@ export async function CreatePdf(duty: any) {
     const data = duty.created_at
     const contract = duty.contrato
     const addinfo = duty.informacoes_adicionais
-    console.log(addinfo)
+
     const dutyid = duty.id
     const ocurrences = await prisma.ocorrencia.findMany({
       where: {
         plantao_id: dutyid,
       },
     })
+    console.log(ocurrences)
     const ocurrence = ocurrences.map((ocurrence) => {
+      
       const formattedDateStart = moment.utc(ocurrence.horario).format('HH:mm')
       const formattedDateEnd = moment.utc(ocurrence.termino).format('HH:mm')
       const formattedData = moment.utc(ocurrence.data).format('DD/MM/YYYY')
+      console.log(formattedData)
       return {
         ...ocurrence,
         newHorario: formattedDateStart,
@@ -443,115 +446,173 @@ export async function CreatePdf(duty: any) {
         })
       }
     }
-    const elevadorTable = {
-      title: 'CHECKLIST ELEVADORES',
-      headers: [
-        'ELEVADOR',
-        'BLOCO',
-        'CLASSE',
-        'STATUS',
-        'INTERFONE',
-        'CÂMERAS',
-        'OBSERVAÇÃO',
-      ],
-      rows: [],
-      prepareHeader: () => doc.font('Helvetica-Bold'),
-      prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
-        doc.font('Helvetica');
-        if (indexColumn >= 3 && indexColumn <= 5) {
-          const value = row[indexColumn];
-          if (value === 'Operante') {
-            doc.fill('#00af50'); // Green
-          } else if (value === 'Inoperante') {
-            doc.fill('#ff0000'); // Red
-          } else if (value === 'none' || value === '-') {
-            doc.fill('#808080'); // Grey
-          } else {
-            doc.fill('#000000'); // Black (default)
-          }
-          doc.rect(rectCell.x, rectCell.y, rectCell.width, rectCell.height).fillAndStroke(); // Apply fill and stroke
-          doc.fill('#000000'); // Reset fill to black for text
-        } else {
-          doc.fill('#000000'); // Black (default)
-          doc.rect(rectCell.x, rectCell.y, rectCell.width, rectCell.height).stroke(); // Apply Stroke
-        }
-        if (indexRow > 0 && row[1] !== elevadorTable.rows[indexRow - 1][1]) {
-          doc.rect(rectRow.x, rectRow.y - 2, rectRow.width, 2).fill('#bcd5ed'); // Blue separator
-        }
-      },
-    };
-    
-    const blockElevatorCounts = {};
-    
-    for (const elevador of addinfo) {
-      if (elevador.observacao === '') {
-        elevador.observacao = '-';
+// Page setup and title section
+doc.addPage();
+doc.fontSize(28).fillColor('#001233').text('CHECKLIST ELEVADORES', { align: 'center' });
+
+// Define table structure
+const elevadorTable = {
+  title: 'CHECKLIST ELEVADORES',
+  headers: [
+    'ELEVADOR',
+    'BLOCO',
+    'CLASSE',
+    'STATUS',
+    'INTERFONE',
+    'CÂMERAS',
+    'OBSERVAÇÃO',
+  ],
+  rows: [],
+  prepareHeader: () => doc.font('Helvetica-Bold'),
+  prepareRow: (row, indexColumn, indexRow, rectRow) => {
+    doc.font('Helvetica');
+
+    // Color the row based on Cameras and Interfone or Status
+    if (indexColumn === 0) { // Only apply color on the first cell to avoid multiple fills
+      let rowColor;
+      const interfoneStatus = row[4]; // Interfone column
+      const camerasStatus = row[5]; // Cameras column
+      const status = row[3]; // Status column
+
+      if (interfoneStatus === 'Inoperante' && camerasStatus === 'Inoperante') {
+        rowColor = '#ff6666'; // Light red for both inoperante
+      } else if (status === 'Inoperante') {
+        rowColor = '#ff0000'; // Red for status inoperante
+      } else if (status === 'Operante') {
+        rowColor = '#ccffcc'; // Light green for status operante
+      } else {
+        rowColor = null; // No color
       }
-      if (!elevador.interfone) {
-        elevador.interfone = '-';
-      }
-      if (!elevador.cameras) {
-        elevador.cameras = '-';
-      }
-    
-      elevadorTable.rows.push([
-        elevador.elevador,
-        elevador.bloco,
-        elevador.classe,
-        elevador.status,
-        elevador.interfone,
-        elevador.cameras,
-        elevador.observacao,
-      ]);
-    
-      if (elevador.status === 'Operante') {
-        blockElevatorCounts[elevador.bloco] =
-          (blockElevatorCounts[elevador.bloco] || 0) + 1;
+
+      if (rowColor) {
+        doc.addBackground(rectRow, rowColor, 0.5); // Apply background using addBackground
       }
     }
-    
-    doc.addPage();
-    doc.fontSize(28).fill('#001233').text('CHECKLIST ELEVADORES', { align: 'center' });
-    
-    await doc.table(elevadorTable, {
-      width: 500,
+
+    // Add blue separator between different blocks
+    if (indexRow > 0 && row[1] !== elevadorTable.rows[indexRow - 1][1]) {
+      doc.fillColor('#bcd5ed').rect(rectRow.x, rectRow.y - 2, rectRow.width, 2).fill();
+      doc.fillColor('black'); // Reset to black after drawing separator
+    }
+  },
+};
+
+// Populate table rows
+const blockElevatorCounts = {};
+const blockInoperanteElevatorCounts = {};
+let prevbloco = null; // Initialize prevbloco to null
+
+for (const elevador of addinfo) {
+  if (elevador.observacao === '') {
+    elevador.observacao = '-';
+  }
+  if (!elevador.interfone) {
+    elevador.interfone = '-';
+  }
+  if (!elevador.cameras) {
+    elevador.cameras = '-';
+  }
+
+  if (prevbloco !== null && elevador.bloco !== prevbloco) {
+    elevadorTable.rows.push([
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+    ]);
+  }
+
+  elevadorTable.rows.push([
+    elevador.elevadorFullName,
+    elevador.bloco,
+    elevador.classe,
+    elevador.status,
+    elevador.interfone,
+    elevador.cameras,
+    elevador.observacao,
+  ]);
+
+  prevbloco = elevador.bloco;
+
+  // Count both operante and inoperante elevators for each block
+  if (elevador.status === 'Operante') {
+    blockElevatorCounts[elevador.bloco] = (blockElevatorCounts[elevador.bloco] || 0) + 1;
+  } else if (elevador.status === 'Inoperante') {
+    blockInoperanteElevatorCounts[elevador.bloco] = (blockInoperanteElevatorCounts[elevador.bloco] || 0) + 1;
+  }
+}
+
+// Render the table
+await doc.table(elevadorTable, {
+  width: 500,
+});
+doc.addPage();
+
+// Bar chart
+const chartX = 50;
+const chartY = doc.y + 50; // Use doc.y after the table
+const barWidth = 70;
+const barSpacing = 20;
+const chartHeight = 300;
+
+// Calculate max value for scaling the chart
+const allCounts = [...Object.values(blockElevatorCounts), ...Object.values(blockInoperanteElevatorCounts)];
+const maxValue = Math.max(...allCounts, 1); // Ensure at least 1 to avoid division by zero
+
+// Chart title
+doc.fontSize(12).fillColor('#000000').text('Elevadores por Bloco', chartX, chartY - 30);
+
+// Add legend with better positioning
+const legendY = chartY + chartHeight + 25; // Position legend below the chart
+doc.rect(chartX, legendY, 15, 15).fillColor('#00af50').fill();
+doc.fillColor('#000000').text('Operante', chartX + 20, legendY);
+doc.rect(chartX + 100, legendY, 15, 15).fillColor('#ff0000').fill();
+doc.fillColor('#000000').text('Inoperante', chartX + 120, legendY);
+
+// Draw bars
+let currentX = chartX;
+const allBlocks = new Set([...Object.keys(blockElevatorCounts), ...Object.keys(blockInoperanteElevatorCounts)]);
+
+for (const block of allBlocks) {
+  const operanteCount = blockElevatorCounts[block] || 0;
+  const inoperanteCount = blockInoperanteElevatorCounts[block] || 0;
+  
+  // Draw operante bar (green)
+  if (operanteCount > 0) {
+    const barHeight = (operanteCount / maxValue) * chartHeight;
+    doc.fillColor('#00af50');
+    doc.rect(currentX, chartY + chartHeight - barHeight, barWidth / 2, barHeight).fill();
+    doc.fillColor('#000000');
+    doc.text(operanteCount.toString(), currentX, chartY + chartHeight - barHeight - 15, {
+      width: barWidth / 2,
+      align: 'center',
     });
-    
-    // Bar chart
-    const chartX = 50;
-    const chartY = doc.y + 50; // Use doc.y after the table
-    const barWidth = 30;
-    const barSpacing = 10;
-    const chartHeight = 200;
-    const maxValue = Math.max(...Object.values(blockElevatorCounts));
-    
-    doc.fontSize(12).fill('#000000').text('Elevadores Operantes por Bloco', chartX, chartY - 30);
-    
-    let currentX = chartX;
-    for (const block in blockElevatorCounts) {
-      const count = blockElevatorCounts[block];
-      const barHeight = (count / maxValue) * chartHeight;
-      let barColor = '#00af50'; // Default to green
-    
-      if (addinfo.some(elevador => elevador.bloco === block && elevador.status !== 'Operante')) {
-        barColor = '#00af50'; // Keep green if at least one is operante.
-      }
-    
-      doc.rect(currentX, chartY + chartHeight - barHeight, barWidth, barHeight).fill(barColor);
-      doc
-        .fontSize(10)
-        .fill('#000000')
-        .text(block, currentX, chartY + chartHeight + 5, { width: barWidth, align: 'center' });
-      doc
-        .fontSize(10)
-        .fill('#000000')
-        .text(count.toString(), currentX, chartY + chartHeight - barHeight - 15, {
-          width: barWidth,
-          align: 'center',
-        });
-    
-      currentX += barWidth + barSpacing;
-    }
+  }
+  
+  // Draw inoperante bar (red)
+  if (inoperanteCount > 0) {
+    const barHeight = (inoperanteCount / maxValue) * chartHeight;
+    doc.fillColor('#ff0000');
+    doc.rect(currentX + barWidth / 2, chartY + chartHeight - barHeight, barWidth / 2, barHeight).fill();
+    doc.fillColor('#000000');
+    doc.text(inoperanteCount.toString(), currentX + barWidth / 2, chartY + chartHeight - barHeight - 15, {
+      width: barWidth / 2,
+      align: 'center',
+    });
+  }
+  
+  // Block label
+  doc.fillColor('#000000');
+  doc.text(block, currentX, chartY + chartHeight + 5, {
+    width: barWidth,
+    align: 'center',
+  });
+  
+  currentX += barWidth + barSpacing;
+}
     if (contract === 'Union Square') {
       // Constants for layout
       const imageMargin = 20

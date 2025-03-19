@@ -122,7 +122,7 @@ model Ocorrencia {
   descricao             String?      
   horario            DateTime?
   termino            DateTime?
-  data               DateTime?  
+  data               DateTime       @default(now()) 
   local              String?     
   observacao         String?     
   acao               String?

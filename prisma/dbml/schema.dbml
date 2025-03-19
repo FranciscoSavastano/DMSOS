@@ -98,7 +98,7 @@ Table ocorrencias {
   descricao String
   horario DateTime
   termino DateTime
-  data DateTime
+  data DateTime [default: `now()`, not null]
   local String
   observacao String
   acao String

@@ -4,7 +4,7 @@ export async function refreshToken(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
-  console.log(request.cookies)
+  
   await request.jwtVerify({ onlyCookie: true })
 
   const accessToken = await reply.jwtSign(
