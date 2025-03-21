@@ -63,7 +63,7 @@ export class CreateDutyUseCase {
       consideracoes,
       informacoes_adicionais,
     })
-    console.log(ocurrence)
+    
     for (const ocorrencia of ocurrence) {
       const newOccurrence = await this.dutyRepository.createOcurrence({
         plantao: {

@@ -106,37 +106,44 @@ export async function writeRondasUnion(
   reply: FastifyReply,
 ) {
   try {
-    const parts = await request.parts()
+    const parts = await request.parts();
 
-    const formData: Record<string, any> = {}
-    const images: any[] = []
+    const formData: Record<string, any> = {};
+    const images: Record<number, any[]> = {}; // Store images by index
 
     for await (const part of parts) {
       if (part.type === 'file') {
         // Handle file parts
-        const buffer = await part.toBuffer()
-        images.push({
-          filename: part.filename,
-          mimetype: part.mimetype,
-          data: buffer.toString('base64'),
-        })
+        const match = part.fieldname.match(/images\[(\d+)\]/);
+        if (match) {
+          const index = parseInt(match[1]);
+          const buffer = await part.toBuffer();
+          if (!images[index]) {
+            images[index] = [];
+          }
+          images[index].push({
+            filename: part.filename,
+            mimetype: part.mimetype,
+            data: buffer.toString('base64'),
+          });
+        }
       } else {
         // Handle field parts
-        const key = part.fieldname
-        const value = part.value
+        const key = part.fieldname;
+        const value = part.value;
         if (
           key.startsWith('time[') ||
           key.startsWith('bloco[') ||
           key.startsWith('observation[')
         ) {
-          const match = key.match(/\[(\d+)\]/)
+          const match = key.match(/\[(\d+)\]/);
           if (match) {
-            const index = parseInt(match[1])
-            const fieldName = key.split('[')[0]
+            const index = parseInt(match[1]);
+            const fieldName = key.split('[')[0];
             if (!formData[index]) {
-              formData[index] = {}
+              formData[index] = {};
             }
-            formData[index][fieldName] = value
+            formData[index][fieldName] = value;
           }
         }
       }
@@ -148,19 +155,19 @@ export async function writeRondasUnion(
         time: data.time,
         bloco: data.bloco,
         observation: data.observation,
-        images: images,
+        images: images[parseInt(index)] || [], // Get images for this index
       }),
-    )
+    );
 
-    console.log('Processed entries:', unionTableEntries)
+  Entries);
 
     return reply.status(201).send({
       message: 'Rondas Union data processed successfully.',
       data: unionTableEntries,
-    })
+    });
   } catch (error) {
-    console.error('Error processing Rondas Union data:', error)
-    return reply.status(500).send({ message: 'Internal server error.' })
+    console.error('Error processing Rondas Union data:', error);
+    return reply.status(500).send({ message: 'Internal server error.' });
   }
 }
 export async function writeDesc(request: FastifyRequest, reply: FastifyReply) {
@@ -224,13 +231,13 @@ export async function CreatePdf(duty: any) {
         plantao_id: dutyid,
       },
     })
-    console.log(ocurrences)
+    
     const ocurrence = ocurrences.map((ocurrence) => {
       
       const formattedDateStart = moment.utc(ocurrence.horario).format('HH:mm')
       const formattedDateEnd = moment.utc(ocurrence.termino).format('HH:mm')
       const formattedData = moment.utc(ocurrence.data).format('DD/MM/YYYY')
-      console.log(formattedData)
+    
       return {
         ...ocurrence,
         newHorario: formattedDateStart,
@@ -321,12 +328,6 @@ export async function CreatePdf(duty: any) {
       .fontSize(15)
       .fill('#001233')
       .text(objectivetext, 100, 200, { lineGap: 10 })
-    if (uploadedFileData.length == 0) {
-      console.log('Nao existem imagens')
-    }
-    if (descriptions.length == 0) {
-      console.log('Nao exitem descrições')
-    }
 
     if (uploadedFileData.length > 0) {
       doc.addPage()
@@ -446,6 +447,7 @@ export async function CreatePdf(duty: any) {
         })
       }
     }
+if(contract === "Lead Américas") {
 // Page setup and title section
 doc.addPage();
 doc.fontSize(28).fillColor('#001233').text('CHECKLIST ELEVADORES', { align: 'center' });
@@ -550,7 +552,7 @@ await doc.table(elevadorTable, {
   width: 500,
 });
 doc.addPage();
-
+  
 // Bar chart
 const chartX = 50;
 const chartY = doc.y + 50; // Use doc.y after the table
@@ -613,121 +615,128 @@ for (const block of allBlocks) {
   
   currentX += barWidth + barSpacing;
 }
-    if (contract === 'Union Square') {
-      // Constants for layout
-      const imageMargin = 20
-      const imageWidth = 90
+}
+if (contract === 'Union Square') {
+  // Constants for layout
+  const imageMargin = 20;
+  const imageWidth = 90;
 
-      // Group entries by bloco
-      const entriesByBloco = unionTableEntries.reduce((acc, entry) => {
-        const blocoKey = entry.bloco
-        if (!acc[blocoKey]) {
-          acc[blocoKey] = []
-        }
-        acc[blocoKey].push(entry)
-        return acc
-      }, {})
+  // Ensure unionTableEntries has the right structure
+  const entriesByBloco = unionTableEntries.reduce((acc, entry) => {
+    // Make sure bloco is correctly getting the value
+    const blocoKey = entry.bloco;
+    
+    // Debug
+  
+    if (!acc[blocoKey]) {
+      acc[blocoKey] = [];
+    }
+    acc[blocoKey].push(entry);
+    return acc;
+  }, {});
 
-      // Sort entries by time within each bloco
-      Object.values(entriesByBloco).forEach((entries) => {
-        entries.sort(
-          (a, b) => new Date(a.time).getTime() - new Date(b.time).getTime(),
-        )
-      })
+  // Debug output of grouping
+ 
+  // Sort entries by time within each bloco
+  Object.values(entriesByBloco).forEach((entries) => {
+    entries.sort(
+      (a, b) => new Date(a.time).getTime() - new Date(b.time).getTime(),
+    );
+  });
 
-      // Process each bloco
-      let isFirstPage = true
-      for (const [bloco, entries] of Object.entries(entriesByBloco)) {
-        // Get bloco number from the string (e.g., "bloco1" -> "1")
-        const blocoNumber = bloco.replace(/\D/g, '')
+  // Process each bloco - only create pages for blocos that have images
+  for (const [bloco, entries] of Object.entries(entriesByBloco)) {
+    // Filter entries to ensure they have images
+    const entriesWithImages = entries.filter(entry => entry.images && entry.images.length > 0);
+    
+    if (entriesWithImages.length === 0) {
+      continue; // Skip blocos with no images
+    }
+    
+    // Get bloco number from the string (e.g., "bloco1" -> "1")
+    const blocoNumber = bloco.replace(/\D/g, '');
+  
+    // Add new page for this bloco
+    doc.addPage();
 
-        let imagelength = 0
-        // Add new page (except for first page)
-        for (const entry of entries) {
-          imagelength += entry.images.length
-        }
-        if (imagelength > 0) {
-          doc.addPage()
+    // Initialize positioning for images
+    let x = imageMargin;
+    let y = imageWidth;
 
-          // Initialize positioning for images
-          let x = imageMargin
-          let y = imageWidth
+    // Add page title
+    doc
+      .fontSize(28)
+      .fill('#001233')
+      .text(`RELATÓRIO FOTOGRÁFICO BL${blocoNumber}`, 40, 30, {
+        align: 'center',
+      });
 
-          // Add page title
-          doc
-            .fontSize(28)
-            .fill('#001233')
-            .text(`RELATORIO FOTOGRAFICO BL${blocoNumber}`, 40, 30, {
-              align: 'center',
-            })
+    // Process all images from entries
+    let imageIndex = 0;
 
-          // Process all images from entries
-          let imageIndex = 0
+    for (const entry of entriesWithImages) {
+      if (entry.images && entry.images.length > 0) {
 
-          for (const entry of entries) {
-            if (entry.images && entry.images.length > 0) {
-              for (const image of entry.images) {
-                // Create image description
+        for (const image of entry.images) {
+          // Create image description
+          let timeStr = entry.time.toString();
+          timeStr = timeStr.split('Z');
+          let imageDesc;
+          if (entry.observation) {
+            imageDesc = `${timeStr[0]}: ${entry.observation}`;
+          } else {
+            imageDesc = timeStr[0];
+          }
 
-                let timeStr = entry.time.toString()
-                timeStr = timeStr.split('Z')
-                let imageDesc
-                if (entry.observation) {
-                  imageDesc = `${timeStr[0]}: ${entry.observation}`
-                } else {
-                  imageDesc = timeStr[0]
-                }
+          // Check if we need a new page for this bloco
+          if (imageIndex > 0 && imageIndex % 9 === 0) {
+            doc.addPage();
+            doc
+              .fontSize(28)
+              .fill('#001233')
+              .text(`RELATORIO FOTOGRAFICO BL${blocoNumber}`, 40, 30, {
+                align: 'center',
+              });
+            x = imageMargin;
+            y = imageWidth;
+          }
 
-                // Check if we need a new page
-                if (imageIndex > 0 && imageIndex % 9 === 0) {
-                  doc.addPage()
-                  doc
-                    .fontSize(28)
-                    .fill('#001233')
-                    .text(`RELATORIO FOTOGRAFICO BL${blocoNumber}`, 40, 30, {
-                      align: 'center',
-                    })
-                  x = imageMargin
-                  y = imageWidth
-                }
+          try {
+            // Convert base64 to Buffer
+      
+            const imageBuffer = Buffer.from(image.data, 'base64');
 
-                try {
-                  // Convert base64 to Buffer
-                  const imageBuffer = Buffer.from(image.data, 'base64')
+            // Add image
+            doc.image(imageBuffer, x, y, { width: 150, height: 150 });
 
-                  // Add image
-                  doc.image(imageBuffer, x, y, { width: 150, height: 150 })
+            // Add blue rectangle with description
+            doc.rect(x, y + 150, 150, 70).fill('#007bff');
 
-                  // Add blue rectangle with description
-                  doc.rect(x, y + 150, 150, 70).fill('#007bff')
+            // Add description text
+            doc
+              .fontSize(10)
+              .fill('#fff')
+              .text(imageDesc, x + 5, y + 155, { width: 140 });
 
-                  // Add description text
-                  doc
-                    .fontSize(10)
-                    .fill('#fff')
-                    .text(imageDesc, x + 5, y + 155, { width: 140 })
+            // Update positioning
+            x += 200;
 
-                  // Update positioning
-                  x += 200
-
-                  // Move to next row if needed
-                  if (imageIndex !== 0 && (imageIndex + 1) % 3 === 0) {
-                    x = imageMargin
-                    y += 230
-                  }
-
-                  imageIndex++
-                } catch (error) {
-                  console.error('Error adding image to PDF:', error)
-                  continue
-                }
-              }
+            // Move to next row if needed
+            if ((imageIndex + 1) % 3 === 0) {
+              x = imageMargin;
+              y += 230;
             }
+
+            imageIndex++;
+          } catch (error) {
+            console.error('Error adding image to PDF:', error, image);
+            continue;
           }
         }
       }
     }
-
+  }
+}
     if (contract === 'Centro Metropolitano') {
       doc.addPage()
       doc

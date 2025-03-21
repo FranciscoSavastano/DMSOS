@@ -32,7 +32,7 @@ export class AuthenticateUseCase {
   }: AuthenticateUseCaseRequest): Promise<AuthenticateUseCaseResponse> {
     let user
     user = await this.usersRepository.findByEmail(email)
-    console.log(user)
+    
     if (!user) {
       user = await this.custRepository.findByEmail(email)
     }
