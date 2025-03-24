@@ -158,9 +158,6 @@ export async function writeRondasUnion(
         images: images[parseInt(index)] || [], // Get images for this index
       }),
     );
-
-  Entries);
-
     return reply.status(201).send({
       message: 'Rondas Union data processed successfully.',
       data: unionTableEntries,
@@ -452,6 +449,30 @@ if(contract === "Lead Américas") {
 doc.addPage();
 doc.fontSize(28).fillColor('#001233').text('CHECKLIST ELEVADORES', { align: 'center' });
 
+// Function to generate consistent block colors before table rendering
+// Function to generate consistent block colors before table rendering
+function generateBlockColors(addinfo) {
+  const blockColors = {};
+  const uniqueBlocks = [...new Set(addinfo.map(elevador => elevador.bloco))];
+  
+  uniqueBlocks.forEach((bloco, index) => {
+    // Use a predefined palette of blue shades
+    const bluePalette = [
+      '#E6F2FF', // Very light blue
+      '#B3D9FF', // Light blue
+      '#80C1FF', // Medium light blue
+      '#4DA6FF', // Medium blue
+      '#1A8CFF', // Medium dark blue
+      '#0073E6', // Dark blue
+      '#005CB3'  // Very dark blue
+    ];
+    
+    // Cycle through the palette if we have more blocks than colors
+    blockColors[bloco] = bluePalette[index % bluePalette.length];
+  });
+  
+  return blockColors;
+}
 // Define table structure
 const elevadorTable = {
   title: 'CHECKLIST ELEVADORES',
@@ -466,43 +487,12 @@ const elevadorTable = {
   ],
   rows: [],
   prepareHeader: () => doc.font('Helvetica-Bold'),
-  prepareRow: (row, indexColumn, indexRow, rectRow) => {
-    doc.font('Helvetica');
-
-    // Color the row based on Cameras and Interfone or Status
-    if (indexColumn === 0) { // Only apply color on the first cell to avoid multiple fills
-      let rowColor;
-      const interfoneStatus = row[4]; // Interfone column
-      const camerasStatus = row[5]; // Cameras column
-      const status = row[3]; // Status column
-
-      if (interfoneStatus === 'Inoperante' && camerasStatus === 'Inoperante') {
-        rowColor = '#ff6666'; // Light red for both inoperante
-      } else if (status === 'Inoperante') {
-        rowColor = '#ff0000'; // Red for status inoperante
-      } else if (status === 'Operante') {
-        rowColor = '#ccffcc'; // Light green for status operante
-      } else {
-        rowColor = null; // No color
-      }
-
-      if (rowColor) {
-        doc.addBackground(rectRow, rowColor, 0.5); // Apply background using addBackground
-      }
-    }
-
-    // Add blue separator between different blocks
-    if (indexRow > 0 && row[1] !== elevadorTable.rows[indexRow - 1][1]) {
-      doc.fillColor('#bcd5ed').rect(rectRow.x, rectRow.y - 2, rectRow.width, 2).fill();
-      doc.fillColor('black'); // Reset to black after drawing separator
-    }
-  },
 };
 
 // Populate table rows
 const blockElevatorCounts = {};
 const blockInoperanteElevatorCounts = {};
-let prevbloco = null; // Initialize prevbloco to null
+let prevbloco = null;
 
 for (const elevador of addinfo) {
   if (elevador.observacao === '') {
@@ -526,7 +516,12 @@ for (const elevador of addinfo) {
       '',
     ]);
   }
-
+  
+  if(elevador.bloco != 'outros'){
+    elevador.bloco = "BL0" + elevador.bloco
+  }else {
+    elevador.bloco = "PNE"
+  }
   elevadorTable.rows.push([
     elevador.elevadorFullName,
     elevador.bloco,
@@ -547,12 +542,66 @@ for (const elevador of addinfo) {
   }
 }
 
+// Generate block colors
+const blockColors = generateBlockColors(addinfo);
+
 // Render the table
 await doc.table(elevadorTable, {
   width: 500,
+  columnSpacing: 2,
+  divider: {
+    header: { disabled: false, width: 1, opacity: 1 },
+    horizontal: { disabled: false, width: 1, opacity: 0.5 },
+  },
+  prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
+    doc.registerFont('Segoe UI', './fonts/segoeuithibd.ttf');
+    doc.font('Segoe UI').fontSize(7);
+    
+    // Check if this is a blank separator row
+    const isBlankRow = row[0] === '' && row[1] === '' && row[2] === '';
+    
+    if (isBlankRow && indexColumn === 0) {
+      doc.rect(rectRow.x, rectRow.y, rectRow.width, rectRow.height + 5)
+         .fill('white');
+      return;
+    }
+    
+    if (isBlankRow) {
+      return;
+    }
+    
+    if (rectCell) {
+      const bloco = row[1];
+      
+      // Use the pre-generated block color
+      const blocColor = bloco ? blockColors[bloco] : 'white';
+      
+      doc.rect(
+        rectCell.x,
+        rectCell.y,
+        rectCell.width,
+        rectCell.height
+      )
+      .fillOpacity(0.3)
+      .fillAndStroke(blocColor, 'black')
+      .fillOpacity(1)
+      .fillColor('black');
+    }
+    
+    // Modify block separator logic
+    if (indexColumn === 0 && indexRow > 0 && !isBlankRow) {
+      const currentBloco = row[1];
+      const previousBloco = elevadorTable.rows[indexRow - 1][1];
+      
+      if (currentBloco !== previousBloco) {
+        doc.fillColor('#0047AB').rect(rectRow.x, rectRow.y - 2, rectRow.width, 2).fill();
+        doc.fillColor('black');
+      }
+    }
+  }
 });
+
 doc.addPage();
-  
 // Bar chart
 const chartX = 50;
 const chartY = doc.y + 50; // Use doc.y after the table
