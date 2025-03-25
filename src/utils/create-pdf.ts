@@ -8,6 +8,7 @@ import { fastifyMultipart } from '@fastify/multipart'
 import { Ocorrencia } from '@prisma/client'
 import { FastifyMultipartRequest } from '@fastify/multipart'
 import { test } from 'vitest'
+import { width } from 'pdfkit/js/page'
 var canwrite = false
 var PDFtable = require('pdfkit-table')
 
@@ -446,10 +447,18 @@ export async function CreatePdf(duty: any) {
     }
 if(contract === "Lead Américas") {
 // Page setup and title section
+doc.registerFont('Segoe UI', './fonts/segoeuithibd.ttf');
 doc.addPage();
 doc.fontSize(28).fillColor('#001233').text('CHECKLIST ELEVADORES', { align: 'center' });
-
-// Function to generate consistent block colors before table rendering
+function formatBlockNumber(bloco) {
+  if (bloco === 'outros') {
+    return "PNE";
+  }
+  
+  // Manually pad with zero for older JavaScript versions
+  const paddedBloco = bloco.length === 1 ? '0' + bloco : bloco;
+  return `BL0${paddedBloco}`;
+}
 // Function to generate consistent block colors before table rendering
 function generateBlockColors(addinfo) {
   const blockColors = {};
@@ -477,13 +486,13 @@ function generateBlockColors(addinfo) {
 const elevadorTable = {
   title: 'CHECKLIST ELEVADORES',
   headers: [
-    'ELEVADOR',
-    'BLOCO',
-    'CLASSE',
-    'STATUS',
-    'INTERFONE',
-    'CÂMERAS',
-    'OBSERVAÇÃO',
+    { label: 'ELEVADOR',width: 100, property: 'elevadorFullName', align: 'center', headerAlign: 'center'},
+    { label: 'BLOCO', property: 'bloco', align: 'center', headerAlign: 'center' },
+    { label: 'CLASSE', property: 'classe', align: 'center', headerAlign: 'center' },
+    { label: 'STATUS', property: 'status', align: 'center', headerAlign: 'center' },
+    { label: 'INTERFONE', property: 'interfone', align: 'center', headerAlign: 'center' },
+    { label: 'CÂMERAS', property: 'cameras', align: 'center', headerAlign: 'center' },
+    { label: 'OBSERVAÇÃO', property: 'observacao', align: 'center', headerAlign: 'center' }
   ],
   rows: [],
   prepareHeader: () => doc.font('Helvetica-Bold'),
@@ -495,33 +504,21 @@ const blockInoperanteElevatorCounts = {};
 let prevbloco = null;
 
 for (const elevador of addinfo) {
-  if (elevador.observacao === '') {
-    elevador.observacao = '-';
-  }
-  if (!elevador.interfone) {
-    elevador.interfone = '-';
-  }
-  if (!elevador.cameras) {
-    elevador.cameras = '-';
-  }
+  // Set default values for empty fields
+  elevador.observacao = elevador.observacao || '-';
+  elevador.interfone = elevador.interfone || '-';
+  elevador.cameras = elevador.cameras || '-';
 
+  // Format block number
+  elevador.bloco = formatBlockNumber(elevador.bloco);
+
+  // Add separator row between different blocks
   if (prevbloco !== null && elevador.bloco !== prevbloco) {
     elevadorTable.rows.push([
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
+      '', '', '', '', '', '', ''
     ]);
   }
-  
-  if(elevador.bloco != 'outros'){
-    elevador.bloco = "BL0" + elevador.bloco
-  }else {
-    elevador.bloco = "PNE"
-  }
+
   elevadorTable.rows.push([
     elevador.elevadorFullName,
     elevador.bloco,
@@ -533,7 +530,6 @@ for (const elevador of addinfo) {
   ]);
 
   prevbloco = elevador.bloco;
-
   // Count both operante and inoperante elevators for each block
   if (elevador.status === 'Operante') {
     blockElevatorCounts[elevador.bloco] = (blockElevatorCounts[elevador.bloco] || 0) + 1;
@@ -548,32 +544,37 @@ const blockColors = generateBlockColors(addinfo);
 // Render the table
 await doc.table(elevadorTable, {
   width: 500,
+  align: 'center',
+  x: 50,
   columnSpacing: 2,
   divider: {
-    header: { disabled: false, width: 1, opacity: 1 },
+    header: { 
+      disabled: false, 
+      width: 1, 
+      opacity: 1 
+    },
     horizontal: { disabled: false, width: 1, opacity: 0.5 },
   },
+  prepareHeader: () => {
+    doc.font('Helvetica-Bold')
+       .fillColor('black')
+       .fontSize(8);
+  },
+  prepareCell: (cell, row, column) => {
+    const options = {
+      align: 'center',
+      valign: 'center',
+      lineBreak: false,
+      width: doc.widthOfString(cell),
+      height: 10
+    };
+    
+    return options;
+  },
   prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
-    doc.registerFont('Segoe UI', './fonts/segoeuithibd.ttf');
-    doc.font('Segoe UI').fontSize(7);
-    
-    // Check if this is a blank separator row
-    const isBlankRow = row[0] === '' && row[1] === '' && row[2] === '';
-    
-    if (isBlankRow && indexColumn === 0) {
-      doc.rect(rectRow.x, rectRow.y, rectRow.width, rectRow.height + 5)
-         .fill('white');
-      return;
-    }
-    
-    if (isBlankRow) {
-      return;
-    }
-    
+    // Existing block color logic
     if (rectCell) {
       const bloco = row[1];
-      
-      // Use the pre-generated block color
       const blocColor = bloco ? blockColors[bloco] : 'white';
       
       doc.rect(
@@ -587,12 +588,12 @@ await doc.table(elevadorTable, {
       .fillOpacity(1)
       .fillColor('black');
     }
-    
-    // Modify block separator logic
-    if (indexColumn === 0 && indexRow > 0 && !isBlankRow) {
+
+    // Existing block separator logic
+    if (indexColumn === 0 && indexRow > 0) {
       const currentBloco = row[1];
       const previousBloco = elevadorTable.rows[indexRow - 1][1];
-      
+     
       if (currentBloco !== previousBloco) {
         doc.fillColor('#0047AB').rect(rectRow.x, rectRow.y - 2, rectRow.width, 2).fill();
         doc.fillColor('black');
@@ -600,7 +601,6 @@ await doc.table(elevadorTable, {
     }
   }
 });
-
 doc.addPage();
 // Bar chart
 const chartX = 50;
@@ -618,9 +618,9 @@ doc.fontSize(12).fillColor('#000000').text('Elevadores por Bloco', chartX, chart
 
 // Add legend with better positioning
 const legendY = chartY + chartHeight + 25; // Position legend below the chart
-doc.rect(chartX, legendY, 15, 15).fillColor('#00af50').fill();
+doc.rect(chartX, legendY, 15, 15).fillColor('#0047ab').fill();
 doc.fillColor('#000000').text('Operante', chartX + 20, legendY);
-doc.rect(chartX + 100, legendY, 15, 15).fillColor('#ff0000').fill();
+doc.rect(chartX + 100, legendY, 15, 15).fillColor('#999999').fill();
 doc.fillColor('#000000').text('Inoperante', chartX + 120, legendY);
 
 // Draw bars
@@ -634,7 +634,7 @@ for (const block of allBlocks) {
   // Draw operante bar (green)
   if (operanteCount > 0) {
     const barHeight = (operanteCount / maxValue) * chartHeight;
-    doc.fillColor('#00af50');
+    doc.fillColor('#0047ab');
     doc.rect(currentX, chartY + chartHeight - barHeight, barWidth / 2, barHeight).fill();
     doc.fillColor('#000000');
     doc.text(operanteCount.toString(), currentX, chartY + chartHeight - barHeight - 15, {
@@ -646,7 +646,7 @@ for (const block of allBlocks) {
   // Draw inoperante bar (red)
   if (inoperanteCount > 0) {
     const barHeight = (inoperanteCount / maxValue) * chartHeight;
-    doc.fillColor('#ff0000');
+    doc.fillColor('#999999');
     doc.rect(currentX + barWidth / 2, chartY + chartHeight - barHeight, barWidth / 2, barHeight).fill();
     doc.fillColor('#000000');
     doc.text(inoperanteCount.toString(), currentX + barWidth / 2, chartY + chartHeight - barHeight - 15, {
