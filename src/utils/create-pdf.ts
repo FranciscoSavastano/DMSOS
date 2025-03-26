@@ -379,28 +379,35 @@ export async function CreatePdf(duty: any) {
     if (contract === 'Lead Américas') {
       const rondasTable: {
         title: string
-        headers: string[]
+        headers: { label: string; align: string; headerAlign: string; }[]
         rows: string[][]
       } = {
         title: 'RONDA',
         headers: [
-          'HORÁRIO INICIO',
-          'HORÁRIO TERMINO',
-          'LOCAL',
-          'RESPONSÁVEL',
-          'OBSERVAÇÃO',
+          { label: 'HORÁRIO INICIO', align: 'center', headerAlign: 'center'},
+          { label: 'HORÁRIO TERMINO', align: 'center', headerAlign: 'center' },
+          { label: 'LOCAL', align: 'center', headerAlign: 'center' },
+          { label: 'RESPONSÁVEL', align: 'center', headerAlign: 'center' },
+          { label: 'OBSERVAÇÃO', align: 'center', headerAlign: 'center' },
         ],
         rows: [],
+        prepareHeader: () => doc.font('Helvetica-Bold'),
+      
       }
 
       const limpezaTable: {
         title: string
-        headers: string[]
+        headers: { label: string; align: string; headerAlign: string; }[]
         rows: string[][]
       } = {
         title: 'LIMPEZA',
-        headers: ['HORÁRIO', 'LOCAL', 'DATA'],
+        headers: [
+          { label: 'HORÁRIO', align: 'center', headerAlign: 'center'},
+          { label: 'LOCAL', align: 'center', headerAlign: 'center' },
+          { label: 'DATA', align: 'center', headerAlign: 'center' },
+        ],
         rows: [],
+        prepareHeader: () => doc.font('Helvetica-Bold'),
       }
 
       for (const occurrence of ocurrence) {
@@ -429,20 +436,108 @@ export async function CreatePdf(duty: any) {
           .text('RONDAS NO EMPREENDIMENTO', { align: 'center' })
         await doc.table(rondasTable, {
           width: 500,
-          // Other table options
-        })
+          align: 'center',
+          x: 50,
+          columnSpacing: 2,
+          divider: {
+            header: { 
+              disabled: false, 
+              width: 1, 
+              opacity: 1 
+            },
+            horizontal: { 
+              disabled: false, 
+              width: 1, 
+              opacity: 0.5 
+            },
+          },
+          prepareHeader: () => {
+            doc.font('Helvetica-Bold')
+               .fillColor('black')
+               .fontSize(8);
+          },
+          prepareCell: (cell, row, column) => {
+            const options = {
+              align: 'center',
+              valign: 'center',
+              lineBreak: false,
+              width: doc.widthOfString(cell),
+              height: 10
+            };
+            
+            return options;
+          },
+          prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
+            if (rectCell) {
+              // Alternate row colors (fix for both even and odd rows)
+              const rowColor = indexRow % 2 === 0 ? '#d9ecff' : '#b3d5f7';
+              
+              doc.rect(
+                rectCell.x,
+                rectCell.y,
+                rectCell.width,
+                rectCell.height
+              )
+              .fillAndStroke(rowColor, 'black')
+              .fillOpacity(1)
+              .fillColor('black');
+            }
+          }
+        });
       }
 
       if (limpezaTable.rows.length > 0) {
         doc.moveDown(15)
-        doc
-          .fontSize(28)
-          .fill('#001233')
-          .text('LIMPEZA E CONSERVAÇÃO', { align: 'center' })
         await doc.table(limpezaTable, {
           width: 500,
-          // Other table options
-        })
+          align: 'center',
+          x: 50,
+          columnSpacing: 2,
+          divider: {
+            header: { 
+              disabled: false, 
+              width: 1, 
+              opacity: 1 
+            },
+            horizontal: { 
+              disabled: false, 
+              width: 1, 
+              opacity: 0.5 
+            },
+          },
+          prepareHeader: () => {
+            doc.font('Helvetica-Bold')
+               .fillColor('black')
+               .fontSize(8);
+          },
+          prepareCell: (cell, row, column) => {
+            const options = {
+              align: 'center',
+              valign: 'center',
+              lineBreak: false,
+              width: doc.widthOfString(cell),
+              height: 10
+            };
+            
+            return options;
+          },
+          prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
+            if (rectCell) {
+              // Alternate row colors (fix for both even and odd rows)
+              const rowColor = indexRow % 2 === 0 ? '#d9ecff' : '#b3d5f7';
+              
+              doc.rect(
+                rectCell.x,
+                rectCell.y,
+                rectCell.width,
+                rectCell.height
+              )
+              .fillAndStroke(rowColor, 'black')
+              .fillOpacity(1)
+              .fillColor('black');
+            }
+          }
+        });
       }
     }
 if(contract === "Lead Américas") {
@@ -484,9 +579,8 @@ function generateBlockColors(addinfo) {
 }
 // Define table structure
 const elevadorTable = {
-  title: 'CHECKLIST ELEVADORES',
   headers: [
-    { label: 'ELEVADOR',width: 100, property: 'elevadorFullName', align: 'center', headerAlign: 'center'},
+    { label: 'ELEVADOR', property: 'elevadorFullName', align: 'center', headerAlign: 'center'},
     { label: 'BLOCO', property: 'bloco', align: 'center', headerAlign: 'center' },
     { label: 'CLASSE', property: 'classe', align: 'center', headerAlign: 'center' },
     { label: 'STATUS', property: 'status', align: 'center', headerAlign: 'center' },
@@ -588,7 +682,22 @@ await doc.table(elevadorTable, {
       .fillOpacity(1)
       .fillColor('black');
     }
-
+    if (indexRow > 0) {
+      const currentBloco = row[1];
+      const previousBloco = elevadorTable.rows[indexRow - 1][1];
+     
+      if (currentBloco !== previousBloco) {
+        // Color the entire separator row
+        if (row[0] === '' && row[1] === '' && row[2] === '') {
+          doc
+            .fillOpacity(0.2)
+            .fillColor('#0047AB')
+            .rect(rectRow.x, rectRow.y, rectRow.width, rectRow.height)
+            .fill()
+            .fillOpacity(1);
+        }
+      }
+    }
     // Existing block separator logic
     if (indexColumn === 0 && indexRow > 0) {
       const currentBloco = row[1];
@@ -602,28 +711,39 @@ await doc.table(elevadorTable, {
   }
 });
 doc.addPage();
-// Bar chart
+doc.moveDown(13)
+// Bar chart with improved styling
 const chartX = 50;
-const chartY = doc.y + 50; // Use doc.y after the table
+const chartY = doc.y + 50;
 const barWidth = 70;
 const barSpacing = 20;
-const chartHeight = 300;
+const chartHeight = 250;
 
 // Calculate max value for scaling the chart
 const allCounts = [...Object.values(blockElevatorCounts), ...Object.values(blockInoperanteElevatorCounts)];
-const maxValue = Math.max(...allCounts, 1); // Ensure at least 1 to avoid division by zero
+const maxValue = Math.max(...allCounts, 1);
 
-// Chart title
-doc.fontSize(12).fillColor('#000000').text('Elevadores por Bloco', chartX, chartY - 30);
+// Chart title with more emphasis
+doc
+  .fontSize(16)
+  .fillColor('#001233')
+  .font('Helvetica-Bold')
+  .text('Elevadores por Bloco', chartX, chartY - 40, { align: 'center' });
 
-// Add legend with better positioning
-const legendY = chartY + chartHeight + 25; // Position legend below the chart
+// Add a more distinct legend
+const legendY = chartY + chartHeight + 25;
+doc
+  .fontSize(10)
+  .fillColor('#000000')
+  .font('Helvetica');
+
 doc.rect(chartX, legendY, 15, 15).fillColor('#0047ab').fill();
-doc.fillColor('#000000').text('Operante', chartX + 20, legendY);
-doc.rect(chartX + 100, legendY, 15, 15).fillColor('#999999').fill();
-doc.fillColor('#000000').text('Inoperante', chartX + 120, legendY);
+doc.text('Operante', chartX + 20, legendY + 2);
 
-// Draw bars
+doc.rect(chartX + 100, legendY, 15, 15).fillColor('#999999').fill();
+doc.text('Inoperante', chartX + 120, legendY + 2);
+
+// Draw bars with improved visual hierarchy
 let currentX = chartX;
 const allBlocks = new Set([...Object.keys(blockElevatorCounts), ...Object.keys(blockInoperanteElevatorCounts)]);
 
@@ -631,36 +751,52 @@ for (const block of allBlocks) {
   const operanteCount = blockElevatorCounts[block] || 0;
   const inoperanteCount = blockInoperanteElevatorCounts[block] || 0;
   
-  // Draw operante bar (green)
+  // Draw operante bar with gradient and shadow effect
   if (operanteCount > 0) {
     const barHeight = (operanteCount / maxValue) * chartHeight;
-    doc.fillColor('#0047ab');
-    doc.rect(currentX, chartY + chartHeight - barHeight, barWidth / 2, barHeight).fill();
-    doc.fillColor('#000000');
-    doc.text(operanteCount.toString(), currentX, chartY + chartHeight - barHeight - 15, {
-      width: barWidth / 2,
-      align: 'center',
-    });
+    doc
+      .fillColor('#0047ab')
+      .opacity(0.8)
+      .rect(currentX, chartY + chartHeight - barHeight, barWidth / 2, barHeight)
+      .fill();
+    
+    doc
+      .fillColor('#000000')
+      .opacity(1)
+      .fontSize(9)
+      .text(operanteCount.toString(), currentX, chartY + chartHeight - barHeight - 15, {
+        width: barWidth / 2,
+        align: 'center',
+      });
   }
   
-  // Draw inoperante bar (red)
+  // Draw inoperante bar with gradient and shadow effect
   if (inoperanteCount > 0) {
     const barHeight = (inoperanteCount / maxValue) * chartHeight;
-    doc.fillColor('#999999');
-    doc.rect(currentX + barWidth / 2, chartY + chartHeight - barHeight, barWidth / 2, barHeight).fill();
-    doc.fillColor('#000000');
-    doc.text(inoperanteCount.toString(), currentX + barWidth / 2, chartY + chartHeight - barHeight - 15, {
-      width: barWidth / 2,
-      align: 'center',
-    });
+    doc
+      .fillColor('#999999')
+      .opacity(0.8)
+      .rect(currentX + barWidth / 2, chartY + chartHeight - barHeight, barWidth / 2, barHeight)
+      .fill();
+    
+    doc
+      .fillColor('#000000')
+      .opacity(1)
+      .fontSize(9)
+      .text(inoperanteCount.toString(), currentX + barWidth / 2, chartY + chartHeight - barHeight - 15, {
+        width: barWidth / 2,
+        align: 'center',
+      });
   }
   
-  // Block label
-  doc.fillColor('#000000');
-  doc.text(block, currentX, chartY + chartHeight + 5, {
-    width: barWidth,
-    align: 'center',
-  });
+  // Block label with improved typography
+  doc
+    .fillColor('#333333')
+    .fontSize(10)
+    .text(block, currentX, chartY + chartHeight + 5, {
+      width: barWidth,
+      align: 'center',
+    });
   
   currentX += barWidth + barSpacing;
 }
@@ -794,21 +930,71 @@ if (contract === 'Union Square') {
         .text('POLICIA MILITAR', { align: 'center' })
       const table: {
         title: string
-        headers: string[]
+        headers: { label: string; align: string; headerAlign: string; }[]
         rows: string[][]
       } = {
-        title: 'OCORRENCIAS',
-        headers: ['HORÁRIO', 'LOCAL', 'OBSERVAÇÃO'],
+        headers: [
+          { label: 'HORÁRIO', align: 'center', headerAlign: 'center'},
+          { label: 'LOCAL', align: 'center', headerAlign: 'center' },
+          { label: 'OBSEV', align: 'center', headerAlign: 'center' },
+        ],
         rows: ocurrence.map((ocurrence) => [
           ocurrence.newHorario || '',
           ocurrence.local || '',
           ocurrence.observacao || '',
         ]),
+        prepareHeader: () => doc.font('Helvetica-Bold'),
       }
       await doc.table(table, {
-        width: 500, // Adjust the width as needed
-        // Other table options, like font size, colors, etc.
-      })
+          width: 500,
+          align: 'center',
+          x: 50,
+          columnSpacing: 2,
+          divider: {
+            header: { 
+              disabled: false, 
+              width: 1, 
+              opacity: 1 
+            },
+            horizontal: { 
+              disabled: false, 
+              width: 1, 
+              opacity: 0.5 
+            },
+          },
+          prepareHeader: () => {
+            doc.font('Helvetica-Bold')
+               .fillColor('black')
+               .fontSize(8);
+          },
+          prepareCell: (cell, row, column) => {
+            const options = {
+              align: 'center',
+              valign: 'center',
+              lineBreak: false,
+              width: doc.widthOfString(cell),
+              height: 10
+            };
+            
+            return options;
+          },
+          prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
+            if (rectCell) {
+              // Alternate row colors (fix for both even and odd rows)
+              const rowColor = indexRow % 2 === 0 ? '#d9ecff' : '#b3d5f7';
+              
+              doc.rect(
+                rectCell.x,
+                rectCell.y,
+                rectCell.width,
+                rectCell.height
+              )
+              .fillAndStroke(rowColor, 'black')
+              .fillOpacity(1)
+              .fillColor('black');
+            }
+          }
+        });
     }
     doc.addPage()
     doc
