@@ -14,19 +14,15 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-generator dbml {
-  provider = "prisma-dbml-generator"
-}
-
 model User {
   cpf                   String    @unique
   id                    String    @default(uuid()) @id
   nome                  String    
   email                 String    @unique
   password_digest       String
-  is_admin              Boolean   @default(false)
-  tentativas_de_login   Int       @default(0)
   is_new              Boolean     @default(true)
+  contrato            String      @default("Nenhum")
+  tentativas_de_login   Int       @default(0)
   last_login            DateTime?
   created_at            DateTime  @default(now())
   updated_at            DateTime  @updatedAt
@@ -47,14 +43,15 @@ model Cliente {
   endereco        String      @default("")
   cnpj            String      @unique
   is_new          Boolean     @default(true)
+  user_role       String      @default("Cliente")
   tentativas_de_login   Int       @default(0)
-  has_cftv        Boolean     @default(false)
   services        String[]    @default(["Nenhum"])
   last_login            DateTime?
   created_at            DateTime  @default(now())
   updated_at            DateTime  @updatedAt
   equipamento Equipamento[]
   tipo_ocorrencias Ocurrence_types[]
+  AuthenticationAudit AuthenticationAuditCustomer[]
   @@map("clientes")
 }
 
@@ -70,6 +67,20 @@ model AuthenticationAudit {
 
   @@map("authentication_audit")
 }
+
+model AuthenticationAuditCustomer {
+  id          Int                   @id @default(autoincrement())
+  ip_address  String?
+  remote_port String?
+  browser     String?
+  status      AUTHENTICATION_STATUS
+  cliente_id String?
+  cliente     Cliente?                 @relation(fields: [cliente_id], references: [id], onDelete: Cascade)
+  created_at  DateTime              @default(now())
+
+  @@map("authentication_audit_customer")
+}
+
 
 enum UserType {
   TECNICO

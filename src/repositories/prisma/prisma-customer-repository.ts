@@ -5,7 +5,6 @@ import type {
   CustomerRepository,
   IUpdateCust,
 } from '../customers-repository'
-
 export class PrismaCustomerRepository implements CustomerRepository {
   async findByEmail(email: string) {
     const cust = await prisma.cliente.findUnique({

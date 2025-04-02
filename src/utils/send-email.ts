@@ -2,21 +2,33 @@ import 'dotenv/config'
 import nodemailer from 'nodemailer'
 
 interface SendEmailProps {
-  to: string
-  subject: string
-  message: string
-  html?: string
+  to: string;
+  cc?: string | string[];
+  bcc?: string | string[];
+  subject: string;
+  message: string;
+  html?: string;
+  attachments?: { 
+    filename: string;
+    content?: string | Buffer;
+    encoding?: string;
+    contentType?: string;
+    path?: string;
+  }[];
 }
 
-export async function sendEmail({
-  to,
-  subject,
-  message,
-  html,
+export async function sendEmail({ 
+  to, 
+  cc,
+  bcc,
+  subject, 
+  message, 
+  html, 
+  attachments 
 }: SendEmailProps) {
   const transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST,
-    port: process.env.EMAIL_PORT,
+    port: Number(process.env.EMAIL_PORT),
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASSWORD,
@@ -24,14 +36,16 @@ export async function sendEmail({
   })
 
   const emailOptions = {
-    from: process.env.EMAIL_USER,
+    from: `"DMSYS" <dmsys@nao-responda.com>`,
     to,
+    cc,
+    bcc,
     subject,
     text: message,
     html,
+    attachments
   }
-  console.log('Sending')
+
   const email = await transporter.sendMail(emailOptions)
-  console.log(email)
-  return
+  return email
 }

@@ -9,9 +9,10 @@ import { Ocorrencia } from '@prisma/client'
 import { FastifyMultipartRequest } from '@fastify/multipart'
 import { test } from 'vitest'
 import { width } from 'pdfkit/js/page'
+import { sendEmail } from './send-email'
 var canwrite = false
 var PDFtable = require('pdfkit-table')
-
+let sendemailpromise: Promise<unknown>
 let pdfCreationPromise: Promise<unknown>
 let descWritePromise: Promise<unknown>
 let archpath: string
@@ -45,7 +46,7 @@ export async function initWrite(
   if (lockAcquired) {
     return reply
       .code(429)
-      .header('Retry-After', '1')
+      .header('Retry-After', '0.5')
       .send({ message: 'Outro upload em progresso, seu pedido está em fila' })
   }
   state++ // deve ser 1
@@ -213,7 +214,12 @@ export async function CreatePdf(duty: any) {
       console.log(`wait step ${state}`)
     }
   }
-  pdfCreationPromise = new Promise(async (resolve) => {
+  pdfCreationPromise = new Promise<{
+    filepath : string,
+    contract : string,
+    filedate : string,
+    dutyid : string,
+  }>(async (resolve) => {
     const users = duty.operadoresNome
     const filteredUsers = users.map((fullName) => {
       const nameParts = fullName.split(' ')
@@ -1032,10 +1038,79 @@ if (contract === 'Union Square') {
     await generatePdf(doc, filePath)
     doc.end()
     archpath = `${gendocsPath}/Relatorio ${contract} ${filedate} ${dutyid}.pdf`
-
+    const filepath = path.resolve(archpath)   
     //Delete os arquivos temporarios, se não houver, descreva no console
-    resolve()
+    resolve({
+      filepath,
+      contract,
+      filedate,
+      dutyid,
+      })
   })
+  //Preparação para email
+  const result = await pdfCreationPromise;
+  const emailto = "jonas.vilas@dmsys.com.br"
+  const message = `Relatorio do contrato ${result.contract} na data de ${result.filedate}`
+  const subject = `Relatório Diario ${result.contract} ${result.filedate}`
+  const resolvepath = path.resolve(result.filepath)
+  //Envio do email
+  sendemailpromise = new Promise<void>(async (resolve, reject) => {
+    try {
+      // Verify file exists and is readable
+      if (!fs.existsSync(resolvepath)) {
+        throw new Error(`File does not exist: ${resolvepath}`);
+      }
+  
+      // Log file details before sending
+      const fileStats = fs.statSync(resolvepath);
+  
+      // Use file stream instead of readFileSync
+      const fileStream = fs.createReadStream(resolvepath);
+  
+      await sendEmail({
+        to: emailto,
+        bcc: ["francisco.pereira@dmsys.com.br", "anne.nascimento@dmsys.com.br"],
+        subject: subject,
+        message: message,
+        attachments: [
+          {
+            filename: `Relatorio ${result.contract} ${result.filedate} ${result.dutyid}.pdf`,
+            content: fileStream,
+            contentType: 'application/pdf'
+          }
+        ]
+      });
+  
+      // Wait for the stream to finish
+      await new Promise((streamResolve, streamReject) => {
+        fileStream.on('end', () => {
+                    streamResolve();
+        });
+        fileStream.on('error', (streamError) => {
+          console.error('File stream error:', streamError);
+          streamReject(streamError);
+        });
+      });
+  
+      console.log('Email sent successfully');
+      resolve();
+    } catch (error) {
+      console.error('Error sending email:', error);
+      
+      if (error instanceof Error) {
+        console.error('Error name:', error.name);
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+      }
+      
+      reject(error);
+    }
+  });
+  
+  // If you want to log the error when calling the promise
+  sendemailpromise.catch(error => {
+    console.error('Unhandled error in email sending:', error);
+  });
 }
 
 export async function sendPdf(request: FastifyRequest, reply: FastifyReply) {

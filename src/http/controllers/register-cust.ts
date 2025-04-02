@@ -17,7 +17,7 @@ export async function registerCust(
       email: z.string().email(),
       endereco: z.string(),
       cnpj: z.string(),
-      password: z.string().optional(),
+      password: z.string().min(6).optional(),
       services: z.string().array().optional(),
     })
     .parse(request.body)

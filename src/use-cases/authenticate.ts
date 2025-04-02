@@ -21,8 +21,11 @@ export class AuthenticateUseCase {
   constructor(
     private readonly usersRepository: UsersRepository,
     private readonly authenticationAuditRepository: AuthenticationAuditRepository,
-    private readonly custRepository: CustomerRepository,
-  ) {}
+  ) {
+    console.log('Constructor called');
+    console.log('usersRepository:', !!this.usersRepository);
+    console.log('authenticationAuditRepository:', !!this.authenticationAuditRepository);
+  }
   async execute({
     email,
     password,
@@ -32,15 +35,7 @@ export class AuthenticateUseCase {
   }: AuthenticateUseCaseRequest): Promise<AuthenticateUseCaseResponse> {
     let user
     user = await this.usersRepository.findByEmail(email)
-    
-    if (!user) {
-      user = await this.custRepository.findByEmail(email)
-    }
-    if (user === null) {
-      return {
-        user,
-      }
-    }
+
     const auditAuthenticateObject = {
       browser: browser ?? null,
       ip_address: ipAddress ?? null,

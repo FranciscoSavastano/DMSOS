@@ -8,10 +8,15 @@ export interface IChangePassword {
 export interface IUpdateCust {
   id: string
   data: {
-    cpf?: string
+    cnpj?: string
     nome?: string
-    is_admin?: boolean
     user_role?: string
+    responsavel?: string
+    email?: string
+    password_digest?: string
+    endereco?: string
+    is_new?: boolean
+    services?: Array<string>
   }
 }
 export interface IChangePassword {

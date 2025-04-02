@@ -29,6 +29,8 @@ export class UpdateUserUseCase {
     is_admin,
     cpf,
     user_role,
+    is_new,
+    email,
   }: UpdateUseCaseRequest): Promise<UpdateUseCaseResponse> {
     const token = bearerAuth.split(' ')[1]
     let token_payload: { sub: string }
@@ -45,6 +47,8 @@ export class UpdateUserUseCase {
       nome,
       is_admin,
       user_role,
+      is_new,
+      email,
     }
 
     // Only add password_digest if password is provided

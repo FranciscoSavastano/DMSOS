@@ -15,7 +15,8 @@ const allowedOrigins = [
   'http://192.168.10.246',
   'http://192.168.10.246:80',
   'http://dmsys.app.ci',
-  'https://dmsysci01.ddns.me', //local microtik ip mapping
+  'https://dmsysci01.ddns.me',
+  'http://200.142.98.17', //local microtik ip mapping
 ]
 
 app.register(cors, {
@@ -26,7 +27,7 @@ app.register(cors, {
       cb(new Error('Not allowed by CORS'), false)
     }
   },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true,
   allowedHeaders: ['c', 'Content-Type', 'Authorization', 'Cookie'], // Add any custom headers your frontend sends
 })

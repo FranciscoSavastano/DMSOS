@@ -28,6 +28,8 @@ import { readAllCust } from './controllers/read-all-customers'
 import { fetchCustomerNames } from './controllers/read-all-customer-names'
 import { gptCorrection } from './controllers/gpt-helper'
 import { verifySession } from './controllers/verify-session'
+import { updateCustomer } from './controllers/update-customer'
+import { readCust } from './controllers/read-cust'
 
 export async function appRoutes(app: FastifyInstance) {
   //Users
@@ -36,9 +38,13 @@ export async function appRoutes(app: FastifyInstance) {
 
   app.post('/clientes', registerCust)
 
+  app.post('/clientes/read/:id', readCust)
+
   app.get('/clientes/readAll', readAllCust)
 
   app.get('/clientes/getnames/:cftv', fetchCustomerNames)
+
+  app.patch('/clientes/update', updateCustomer)
 
   app.post('/users/read/:id', readUser)
 

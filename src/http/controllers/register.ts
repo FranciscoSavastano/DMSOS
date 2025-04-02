@@ -13,8 +13,9 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
       nome: z.string(),
       email: z.string().email(),
       cpf: z.string(),
-      password: z.string().min(6),
+      password: z.string().min(6).optional(),
       user_role: z.string(),
+      contrato: z.string().optional()
     })
     .parse(request.body)
 
@@ -24,18 +25,18 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
     cpf: cpfunflit,
     password,
     user_role,
+    contrato,
   } = registerBodySchema
   const cpf = cpfunflit.replace(/[^0-9]/g, '')
   if (user_role != 'Cliente') {
     try {
       const registerUserCase = makeRegisterTecUseCase()
-
       const { user } = await registerUserCase.execute({
         nome,
         cpf,
         email,
-        password,
         user_role,
+        contrato
       })
 
       return await reply.status(201).send(user)

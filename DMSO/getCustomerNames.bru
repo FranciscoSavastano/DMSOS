@@ -1,0 +1,15 @@
+meta {
+  name: getCustomerNames
+  type: http
+  seq: 12
+}
+
+get {
+  url: 127.0.0.1:3333/clientes/getnames/
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0Nzk4MWFjOC05NGYwLTRmNzUtYWRkOC0zNTA4MGVkNmNmYWIiLCJpYXQiOjE3Mjk1MTgzMDAsImV4cCI6MTcyOTUxODYwMH0.yt44u4hzV1yibW-lAbLa5t1-OMlr80XTMq3KBt2dZ6I
+}
