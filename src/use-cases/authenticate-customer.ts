@@ -21,9 +21,6 @@ export class AuthenticateCustomerUseCase {
     private readonly authenticationAuditRepository: AuthenticationAuditCustomerRepository,
     private readonly custRepository: CustomerRepository,
   ) {
-    console.log('Constructor called');
-    console.log('authenticationAuditRepository:', !!this.authenticationAuditRepository);
-    console.log('custRepository:', !!this.custRepository);
   }
 
   async execute({
@@ -53,8 +50,6 @@ export class AuthenticateCustomerUseCase {
     }
 
     const doesPasswordMatch = await compare(password, user.password_digest)
-    console.log(doesPasswordMatch)
-    
     if (!doesPasswordMatch) {
       await this.authenticationAuditRepository.create({
         ...auditAuthenticateObject,

@@ -22,9 +22,6 @@ export class AuthenticateUseCase {
     private readonly usersRepository: UsersRepository,
     private readonly authenticationAuditRepository: AuthenticationAuditRepository,
   ) {
-    console.log('Constructor called');
-    console.log('usersRepository:', !!this.usersRepository);
-    console.log('authenticationAuditRepository:', !!this.authenticationAuditRepository);
   }
   async execute({
     email,

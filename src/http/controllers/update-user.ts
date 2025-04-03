@@ -27,7 +27,6 @@ export async function updateUser(request: FastifyRequest, reply: FastifyReply) {
   const { authorization: bearerAuth } = updateUserHeadersSchema
 
   // Valide que as strings nao sao vazias ou nulas.
-  console.log(updateUserBodySchema)
   try {
     const updateUserUseCase = makeUpdateUserUseCase()
 
