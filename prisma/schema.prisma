@@ -15,21 +15,22 @@ datasource db {
 }
 
 model User {
-  cpf                   String    @unique
-  id                    String    @default(uuid()) @id
-  nome                  String    
-  email                 String    @unique
-  password_digest       String
-  is_new              Boolean     @default(true)
-  contrato            String      @default("Nenhum")
-  tentativas_de_login   Int       @default(0)
-  last_login            DateTime?
-  created_at            DateTime  @default(now())
-  updated_at            DateTime  @updatedAt
-  user_role             String    
+  id                 String               @id @default(uuid())
+  cpf                String               @unique
+  nome               String
+  email              String               @unique
+  password_digest    String
+  is_new             Boolean              @default(true)
+  contrato           String               @default("Nenhum")
+  tentativas_de_login Int                  @default(0)
+  last_login         DateTime?
+  created_at         DateTime             @default(now())
+  updated_at         DateTime             @updatedAt
+  user_role          String
   AuthenticationAudit AuthenticationAudit[]
-  OS                  OS[]
-  plantao             Plantao[]
+  OS                 OS[]
+  plantoes           PlantaoOperador[]    // Changed to reference the join table
+
   @@map("users")
 }
 
@@ -104,24 +105,27 @@ model OS {
 }
 
 model Plantao {
-  id                    Int         @id @default(autoincrement())
-  operadoresNome        String[]
-  operadores            User[]
-  data_inicio           DateTime    @default(now())
+  id                    Int                @id @default(autoincrement())
+  data_inicio           DateTime           @default(now())
   data_fim              DateTime
   horario_rf            DateTime
   contrato              String
   ocorrencia            Ocorrencia[]
   informacoes_adicionais Json[]
-  consideracoes         String      @default("")
-  created_at            DateTime    @default(now())
-  updated_at            DateTime    @updatedAt
+  consideracoes         String             @default("")
+  created_at            DateTime           @default(now())
+  updated_at            DateTime           @updatedAt
+  operadoresNome         String[]
+  operadores            PlantaoOperador[]  // Changed to reference the join table
+
   @@map("plantoes")
 }
-
 model PlantaoOperador {
+  plantao    Plantao @relation(fields: [plantaoId], references: [id])
   plantaoId  Int
+  operador   User    @relation(fields: [operadorId], references: [id])
   operadorId String
+
   @@id([plantaoId, operadorId])
   @@map("plantao_operador")
 }

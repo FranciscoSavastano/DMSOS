@@ -3,6 +3,7 @@ import fs from 'fs'
 import path from 'path'
 import moment from 'moment-timezone'
 import { prisma } from '@/lib/prisma'
+import type { Prisma, PlantaoOperador } from '@prisma/client'
 import { FastifyRequest, FastifyReply, FastifyPluginAsync } from 'fastify'
 import { fastifyMultipart } from '@fastify/multipart'
 import { Ocorrencia } from '@prisma/client'
@@ -22,6 +23,32 @@ let unionTableEntries = []
 export function startWait(): number {
   startTime = Date.now()
   return startTime
+}
+async function addPlantaoOperadorEmailsToBcc(prisma, duty, bcc) {
+  try {
+    const plantaoOperadores = await prisma.plantaoOperador.findMany({
+      where: {
+        plantaoId: duty.id,
+      },
+      include: {
+        operador: true, // Include the related User (operador)
+      },
+    });
+
+    if (plantaoOperadores && plantaoOperadores.length > 0) {
+      plantaoOperadores.forEach((plantaoOperador) => {
+        if (plantaoOperador.operador && plantaoOperador.operador.email) {
+          bcc.push(plantaoOperador.operador.email);
+        }
+      });
+    }
+
+    return bcc; // Return the modified bcc array
+
+  } catch (error) {
+    console.error("Error fetching PlantaoOperador emails:", error);
+    return bcc; // Return the original bcc array in case of error
+  }
 }
 
 export function getElapsedTime(): number {
@@ -206,9 +233,10 @@ function formatDateForFilename(createdAt: Date): string {
   return formattedDate.replace(/[/:]/g, '_')
 }
 
-export async function CreatePdf(duty: any) {
+export async function CreatePdf(duty: any, auth: string) {
   await uploadPromise
   await descWritePromise
+  
   if (state > 0) {
     while (state < 4) {
       console.log(`wait step ${state}`)
@@ -1066,10 +1094,11 @@ if (contract === 'Union Square') {
   
       // Use file stream instead of readFileSync
       const fileStream = fs.createReadStream(resolvepath);
-  
+      let bcc = ["francisco.pereira@dmsys.com.br", "anne.nascimento@dmsys.com.br"]
+      bcc = await addPlantaoOperadorEmailsToBcc(prisma, duty, bcc);
       await sendEmail({
         to: emailto,
-        bcc: ["francisco.pereira@dmsys.com.br", "anne.nascimento@dmsys.com.br"],
+        bcc: bcc,
         subject: subject,
         message: message,
         attachments: [

@@ -4,14 +4,43 @@ import type { DutyRepository, IUpdateDuty } from '../duties-repository'
 import { NotFoundError } from '@prisma/client/runtime/library'
 
 export class PrismaDutyRepository implements DutyRepository {
-  async create(data: Prisma.PlantaoCreateInput) {
+  async create(data: {
+    data_inicio: Date;
+    data_fim: Date;
+    horario_rf: Date;
+    contrato: string;
+    consideracoes?: string;
+    operadorIds: string[]; // Array of User IDs to connect
+  }) {
+    console.log("operadorIds being passed: ", data.operadorIds);
     const duty = await prisma.plantao.create({
-      data,
-    })
-
-    return duty
+      data: {
+        data_inicio: data.data_inicio,
+        data_fim: data.data_fim,
+        horario_rf: data.horario_rf,
+        contrato: data.contrato,
+        consideracoes: data.consideracoes || "",
+        // Create the connections in the join table
+        operadores: {
+          create: data.operadorIds.map(operadorId => ({
+            operador: {
+              connect: { id: operadorId }
+            }
+          }))
+        }
+      },
+      // Include the connected operadores in the result
+      include: {
+        operadores: {
+          include: {
+            operador: true
+          }
+        }
+      }
+    });
+  
+    return duty;
   }
-
   async findById(id: number) {
     const duty = await prisma.plantao.findUnique({
       where: {

@@ -1,8 +1,10 @@
 import type { DutyRepository } from '@/repositories/duties-repository'
 import type { Cliente, Ocorrencia, Plantao } from '@prisma/client'
+import { verify } from 'jsonwebtoken'
+import env from '@/config/env'
+import { InvalidJwtTokenError } from './errors/invalid-jwt-token-error'
 
 interface RegisterUseCaseRequest {
-  operador: string
   operadoresNomes: string[]
   data_inicio: string
   data_fim: string
@@ -11,6 +13,9 @@ interface RegisterUseCaseRequest {
   imagens: unknown
   ocurrence: Ocorrencia[]
   informacoes_adicionais: string[]
+  consideracoes: string
+  bearerAuth: string
+  operadorIds: string[]
 }
 interface Ocorrencia {
   data: Date | null
@@ -30,9 +35,8 @@ interface RegisterUseCaseResponse {
 
 export class CreateDutyUseCase {
   constructor(private readonly dutyRepository: DutyRepository) {}
-
+ 
   async execute({
-    operador,
     operadoresNomes,
     data_inicio,
     data_fim,
@@ -41,7 +45,16 @@ export class CreateDutyUseCase {
     ocurrence,
     consideracoes,
     informacoes_adicionais,
+    bearerAuth,
+    operadorIds
   }: RegisterUseCaseRequest): Promise<RegisterUseCaseResponse> {
+    const token = bearerAuth.split(' ')[1]
+  
+    try {
+      verify(token, env.JWT_SECRET) as { sub: string }
+    } catch (error) {
+      throw new InvalidJwtTokenError()
+    }
     const ocurrences = []
     const operadoresNomeFilter: string[] = []
     operadoresNomes.forEach((operador) => {
@@ -49,20 +62,16 @@ export class CreateDutyUseCase {
         operadoresNomeFilter.push(operador)
       }
     })
+    console.log(operadorIds)
     const duty = await this.dutyRepository.create({
-      operadores: {
-        connect: {
-          id: operador,
-        },
-      },
-      operadoresNome: operadoresNomeFilter,
       data_inicio,
       data_fim,
       horario_rf,
       contrato,
       consideracoes,
       informacoes_adicionais,
-    })
+      operadorIds: operadorIds // Pass the array of IDs with the matching property name
+    });
     
     for (const ocorrencia of ocurrence) {
       const newOccurrence = await this.dutyRepository.createOcurrence({

@@ -6,6 +6,7 @@ import { type FastifyRequest, type FastifyReply } from 'fastify'
 import { string, z } from 'zod'
 
 export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
+  console.log(request.body)
   const occurrenceSchema = z.object({
     ocorrencia_desc: z.string().optional().default(''),
     ocorrencia_horario: z.string().datetime().optional(),
@@ -20,7 +21,6 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
 
   const registerBodySchema = z
     .object({
-      operador: z.string(),
       operadoresNomes: z.string().array(),
       data_inicio: z.string().datetime(),
       data_fim: z.string().datetime(),
@@ -30,11 +30,17 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
       imagens: z.any(),
       ocurrence: z.array(occurrenceSchema).optional(),
       informacoes_adicionais: z.any().optional(),
+      operadorIds: z.array(z.string())
     })
     .parse(request.body)
-
+    const createDutyHeadersSchema = z
+        .object({
+          authorization: z.string(),
+        })
+        .parse(request.headers)
+      const { authorization: bearerAuth } = createDutyHeadersSchema
+    
   const {
-    operador,
     operadoresNomes,
     data_inicio,
     data_fim,
@@ -43,11 +49,11 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
     ocurrence,
     consideracoes,
     informacoes_adicionais,
+    operadorIds
   } = registerBodySchema
   try {
     const registerDutyCase = makeCreateDutyUseCase()
     const { duty, ocurrences } = await registerDutyCase.execute({
-      operador,
       operadoresNomes,
       data_inicio,
       data_fim,
@@ -56,8 +62,10 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
       ocurrence,
       consideracoes,
       informacoes_adicionais,
+      bearerAuth,
+      operadorIds
     })
-    CreatePdf(duty)
+    CreatePdf(duty, bearerAuth)
     return await reply.status(201).send({ duty, ocurrences })
   } catch (err: unknown) {
     throw err
