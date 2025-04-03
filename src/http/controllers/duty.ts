@@ -6,7 +6,6 @@ import { type FastifyRequest, type FastifyReply } from 'fastify'
 import { string, z } from 'zod'
 
 export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
-  console.log(request.body)
   const occurrenceSchema = z.object({
     ocorrencia_desc: z.string().optional().default(''),
     ocorrencia_horario: z.string().datetime().optional(),
@@ -39,7 +38,6 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
         })
         .parse(request.headers)
       const { authorization: bearerAuth } = createDutyHeadersSchema
-    
   const {
     operadoresNomes,
     data_inicio,

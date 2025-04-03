@@ -247,12 +247,25 @@ export async function CreatePdf(duty: any, auth: string) {
     contract : string,
     filedate : string,
     dutyid : string,
+    operadores : string,
   }>(async (resolve) => {
-    const users = duty.operadoresNome
+    const users = duty.operadoresNomes
     const filteredUsers = users.map((fullName) => {
-      const nameParts = fullName.split(' ')
-      return `${nameParts[0]} ${nameParts[nameParts.length - 1]}`
-    })
+      const nameParts = fullName.split(' ');
+      const firstName = nameParts[0];
+      const lastName = nameParts[nameParts.length - 1];
+    
+      if (firstName && lastName) { // Check if both first and last names are not empty
+        return `${firstName} ${lastName}`;
+      } else if (firstName) { // check if only the first name is not empty.
+        return firstName;
+      } else if (lastName) { // check if only the last name is not empty.
+        return lastName;
+      }
+      return null; // Return null if both names are empty
+    }).filter(name => name !== null); // Filter out null values
+    
+    console.log(filteredUsers)
     const data = duty.created_at
     const contract = duty.contrato
     const addinfo = duty.informacoes_adicionais
@@ -1073,12 +1086,20 @@ if (contract === 'Union Square') {
       contract,
       filedate,
       dutyid,
+      operadores: filteredUsers,
       })
   })
   //Preparação para email
   const result = await pdfCreationPromise;
-  const emailto = "jonas.vilas@dmsys.com.br"
-  const message = `Relatorio do contrato ${result.contract} na data de ${result.filedate}`
+  //const emailto = "jonas.vilas@dmsys.com.br"
+  const emailto = "francisco.pereira@dmsys.com.br"
+  let message
+  if(result.operadores.length > 1){
+    message = `Relatorio do contrato ${result.contract} na data de ${result.filedate} \nOperadores: ${result.operadores}`
+  }else {
+    message = `Relatorio do contrato ${result.contract} na data de ${result.filedate} \nOperador: ${result.operadores}`
+  }
+ 
   const subject = `Relatório Diario ${result.contract} ${result.filedate}`
   const resolvepath = path.resolve(result.filepath)
   //Envio do email
@@ -1094,7 +1115,9 @@ if (contract === 'Union Square') {
   
       // Use file stream instead of readFileSync
       const fileStream = fs.createReadStream(resolvepath);
-      let bcc = ["francisco.pereira@dmsys.com.br", "anne.nascimento@dmsys.com.br"]
+      //let bcc = ["francisco.pereira@dmsys.com.br", "anne.nascimento@dmsys.com.br"]
+      
+      let bcc = ["francisco.pereira@dmsys.com.br"]
       bcc = await addPlantaoOperadorEmailsToBcc(prisma, duty, bcc);
       await sendEmail({
         to: emailto,

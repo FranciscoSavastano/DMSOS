@@ -10,11 +10,12 @@ export class PrismaDutyRepository implements DutyRepository {
     horario_rf: Date;
     contrato: string;
     consideracoes?: string;
+    operadoresNomes: string[]
     operadorIds: string[]; // Array of User IDs to connect
   }) {
-    console.log("operadorIds being passed: ", data.operadorIds);
     const duty = await prisma.plantao.create({
       data: {
+        operadoresNomes: data.operadoresNomes,
         data_inicio: data.data_inicio,
         data_fim: data.data_fim,
         horario_rf: data.horario_rf,
@@ -91,7 +92,7 @@ export class PrismaDutyRepository implements DutyRepository {
 
       const plantoes = await prisma.plantao.findMany({
         where: {
-          operadoresNome: {
+          operadoresNomes: {
             has: user.nome,
           },
         },

@@ -115,7 +115,7 @@ model Plantao {
   consideracoes         String             @default("")
   created_at            DateTime           @default(now())
   updated_at            DateTime           @updatedAt
-  operadoresNome         String[]
+  operadoresNomes         String[]
   operadores            PlantaoOperador[]  // Changed to reference the join table
 
   @@map("plantoes")

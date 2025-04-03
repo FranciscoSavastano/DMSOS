@@ -49,7 +49,6 @@ export class CreateDutyUseCase {
     operadorIds
   }: RegisterUseCaseRequest): Promise<RegisterUseCaseResponse> {
     const token = bearerAuth.split(' ')[1]
-  
     try {
       verify(token, env.JWT_SECRET) as { sub: string }
     } catch (error) {
@@ -62,7 +61,6 @@ export class CreateDutyUseCase {
         operadoresNomeFilter.push(operador)
       }
     })
-    console.log(operadorIds)
     const duty = await this.dutyRepository.create({
       data_inicio,
       data_fim,
@@ -70,6 +68,7 @@ export class CreateDutyUseCase {
       contrato,
       consideracoes,
       informacoes_adicionais,
+      operadoresNomes,
       operadorIds: operadorIds // Pass the array of IDs with the matching property name
     });
     
