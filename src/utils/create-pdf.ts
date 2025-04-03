@@ -1091,8 +1091,7 @@ if (contract === 'Union Square') {
   })
   //Preparação para email
   const result = await pdfCreationPromise;
-  //const emailto = "jonas.vilas@dmsys.com.br"
-  const emailto = "francisco.pereira@dmsys.com.br"
+  const emailto = "jonas.vilas@dmsys.com.br"
   let message
   if(result.operadores.length > 1){
     message = `Relatorio do contrato ${result.contract} na data de ${result.filedate} \nOperadores: ${result.operadores}`
@@ -1115,9 +1114,7 @@ if (contract === 'Union Square') {
   
       // Use file stream instead of readFileSync
       const fileStream = fs.createReadStream(resolvepath);
-      //let bcc = ["francisco.pereira@dmsys.com.br", "anne.nascimento@dmsys.com.br"]
-      
-      let bcc = ["francisco.pereira@dmsys.com.br"]
+      let bcc = ["francisco.pereira@dmsys.com.br", "anne.nascimento@dmsys.com.br"]
       bcc = await addPlantaoOperadorEmailsToBcc(prisma, duty, bcc);
       await sendEmail({
         to: emailto,
