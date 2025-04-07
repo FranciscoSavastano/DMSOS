@@ -265,7 +265,6 @@ export async function CreatePdf(duty: any, auth: string) {
       return null; // Return null if both names are empty
     }).filter(name => name !== null); // Filter out null values
     
-    console.log(filteredUsers)
     const data = duty.created_at
     const contract = duty.contrato
     const addinfo = duty.informacoes_adicionais
