@@ -93,4 +93,67 @@ export async function appRoutes(app: FastifyInstance) {
   app.get('/gpthelper', gptCorrection)
 
   app.get('/sessions/verify', verifySession)
+
+  app.post('/v1/users', register)
+
+  app.post('/v1/clientes', registerCust)
+
+  app.post('/v1/clientes/read/:id', readCust)
+
+  app.get('/v1/clientes/readAll', readAllCust)
+
+  app.get('/v1/clientes/getnames/:cftv', fetchCustomerNames)
+
+  app.patch('/v1/clientes/update', updateCustomer)
+
+  app.post('/v1/users/read/:id', readUser)
+
+  app.get('/v1/users/readAll', readAllUser)
+
+  app.patch('/v1/users/update', updateUser)
+
+  app.delete('/v1/users/delete', deleteUser)
+
+  app.get('/v1/users/getnames/:user_role', fetchUserNames)
+
+  //Plantao
+  app.post('/v1/duty', createDuty)
+
+  app.post('/v1/duty/union', writeRondasUnion)
+
+  app.post('/v1/duty/read', readDuty)
+
+  app.get('/v1/duty/readAll', readAllDuty)
+
+  app.post('/v1/duty/readAllUserDuty', readAllUserDuty)
+
+  app.patch('/v1/duty/update', updateDuty)
+
+  app.delete('/v1/duty/delete', deleteDuty)
+
+  app.post('/v1/ocurrencetypes', createOcurrenceType)
+  //Outros
+
+  app.post('/v1/users/forgot-password', forgotPassword)
+
+  app.patch('/v1/users/reset-password', resetPassword)
+
+  app.post('/v1/sessions', authenticate)
+
+  app.post('/v1/sessions/refresh-token', refreshToken)
+
+  app.get('/v1/createpdf', CreatePdf)
+
+  app.post('/v1/writeFiles', initWrite)
+
+  app.post('/v1/writeDescriptions', writeDesc)
+
+  app.get('/v1/download', sendPdf)
+
+  app.get('/v1/gpthelper', gptCorrection)
+
+  app.get('/v1/sessions/verify', verifySession)
+  
+  app.get('/v1/reset-password', resetPassword)  
+
 }
