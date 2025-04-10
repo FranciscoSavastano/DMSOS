@@ -15,7 +15,7 @@ const allowedOrigins = [
   'http://192.168.10.246',
   'http://192.168.10.246:80',
   'http://dmsys.app.ci',
-  'https://dmsysci01.ddns.me',
+  'http://dmsysci01.ddns.me',
   'http://200.142.98.17', //local microtik ip mapping
 ]
 
