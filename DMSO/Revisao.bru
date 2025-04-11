@@ -1,0 +1,25 @@
+meta {
+  name: Revisao
+  type: http
+  seq: 29
+}
+
+post {
+  url: 127.0.0.1:3333/v1/duty/revisao
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjNmM2NTYzNC0xN2ZlLTRkYWUtYmEwOS1kODA5NjlmZjlhODYiLCJpYXQiOjE3NDQzOTczNjksImV4cCI6MTc0NDQxMTc2OX0.Hj4pLle-rn1iqXbCZezs3Emr5lvA3MYd9j5iM5WhUsw
+}
+
+body:json {
+  {
+    "plantao": 2,
+    "userid": "26e285db-8e2f-4a72-8999-cae8e18176c9",
+    "nome": "Francisco",
+    "texto": "BLABLBALBALBA",
+    "usertype": "Cliente"
+  }
+}

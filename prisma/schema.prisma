@@ -30,7 +30,7 @@ model User {
   AuthenticationAudit AuthenticationAudit[]
   OS                 OS[]
   plantoes           PlantaoOperador[]    // Changed to reference the join table
-
+  revisao             Revisao[]
   @@map("users")
 }
 
@@ -53,6 +53,7 @@ model Cliente {
   equipamento Equipamento[]
   tipo_ocorrencias Ocurrence_types[]
   AuthenticationAudit AuthenticationAuditCustomer[]
+  revisao           Revisao[]
   @@map("clientes")
 }
 
@@ -111,6 +112,7 @@ model Plantao {
   horario_rf            DateTime
   contrato              String
   ocorrencia            Ocorrencia[]
+  revisao               Revisao[]
   informacoes_adicionais Json[]
   consideracoes         String             @default("")
   created_at            DateTime           @default(now())
@@ -145,6 +147,19 @@ model Ocorrencia {
   @@map("ocorrencias")
 }
 
+model Revisao {
+  id Int   @id @default(autoincrement())
+  plantao_id Int
+  plantao Plantao @relation(fields: [plantao_id], references: [id])
+  cliente_id String?
+  cliente Cliente? @relation(fields: [cliente_id], references: [id])
+  user_id    String?
+  user    User?   @relation(fields: [user_id], references: [id])
+  nomeSolicitante String
+  solicitacao     String
+  isSolved        Boolean  @default(false)
+  @@map("revisoes")
+}
 model Ocurrence_types {
   id              Int           @default(autoincrement()) @id
   type            String

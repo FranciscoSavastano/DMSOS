@@ -2,6 +2,14 @@ import { prisma } from '@/lib/prisma'
 import type { Prisma } from '@prisma/client'
 import type { DutyRepository, IUpdateDuty } from '../duties-repository'
 import { NotFoundError } from '@prisma/client/runtime/library'
+import { string } from 'zod';
+interface RevisaoData {
+  plantao_id: number;
+  usertype: string;
+  userid: string;
+  nomeSolicitante: string;
+  solicitacao: string;
+}
 
 export class PrismaDutyRepository implements DutyRepository {
   async create(data: {
@@ -60,6 +68,37 @@ export class PrismaDutyRepository implements DutyRepository {
     return ocurrence
   }
 
+  async createRevisao(data: Prisma.RevisaoCreateInput) {
+    // Extract usertype and userid from data, but don't include them directly in the database record
+    const { usertype, userid, ...revisaoData } = data;
+    
+    // Create the base revisao object with the required fields
+    const createData = {
+      plantao: {
+        connect: { id: data.plantao_id }
+      },
+      nomeSolicitante: data.nomeSolicitante,
+      solicitacao: data.solicitacao
+    };
+    
+    // Based on usertype, connect to either cliente or user
+    if (usertype === 'Cliente' && userid) {
+      createData.cliente = {
+        connect: { id: userid }
+      };
+    } else if (userid) {
+      createData.user = {
+        connect: { id: userid }
+      };
+    }
+    
+    // Create the revisao record
+    const revisao = await prisma.revisao.create({
+      data: createData
+    });
+    
+    return revisao;
+  }
   async read(id: number) {
     const duty = await prisma.plantao.findUnique({
       where: {

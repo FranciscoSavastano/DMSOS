@@ -1,4 +1,5 @@
-import type { Prisma, Plantao, Ocorrencia } from '@prisma/client'
+import type { Prisma, Plantao, Ocorrencia, Revisao } from '@prisma/client'
+import { Primitive } from 'zod'
 export interface IUpdateDuty {
   id: number
   data: {
@@ -21,6 +22,7 @@ export interface IUpdateOcurrence {
 }
 export interface DutyRepository {
   create: (data: Prisma.PlantaoCreateInput) => Promise<Plantao>
+  createRevisao: (data: Prisma.RevisaoCreateInput) => Promise<Revisao>
   createOcurrence: (
     data: Prisma.OcorrenciaCreateInput,
   ) => Promise<Ocorrencia | null>

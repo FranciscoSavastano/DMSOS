@@ -30,6 +30,8 @@ import { gptCorrection } from './controllers/gpt-helper'
 import { verifySession } from './controllers/verify-session'
 import { updateCustomer } from './controllers/update-customer'
 import { readCust } from './controllers/read-cust'
+import { getPdfReport } from '@/utils/search-pdf'
+import { createRevisao } from './controllers/revisao'
 
 export async function appRoutes(app: FastifyInstance) {
   //Users
@@ -131,6 +133,10 @@ export async function appRoutes(app: FastifyInstance) {
 
   app.delete('/v1/duty/delete', deleteDuty)
 
+  app.get('/v1/duty/pdf/:id', getPdfReport)
+
+  app.post('/v1/duty/revisao', createRevisao)
+  
   app.post('/v1/ocurrencetypes', createOcurrenceType)
   //Outros
 
