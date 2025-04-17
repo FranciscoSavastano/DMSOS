@@ -3,21 +3,27 @@
 //// ------------------------------------------------------
 
 Table users {
-  cpf String [unique, not null]
   id String [pk]
+  cpf String [unique, not null]
   nome String [not null]
-  email String [unique, not null]
+  email String [unique]
   password_digest String [not null]
-  is_admin Boolean [not null, default: false]
-  tentativas_de_login Int [not null, default: 0]
+  homem_hora Float [default: 0]
   is_new Boolean [not null, default: true]
+  contrato String [not null, default: 'Nenhum']
+  tentativas_de_login Int [not null, default: 0]
   last_login DateTime
   created_at DateTime [default: `now()`, not null]
   updated_at DateTime [not null]
   user_role String [not null]
   AuthenticationAudit authentication_audit [not null]
   OS OS [not null]
-  plantao plantoes [not null]
+  obrasGerenciadas obras [not null]
+  obrasSupervisionadas dia_obras [not null]
+  obrasParticipadas ProfissionalNaObra [not null]
+  plantoes plantao_operador [not null]
+  atividadesParticipadas ProfissionalNaAtividade [not null]
+  revisao revisoes [not null]
 }
 
 Table clientes {
@@ -30,14 +36,17 @@ Table clientes {
   endereco String [not null, default: '']
   cnpj String [unique, not null]
   is_new Boolean [not null, default: true]
+  user_role String [not null, default: 'Cliente']
   tentativas_de_login Int [not null, default: 0]
-  has_cftv Boolean [not null, default: false]
   services String[] [not null]
   last_login DateTime
   created_at DateTime [default: `now()`, not null]
   updated_at DateTime [not null]
   equipamento Equipamento [not null]
   tipo_ocorrencias Ocurrence_type [not null]
+  obra obras [not null]
+  AuthenticationAudit authentication_audit_customer [not null]
+  revisao revisoes [not null]
 }
 
 Table authentication_audit {
@@ -48,6 +57,17 @@ Table authentication_audit {
   status AUTHENTICATION_STATUS [not null]
   user_id String
   tecnico users
+  created_at DateTime [default: `now()`, not null]
+}
+
+Table authentication_audit_customer {
+  id Int [pk, increment]
+  ip_address String
+  remote_port String
+  browser String
+  status AUTHENTICATION_STATUS [not null]
+  cliente_id String
+  cliente clientes
   created_at DateTime [default: `now()`, not null]
 }
 
@@ -68,21 +88,24 @@ Table OS {
 
 Table plantoes {
   id Int [pk, increment]
-  operadoresNome String[] [not null]
-  operadores users [not null]
   data_inicio DateTime [default: `now()`, not null]
   data_fim DateTime [not null]
   horario_rf DateTime [not null]
   contrato String [not null]
   ocorrencia ocorrencias [not null]
+  revisao revisoes [not null]
   informacoes_adicionais Json[] [not null]
   consideracoes String [not null, default: '']
   created_at DateTime [default: `now()`, not null]
   updated_at DateTime [not null]
+  operadoresNomes String[] [not null]
+  operadores plantao_operador [not null]
 }
 
 Table plantao_operador {
+  plantao plantoes [not null]
   plantaoId Int [not null]
+  operador users [not null]
   operadorId String [not null]
 
   indexes {
@@ -103,6 +126,84 @@ Table ocorrencias {
   observacao String
   acao String
   responsavel String
+}
+
+Table revisoes {
+  id Int [pk, increment]
+  plantao_id Int [not null]
+  plantao plantoes [not null]
+  cliente_id String
+  cliente clientes
+  user_id String
+  user users
+  nomeSolicitante String [not null]
+  solicitacao String [not null]
+  isSolved Boolean [not null, default: false]
+}
+
+Table obras {
+  id Int [pk, increment]
+  cliente_id String [not null]
+  cliente clientes [not null]
+  gerente_id String [not null]
+  gerente users [not null]
+  nome String [not null]
+  inicio DateTime [not null]
+  termino DateTime
+  numproposta String [not null]
+  disciplinas String[] [not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  horas_previstas Float [not null]
+  dia_obra dia_obras [not null]
+  atividades Atividade [not null]
+}
+
+Table dia_obras {
+  id Int [increment, unique, not null]
+  obra_id Int [not null]
+  obra obras [not null]
+  data DateTime [not null]
+  inicio DateTime [not null]
+  termino DateTime
+  horas_gastas Float [not null]
+  supervisor_id String [not null]
+  supervisor users [not null]
+  profissionais ProfissionalNaObra [not null]
+  atividades Atividade [not null]
+}
+
+Table Atividade {
+  id Int [increment, unique, not null]
+  obra_id Int [not null]
+  obra obras [not null]
+  dia_obra_id Int
+  dia_obra dia_obras
+  interferencia String
+  materiais String
+  profissionais ProfissionalNaAtividade [not null]
+}
+
+Table ProfissionalNaObra {
+  profissional_id String [not null]
+  profissional users [not null]
+  dia_obra_id Int [not null]
+  dia_obra dia_obras [not null]
+
+  indexes {
+    (profissional_id, dia_obra_id) [pk]
+  }
+}
+
+Table ProfissionalNaAtividade {
+  profissional_id String [not null]
+  profissional users [not null]
+  atividade_id Int [not null]
+  atividade Atividade [not null]
+
+  indexes {
+    (profissional_id, atividade_id) [pk]
+  }
 }
 
 Table Ocurrence_type {
@@ -137,11 +238,6 @@ Table Equipamento {
   os OS [not null]
 }
 
-Table PlantaoToUser {
-  plantaoId Int [ref: > plantoes.id]
-  operadoresId String [ref: > users.id]
-}
-
 Enum UserType {
   TECNICO
   CLIENTE
@@ -156,9 +252,41 @@ Enum AUTHENTICATION_STATUS {
 
 Ref: authentication_audit.user_id > users.id [delete: Cascade]
 
+Ref: authentication_audit_customer.cliente_id > clientes.id [delete: Cascade]
+
 Ref: OS.tecnico_id > users.id [delete: Cascade]
 
+Ref: plantao_operador.plantaoId > plantoes.id [delete: Cascade]
+
+Ref: plantao_operador.operadorId > users.id [delete: Cascade]
+
 Ref: ocorrencias.plantao_id > plantoes.id [delete: Cascade]
+
+Ref: revisoes.plantao_id > plantoes.id
+
+Ref: revisoes.cliente_id > clientes.id
+
+Ref: revisoes.user_id > users.id
+
+Ref: obras.cliente_id > clientes.id
+
+Ref: obras.gerente_id > users.id
+
+Ref: dia_obras.obra_id > obras.id
+
+Ref: dia_obras.supervisor_id > users.id
+
+Ref: Atividade.obra_id > obras.id
+
+Ref: Atividade.dia_obra_id > dia_obras.id
+
+Ref: ProfissionalNaObra.profissional_id > users.id
+
+Ref: ProfissionalNaObra.dia_obra_id > dia_obras.id
+
+Ref: ProfissionalNaAtividade.profissional_id > users.id
+
+Ref: ProfissionalNaAtividade.atividade_id > Atividade.id
 
 Ref: Ocurrence_type.contract_id > clientes.id
 

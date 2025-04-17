@@ -8,7 +8,9 @@ generator client {
   provider = "prisma-client-js"
   binaryTargets = ["native", "linux-musl", "linux-musl-openssl-3.0.x"]
 }
-
+generator dbml {
+  provider = "prisma-dbml-generator"
+}
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -18,8 +20,9 @@ model User {
   id                 String               @id @default(uuid())
   cpf                String               @unique
   nome               String
-  email              String               @unique
+  email              String?               @unique 
   password_digest    String
+  homem_hora         Float?                @default(0.0)
   is_new             Boolean              @default(true)
   contrato           String               @default("Nenhum")
   tentativas_de_login Int                  @default(0)
@@ -29,7 +32,13 @@ model User {
   user_role          String
   AuthenticationAudit AuthenticationAudit[]
   OS                 OS[]
+    // Obras que este usuário gerencia
+  obrasGerenciadas Obra[] @relation("ObraGerente")
+  obrasSupervisionadas DiaObra[]
+  // Obras em que este usuário trabalha como profissional
+  obrasParticipadas ProfissionalNaObra[]
   plantoes           PlantaoOperador[]    // Changed to reference the join table
+  atividadesParticipadas    ProfissionalNaAtividade[]
   revisao             Revisao[]
   @@map("users")
 }
@@ -52,6 +61,7 @@ model Cliente {
   updated_at            DateTime  @updatedAt
   equipamento Equipamento[]
   tipo_ocorrencias Ocurrence_types[]
+  obra          Obra[]
   AuthenticationAudit AuthenticationAuditCustomer[]
   revisao           Revisao[]
   @@map("clientes")
@@ -123,9 +133,9 @@ model Plantao {
   @@map("plantoes")
 }
 model PlantaoOperador {
-  plantao    Plantao @relation(fields: [plantaoId], references: [id])
+  plantao    Plantao @relation(fields: [plantaoId], references: [id], onDelete: Cascade)
   plantaoId  Int
-  operador   User    @relation(fields: [operadorId], references: [id])
+  operador   User    @relation(fields: [operadorId], references: [id], onDelete: Cascade)
   operadorId String
 
   @@id([plantaoId, operadorId])
@@ -159,6 +169,74 @@ model Revisao {
   solicitacao     String
   isSolved        Boolean  @default(false)
   @@map("revisoes")
+}
+
+model Obra {
+  id          Int      @id @default(autoincrement())
+  cliente_id  String
+  cliente     Cliente  @relation(fields: [cliente_id], references: [id])
+  // Relação com o gerente (um-para-muitos)
+  gerente_id  String
+  gerente     User     @relation("ObraGerente", fields: [gerente_id], references: [id])
+  // Relação muitos-para-muitos com os profissionais
+  // Outros campos da obra...
+  nome        String
+  inicio        DateTime
+  termino       DateTime? 
+  numproposta  String   
+  disciplinas   String[]
+  created_at            DateTime           @default(now())
+  updated_at            DateTime           @updatedAt
+  horas_previstas  Float
+  dia_obra     DiaObra[]
+  atividades    Atividade[]
+  @@map("obras")
+}
+
+model DiaObra {
+  id    Int  @unique @default(autoincrement())
+  obra_id     Int
+  obra        Obra    @relation(fields: [obra_id], references: [id])
+  data  DateTime
+  inicio  DateTime
+  termino DateTime?
+  horas_gastas  Float
+  supervisor_id String    
+  supervisor    User      @relation(fields: [supervisor_id], references: [id])
+  profissionais ProfissionalNaObra[]
+  atividades    Atividade[]
+
+  @@map("dia_obras")
+}
+
+model Atividade {
+  id   Int    @unique @default(autoincrement())
+  obra_id   Int
+  obra      Obra  @relation(fields: [obra_id], references: [id])
+  dia_obra_id   Int?
+  dia_obra      DiaObra?  @relation(fields: [dia_obra_id], references: [id])
+  interferencia   String?
+  materiais       String?
+  profissionais ProfissionalNaAtividade[]
+}
+// Tabela de relação para o muitos-para-muitos
+model ProfissionalNaObra {
+  profissional_id String
+  profissional    User   @relation(fields: [profissional_id], references: [id])
+  
+  dia_obra_id        Int
+  dia_obra           DiaObra   @relation(fields: [dia_obra_id], references: [id])
+  @@id([profissional_id, dia_obra_id])
+}
+
+model ProfissionalNaAtividade {
+  profissional_id  String
+  profissional      User    @relation(fields: [profissional_id], references: [id])
+
+  atividade_id      Int
+  atividade       Atividade  @relation(fields: [atividade_id], references: [id])
+
+  @@id([profissional_id, atividade_id])
 }
 model Ocurrence_types {
   id              Int           @default(autoincrement()) @id
