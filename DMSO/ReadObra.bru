@@ -1,0 +1,21 @@
+meta {
+  name: ReadObra
+  type: http
+  seq: 31
+}
+
+post {
+  url: 127.0.0.1:3333/v1/obra/read
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NTgwNmVkOC1mMmFhLTQ2MzktYWZjNC0wNWQ5NGZkZTBkMzciLCJpYXQiOjE3NDUzNDMyNDUsImV4cCI6MTc0NTM1NzY0NX0.ywqLBbXPO4vzezKnJIVJetKykaRNfTqTjTY5nksVjiI
+}
+
+body:json {
+  {
+    "id": 1
+  }
+}

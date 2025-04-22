@@ -152,9 +152,11 @@ Table obras {
   termino DateTime
   numproposta String [not null]
   disciplinas String[] [not null]
+  horas_previstas Float [not null]
+  hh_previstas Float [not null, default: 0]
+  isDiaUtil Boolean [not null, default: false]
   created_at DateTime [default: `now()`, not null]
   updated_at DateTime [not null]
-  horas_previstas Float [not null]
   dia_obra dia_obras [not null]
   atividades Atividade [not null]
 }

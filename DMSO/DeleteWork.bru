@@ -1,0 +1,21 @@
+meta {
+  name: DeleteWork
+  type: http
+  seq: 32
+}
+
+delete {
+  url: 127.0.0.1:3333/v1/obra/delete
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NTgwNmVkOC1mMmFhLTQ2MzktYWZjNC0wNWQ5NGZkZTBkMzciLCJpYXQiOjE3NDUzNDQ3NzQsImV4cCI6MTc0NTM1OTE3NH0.CjeuMr9GxrPcTOR7e-JTsVCa9dW00FDkYhuXDtEX56E
+}
+
+body:json {
+  {
+    "id": 1
+  }
+}

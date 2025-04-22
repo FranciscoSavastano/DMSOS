@@ -31,7 +31,7 @@ export async function fetchCustomerNames(
   }
   try {
     // use axios para gerar uma request interna
-    const response = await axios.get('http://127.0.0.1:3333/clientes/readAll', {
+    const response = await axios.get('http://127.0.0.1:3333/v1/clientes/readAll', {
       headers: {
         Authorization: `Bearer ${token}`,
       },

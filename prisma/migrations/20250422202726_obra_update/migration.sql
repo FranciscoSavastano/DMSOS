@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "obras" ADD COLUMN     "hh_previstas" DOUBLE PRECISION NOT NULL DEFAULT 0,
+ADD COLUMN     "isDiaUtil" BOOLEAN NOT NULL DEFAULT false;

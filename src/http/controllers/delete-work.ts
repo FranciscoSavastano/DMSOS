@@ -1,31 +1,29 @@
 import { InvalidJwtTokenError } from '@/use-cases/errors/invalid-jwt-token-error'
 import { WorkIdNotFoundError } from '@/use-cases/errors/work-id-not-found-error'
-import { makeReadWorkUseCase } from '@/use-cases/factories/make-read-work-use-case'
-import type { FastifyReply, FastifyRequest } from 'fastify'
+import { makeDeleteWorkUseCase } from '@/use-cases/factories/make-delete-work-use-case'
+import { type FastifyRequest, type FastifyReply } from 'fastify'
 import { z } from 'zod'
 
-export async function readWork(request: FastifyRequest, reply: FastifyReply) {
-  console.log(request.body)
-  const readWorkBodySchema = z
+export async function deleteWork(request: FastifyRequest, reply: FastifyReply) {
+  const deleteBodySchema = z
     .object({
       id: z.number(),
     })
     .parse(request.body)
 
-  const readWorkHeadersSchema = z
+  const deleteHeadersSchema = z
     .object({
       authorization: z.string(),
     })
     .parse(request.headers)
-
-  const { id } = readWorkBodySchema
-  const { authorization: bearerAuth } = readWorkHeadersSchema
+  const { authorization: bearerAuth } = deleteHeadersSchema
+  const { id } = deleteBodySchema
 
   try {
-    const readWorkUseCase = makeReadWorkUseCase()
-    const work = await readWorkUseCase.execute({ id, bearerAuth })
+    const deleteWorkUseCase = makeDeleteWorkUseCase()
 
-    return await reply.status(200).send({ work })
+    await deleteWorkUseCase.execute({ id, bearerAuth })
+    return await reply.status(204).send()
   } catch (err: unknown) {
     if (err instanceof WorkIdNotFoundError) {
       return await reply.status(404).send({ message: err.message })

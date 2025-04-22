@@ -185,9 +185,11 @@ model Obra {
   termino       DateTime? 
   numproposta  String   
   disciplinas   String[]
+  horas_previstas  Float
+  hh_previstas     Float @default(0)
+  isDiaUtil     Boolean @default(false)
   created_at            DateTime           @default(now())
   updated_at            DateTime           @updatedAt
-  horas_previstas  Float
   dia_obra     DiaObra[]
   atividades    Atividade[]
   @@map("obras")

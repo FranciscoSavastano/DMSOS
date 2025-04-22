@@ -32,70 +32,12 @@ import { updateCustomer } from './controllers/update-customer'
 import { readCust } from './controllers/read-cust'
 import { getPdfReport } from '@/utils/search-pdf'
 import { createRevisao } from './controllers/revisao'
+import { createWork } from './controllers/work'
+import { readAllWorks } from './controllers/read-all-works'
+import { readWork } from './controllers/read-work'
+import { deleteWork } from './controllers/delete-work'
 
 export async function appRoutes(app: FastifyInstance) {
-  //Users
-
-  app.post('/users', register)
-
-  app.post('/clientes', registerCust)
-
-  app.post('/clientes/read/:id', readCust)
-
-  app.get('/clientes/readAll', readAllCust)
-
-  app.get('/clientes/getnames/:cftv', fetchCustomerNames)
-
-  app.patch('/clientes/update', updateCustomer)
-
-  app.post('/users/read/:id', readUser)
-
-  app.get('/users/readAll', readAllUser)
-
-  app.patch('/users/update', updateUser)
-
-  app.delete('/users/delete', deleteUser)
-
-  app.get('/users/getnames/:user_role', fetchUserNames)
-
-  //Plantao
-  app.post('/duty', createDuty)
-
-  app.post('/duty/union', writeRondasUnion)
-
-  app.post('/duty/read', readDuty)
-
-  app.get('/duty/readAll', readAllDuty)
-
-  app.post('/duty/readAllUserDuty', readAllUserDuty)
-
-  app.patch('/duty/update', updateDuty)
-
-  app.delete('/duty/delete', deleteDuty)
-
-  app.post('/ocurrencetypes', createOcurrenceType)
-  //Outros
-
-  app.post('/users/forgot-password', forgotPassword)
-
-  app.patch('/users/reset-password', resetPassword)
-
-  app.post('/sessions', authenticate)
-
-  app.post('/sessions/refresh-token', refreshToken)
-
-  app.get('/createpdf', CreatePdf)
-
-  app.post('/writeFiles', initWrite)
-
-  app.post('/writeDescriptions', writeDesc)
-
-  app.get('/download', sendPdf)
-
-  app.get('/gpthelper', gptCorrection)
-
-  app.get('/sessions/verify', verifySession)
-
   app.post('/v1/users', register)
 
   app.post('/v1/clientes', registerCust)
@@ -138,6 +80,7 @@ export async function appRoutes(app: FastifyInstance) {
   app.post('/v1/duty/revisao', createRevisao)
   
   app.post('/v1/ocurrencetypes', createOcurrenceType)
+
   //Outros
 
   app.post('/v1/users/forgot-password', forgotPassword)
@@ -158,8 +101,19 @@ export async function appRoutes(app: FastifyInstance) {
 
   app.get('/v1/gpthelper', gptCorrection)
 
+  //Obra
+  app.post('/v1/obra', createWork)
+  
+  app.post('/v1/obra/read', readWork)
+
+  app.get('/v1/obra/readAll', readAllWorks)
+
+  app.delete('/v1/obra/delete', deleteWork)
+
+  //Outros
+  
   app.get('/v1/sessions/verify', verifySession)
   
   app.get('/v1/reset-password', resetPassword)  
-
+  
 }
