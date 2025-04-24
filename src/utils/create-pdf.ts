@@ -236,64 +236,33 @@ function formatDateForFilename(createdAt: Date): string {
 export async function CreatePdf(duty: any, auth: string) {
   await uploadPromise
   await descWritePromise
-  
-  if (state > 0) {
-    while (state < 4) {
-      console.log(`wait step ${state}`)
-    }
-  }
-  pdfCreationPromise = new Promise<{
-    filepath : string,
-    contract : string,
-    filedate : string,
-    dutyid : string,
-    operadores : string,
-  }>(async (resolve) => {
-    const users = duty.operadoresNomes
-    const filteredUsers = users.map((fullName) => {
-      const nameParts = fullName.split(' ');
-      const firstName = nameParts[0];
-      const lastName = nameParts[nameParts.length - 1];
-    
-      if (firstName && lastName) { // Check if both first and last names are not empty
-        return `${firstName} ${lastName}`;
-      } else if (firstName) { // check if only the first name is not empty.
-        return firstName;
-      } else if (lastName) { // check if only the last name is not empty.
-        return lastName;
-      }
-      return null; // Return null if both names are empty
-    }).filter(name => name !== null); // Filter out null values
-    
-    const data = duty.created_at
-    const contract = duty.contrato
-    const addinfo = duty.informacoes_adicionais
+  const users = duty.operadoresNomes;
+  const filteredUsers = users.map((fullName) => {
+    const nameParts = fullName.split(' ');
+    const firstName = nameParts[0];
+    const lastName = nameParts[nameParts.length - 1];
+    return firstName && lastName ? `${firstName} ${lastName}` : firstName || lastName || null;
+  }).filter(name => name !== null);
 
-    const dutyid = duty.id
-    const ocurrences = await prisma.ocorrencia.findMany({
-      where: {
-        plantao_id: dutyid,
-      },
-    })
-    
-    const ocurrence = ocurrences.map((ocurrence) => {
-      
-      const formattedDateStart = moment.utc(ocurrence.horario).format('HH:mm')
-      const formattedDateEnd = moment.utc(ocurrence.termino).format('HH:mm')
-      const formattedData = moment.utc(ocurrence.data).format('DD/MM/YYYY')
-    
-      return {
-        ...ocurrence,
-        newHorario: formattedDateStart,
-        newTermino: formattedDateEnd,
-        newData: formattedData,
-      }
-    })
-    const dataformatada = formatarData(duty.created_at)
+  const data = duty.created_at;
+  const contract = duty.contrato;
+  const addinfo = duty.informacoes_adicionais;
+  const dutyid = duty.id;
 
-    const periodo = determinePeriod(duty.created_at)
-    const tempDescFilePath = path.join(__dirname, 'temp_anexpath_desc.txt')
-    const tempFilePath = path.join(__dirname, 'temp_anexpath.txt')
+  const ocurrences = await prisma.ocorrencia.findMany({
+    where: { plantao_id: dutyid },
+  });
+  console.log(ocurrences)
+
+  const formattedOcurrences = ocurrences.map((ocurrence) => ({
+    ...ocurrence,
+    newHorario: moment.utc(ocurrence.horario).format('HH:mm'),
+    newTermino: moment.utc(ocurrence.termino).format('HH:mm'),
+    newData: moment.utc(ocurrence.data).format('DD/MM/YYYY'),
+  }));
+
+  const dataformatada = moment(data).tz('America/Sao_Paulo').locale('pt-br').format('dddd, D [de] MMMM [de] YYYY [às] HH:mm');
+  const periodo = moment(data).tz('America/Sao_Paulo').hour() >= 18 || moment(data).tz('America/Sao_Paulo').hour() < 6 ? 'Noturno' : 'Diurno';
 
     async function getImage() {
       const images = {
@@ -984,7 +953,7 @@ if (contract === 'Union Square') {
           { label: 'LOCAL', align: 'center', headerAlign: 'center' },
           { label: 'OBSEV', align: 'center', headerAlign: 'center' },
         ],
-        rows: ocurrence.map((ocurrence) => [
+        rows: ocurrences.map((ocurrence) => [
           ocurrence.newHorario || '',
           ocurrence.local || '',
           ocurrence.observacao || '',
@@ -1077,92 +1046,17 @@ if (contract === 'Union Square') {
     unionTableEntries = []
     await generatePdf(doc, filePath)
     doc.end()
-    archpath = `${gendocsPath}/Relatorio ${contract} ${filedate} ${dutyid}.pdf`
-    const filepath = path.resolve(archpath)   
-    //Delete os arquivos temporarios, se não houver, descreva no console
-    resolve({
-      filepath,
-      contract,
-      filedate,
-      dutyid,
-      operadores: filteredUsers,
-      })
-  })
-  //Preparação para email
-  const result = await pdfCreationPromise;
-  const emailto = "jonas.vilas@dmsys.com.br"
-  let message
-  if(result.operadores.length > 1){
-    message = `Relatorio do contrato ${result.contract} na data de ${result.filedate} \nOperadores: ${result.operadores}`
-  }else {
-    message = `Relatorio do contrato ${result.contract} na data de ${result.filedate} \nOperador: ${result.operadores}`
-  }
- 
-  const subject = `Relatório Diario ${result.contract} ${result.filedate}`
-  const resolvepath = path.resolve(result.filepath)
-  //Envio do email
-  sendemailpromise = new Promise<void>(async (resolve, reject) => {
-    try {
-      // Verify file exists and is readable
-      if (!fs.existsSync(resolvepath)) {
-        throw new Error(`File does not exist: ${resolvepath}`);
-      }
-  
-      // Log file details before sending
-      const fileStats = fs.statSync(resolvepath);
-  
-      // Use file stream instead of readFileSync
-      const fileStream = fs.createReadStream(resolvepath);
-      let bcc = ["francisco.pereira@dmsys.com.br", "anne.nascimento@dmsys.com.br"]
-      bcc = await addPlantaoOperadorEmailsToBcc(prisma, duty, bcc);
-      await sendEmail({
-        to: emailto,
-        bcc: bcc,
-        subject: subject,
-        message: message,
-        attachments: [
-          {
-            filename: `Relatorio ${result.contract} ${result.filedate} ${result.dutyid}.pdf`,
-            content: fileStream,
-            contentType: 'application/pdf'
-          }
-        ]
-      });
-  
-      // Wait for the stream to finish
-      await new Promise((streamResolve, streamReject) => {
-        fileStream.on('end', () => {
-                    streamResolve();
-        });
-        fileStream.on('error', (streamError) => {
-          console.error('File stream error:', streamError);
-          streamReject(streamError);
-        });
-      });
-  
-      console.log('Email sent successfully');
-      resolve();
-    } catch (error) {
-      console.error('Error sending email:', error);
-      
-      if (error instanceof Error) {
-        console.error('Error name:', error.name);
-        console.error('Error message:', error.message);
-        console.error('Error stack:', error.stack);
-      }
-      
-      reject(error);
-    }
-  });
-  
-  // If you want to log the error when calling the promise
-  sendemailpromise.catch(error => {
-    console.error('Unhandled error in email sending:', error);
-  });
+    
+    return new Promise((resolve, reject) => {
+      const buffers: Buffer[] = [];
+      doc.on('data', buffers.push.bind(buffers));
+      doc.on('end', () => resolve(Buffer.concat(buffers)));
+      doc.on('error', reject);
+      doc.end();
+    });
 }
 
 export async function sendPdf(request: FastifyRequest, reply: FastifyReply) {
-  await pdfCreationPromise
   try {
     if (!archpath) {
       while (!archpath) {
