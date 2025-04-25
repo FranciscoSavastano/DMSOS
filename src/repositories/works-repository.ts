@@ -12,6 +12,13 @@ export interface IUpdateObra {
     numproposta?: string
     horas_previstas?: number
     disciplinas?: string[]
+    hh_previstas?: number
+    equipe?: {
+      cargo?: string
+      quantidade?: number
+      tempoDiario?: number
+    }[]
+    tipoDias?: string
   }
 }
 

@@ -3,6 +3,7 @@ import { type FastifyRequest, type FastifyReply } from 'fastify'
 import { string, z } from 'zod'
 
 export async function createWork(request: FastifyRequest, reply: FastifyReply) {
+  console.log(request.body)
   const registerBodySchema = z
     .object({
       cliente_id: z.string(),
@@ -13,6 +14,14 @@ export async function createWork(request: FastifyRequest, reply: FastifyReply) {
       numproposta: z.string(),
       horas_previstas: z.number(),
       hh_previstas: z.number(),
+      tipoDias: z.string(),
+      equipe: z.array(
+        z.object({
+          cargo: z.string(),
+          quantidade: z.number(),
+          tempoDiario: z.number(),
+        })
+      ),
       disciplinas: z.string().array(),
     })
     .parse(request.body)
@@ -31,7 +40,9 @@ export async function createWork(request: FastifyRequest, reply: FastifyReply) {
     numproposta,
     horas_previstas,
     hh_previstas,
-    disciplinas
+    disciplinas,
+    equipe,
+    tipoDias,
   } = registerBodySchema
   try {
     const registerWorkCase = makeCreateWorkUseCase()
@@ -45,6 +56,8 @@ export async function createWork(request: FastifyRequest, reply: FastifyReply) {
       horas_previstas,
       hh_previstas,
       disciplinas,
+      equipe,
+      tipoDias,
       bearerAuth,
     })
     return await reply.status(201).send({ work })

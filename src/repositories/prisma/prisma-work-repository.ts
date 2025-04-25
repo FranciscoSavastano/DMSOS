@@ -15,6 +15,13 @@ export class PrismaWorkRepository implements WorkRepository {
         numproposta: string
         disciplinas: string[]
         horas_previstas: number
+        hh_previstas: number
+        tipoDias: string
+        equipe: {
+            cargo: string
+            quantidade: number
+            tempoDiario: number
+        }[]
     }) {
         const work = await prisma.obra.create({
             data: {
@@ -30,12 +37,15 @@ export class PrismaWorkRepository implements WorkRepository {
                 numproposta: data.numproposta,
                 disciplinas: data.disciplinas,
                 horas_previstas: data.horas_previstas,
+                hh_previstas: data.hh_previstas,
+                tipoDias: data.tipoDias,
+                equipe: data.equipe,
             },
-            include: {
+            include: { 
                 cliente: true,
                 gerente: true,
             },
-        })
+        });
 
         return work
     }

@@ -32,7 +32,7 @@ export async function fetchUserNames(
   }
   try {
     // use axios para gerar uma request interna
-    const response = await axios.get('http://127.0.0.1:3333/users/readAll', {
+    const response = await axios.get('http://127.0.0.1:3333/v1/users/readAll', {
       headers: {
         Authorization: `Bearer ${token}`,
       },

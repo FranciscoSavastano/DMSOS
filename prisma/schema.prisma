@@ -187,7 +187,8 @@ model Obra {
   disciplinas   String[]
   horas_previstas  Float
   hh_previstas     Float @default(0)
-  isDiaUtil     Boolean @default(false)
+  tipoDias        String @default("util")
+  equipe        Json[] @default([])
   created_at            DateTime           @default(now())
   updated_at            DateTime           @updatedAt
   dia_obra     DiaObra[]

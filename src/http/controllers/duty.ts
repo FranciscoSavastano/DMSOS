@@ -61,13 +61,16 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
       bearerAuth,
       operadorIds,
     });
-
+    console.log("Duty created successfully Sending to pdf...");
     const pdfBuffer = await CreatePdf(duty, bearerAuth);
-
+    console.log('PDF created successfully!');
     // Send email with the PDF buffer
     const emailto = "francisco.pereira@dmsys.com.br";
     const subject = `Relatório Diário ${contrato}`;
     const message = `Relatório do contrato ${contrato} na data de ${moment(data_inicio).format('DD/MM/YYYY')}`;
+    console.log('PDF created successfully at:', pdfBuffer);
+
+    // Send email with the PDF attachment
     await sendEmail({
       to: emailto,
       subject,
@@ -75,12 +78,12 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
       attachments: [
         {
           filename: `Relatorio_${contrato}_${duty.id}.pdf`,
-          content: pdfBuffer,
+          path: pdfBuffer, // Attach the file directly from the path
           contentType: 'application/pdf',
         },
       ],
     });
-
+    console.log('Email sent successfully!');
     return reply.status(201).send({ duty, ocurrences });
   } catch (err) {
     console.error(err);

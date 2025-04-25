@@ -5,7 +5,11 @@ meta {
 }
 
 get {
-  url: 127.0.0.1:3333/users/getnames
+  url: 127.0.0.1:3333/v1/users/getnames/Operador
   body: none
-  auth: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NTgwNmVkOC1mMmFhLTQ2MzktYWZjNC0wNWQ5NGZkZTBkMzciLCJpYXQiOjE3NDU1ODczOTEsImV4cCI6MTc0NTYwMTc5MX0.mNGeVc8v4mKU1KN3IGlNWKpTFBHllg78eqlw0Jnuu-A
 }

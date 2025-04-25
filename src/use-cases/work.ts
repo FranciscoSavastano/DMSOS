@@ -14,6 +14,12 @@ interface RegisterUseCaseRequest {
   horas_previstas: number
   hh_previstas: number
   disciplinas: string[]
+  equipe: {
+    cargo: string
+    quantidade: number
+    tempoDiario: number
+  }[]
+  tipoDias: string
   bearerAuth: string
 }
 
@@ -34,6 +40,8 @@ export class CreateWorkUseCase {
     horas_previstas,
     hh_previstas,
     disciplinas,
+    equipe,
+    tipoDias,
     bearerAuth,
   }: RegisterUseCaseRequest): Promise<RegisterUseCaseResponse> {
     const token = bearerAuth.split(' ')[1]
@@ -52,6 +60,8 @@ export class CreateWorkUseCase {
       numproposta,
       horas_previstas,
       hh_previstas,
+      equipe,
+      tipoDias,
       disciplinas,
     });
     

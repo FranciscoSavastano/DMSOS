@@ -11,6 +11,7 @@ import { FastifyMultipartRequest } from '@fastify/multipart'
 import { test } from 'vitest'
 import { width } from 'pdfkit/js/page'
 import { sendEmail } from './send-email'
+import { getPdfReport } from './search-pdf'
 var canwrite = false
 var PDFtable = require('pdfkit-table')
 let sendemailpromise: Promise<unknown>
@@ -33,21 +34,20 @@ async function addPlantaoOperadorEmailsToBcc(prisma, duty, bcc) {
       include: {
         operador: true, // Include the related User (operador)
       },
-    });
+    })
 
     if (plantaoOperadores && plantaoOperadores.length > 0) {
       plantaoOperadores.forEach((plantaoOperador) => {
         if (plantaoOperador.operador && plantaoOperador.operador.email) {
-          bcc.push(plantaoOperador.operador.email);
+          bcc.push(plantaoOperador.operador.email)
         }
-      });
+      })
     }
 
-    return bcc; // Return the modified bcc array
-
+    return bcc // Return the modified bcc array
   } catch (error) {
-    console.error("Error fetching PlantaoOperador emails:", error);
-    return bcc; // Return the original bcc array in case of error
+    console.error('Error fetching PlantaoOperador emails:', error)
+    return bcc // Return the original bcc array in case of error
   }
 }
 
@@ -135,44 +135,44 @@ export async function writeRondasUnion(
   reply: FastifyReply,
 ) {
   try {
-    const parts = await request.parts();
+    const parts = await request.parts()
 
-    const formData: Record<string, any> = {};
-    const images: Record<number, any[]> = {}; // Store images by index
+    const formData: Record<string, any> = {}
+    const images: Record<number, any[]> = {} // Store images by index
 
     for await (const part of parts) {
       if (part.type === 'file') {
         // Handle file parts
-        const match = part.fieldname.match(/images\[(\d+)\]/);
+        const match = part.fieldname.match(/images\[(\d+)\]/)
         if (match) {
-          const index = parseInt(match[1]);
-          const buffer = await part.toBuffer();
+          const index = parseInt(match[1])
+          const buffer = await part.toBuffer()
           if (!images[index]) {
-            images[index] = [];
+            images[index] = []
           }
           images[index].push({
             filename: part.filename,
             mimetype: part.mimetype,
             data: buffer.toString('base64'),
-          });
+          })
         }
       } else {
         // Handle field parts
-        const key = part.fieldname;
-        const value = part.value;
+        const key = part.fieldname
+        const value = part.value
         if (
           key.startsWith('time[') ||
           key.startsWith('bloco[') ||
           key.startsWith('observation[')
         ) {
-          const match = key.match(/\[(\d+)\]/);
+          const match = key.match(/\[(\d+)\]/)
           if (match) {
-            const index = parseInt(match[1]);
-            const fieldName = key.split('[')[0];
+            const index = parseInt(match[1])
+            const fieldName = key.split('[')[0]
             if (!formData[index]) {
-              formData[index] = {};
+              formData[index] = {}
             }
-            formData[index][fieldName] = value;
+            formData[index][fieldName] = value
           }
         }
       }
@@ -186,14 +186,14 @@ export async function writeRondasUnion(
         observation: data.observation,
         images: images[parseInt(index)] || [], // Get images for this index
       }),
-    );
+    )
     return reply.status(201).send({
       message: 'Rondas Union data processed successfully.',
       data: unionTableEntries,
-    });
+    })
   } catch (error) {
-    console.error('Error processing Rondas Union data:', error);
-    return reply.status(500).send({ message: 'Internal server error.' });
+    console.error('Error processing Rondas Union data:', error)
+    return reply.status(500).send({ message: 'Internal server error.' })
   }
 }
 export async function writeDesc(request: FastifyRequest, reply: FastifyReply) {
@@ -236,859 +236,914 @@ function formatDateForFilename(createdAt: Date): string {
 export async function CreatePdf(duty: any, auth: string) {
   await uploadPromise
   await descWritePromise
-  const users = duty.operadoresNomes;
-  const filteredUsers = users.map((fullName) => {
-    const nameParts = fullName.split(' ');
-    const firstName = nameParts[0];
-    const lastName = nameParts[nameParts.length - 1];
-    return firstName && lastName ? `${firstName} ${lastName}` : firstName || lastName || null;
-  }).filter(name => name !== null);
+  const users = duty.operadoresNomes
+  const filteredUsers = users
+    .map((fullName) => {
+      const nameParts = fullName.split(' ')
+      const firstName = nameParts[0]
+      const lastName = nameParts[nameParts.length - 1]
+      return firstName && lastName
+        ? `${firstName} ${lastName}`
+        : firstName || lastName || null
+    })
+    .filter((name) => name !== null)
 
-  const data = duty.created_at;
-  const contract = duty.contrato;
-  const addinfo = duty.informacoes_adicionais;
-  const dutyid = duty.id;
+  const data = duty.created_at
+  const contract = duty.contrato
+  const addinfo = duty.informacoes_adicionais
+  const dutyid = duty.id
 
   const ocurrences = await prisma.ocorrencia.findMany({
     where: { plantao_id: dutyid },
-  });
-  console.log(ocurrences)
+  })
 
   const formattedOcurrences = ocurrences.map((ocurrence) => ({
     ...ocurrence,
     newHorario: moment.utc(ocurrence.horario).format('HH:mm'),
     newTermino: moment.utc(ocurrence.termino).format('HH:mm'),
     newData: moment.utc(ocurrence.data).format('DD/MM/YYYY'),
-  }));
+  }))
 
-  const dataformatada = moment(data).tz('America/Sao_Paulo').locale('pt-br').format('dddd, D [de] MMMM [de] YYYY [às] HH:mm');
-  const periodo = moment(data).tz('America/Sao_Paulo').hour() >= 18 || moment(data).tz('America/Sao_Paulo').hour() < 6 ? 'Noturno' : 'Diurno';
+  const dataformatada = moment(data)
+    .tz('America/Sao_Paulo')
+    .locale('pt-br')
+    .format('dddd, D [de] MMMM [de] YYYY [às] HH:mm')
+  const periodo =
+    moment(data).tz('America/Sao_Paulo').hour() >= 18 ||
+    moment(data).tz('America/Sao_Paulo').hour() < 6
+      ? 'Noturno'
+      : 'Diurno'
 
-    async function getImage() {
-      const images = {
-        comercialImage: './src/utils/pdf-img/com-image.png',
-        fadelogo: './src/utils/pdf-img/fade-logo.png',
-        simplelogo: './src/utils/pdf-img/logo-simple.png',
-        techborder: './src/utils/pdf-img/tech-border.png',
-        bordercover: './src/utils/pdf-img/border-cover.png',
-      }
-      return images
+  async function getImage() {
+    const images = {
+      comercialImage: './src/utils/pdf-img/com-image.png',
+      fadelogo: './src/utils/pdf-img/fade-logo.png',
+      simplelogo: './src/utils/pdf-img/logo-simple.png',
+      techborder: './src/utils/pdf-img/tech-border.png',
+      bordercover: './src/utils/pdf-img/border-cover.png',
     }
+    return images
+  }
 
-    const PDFDocument = pdfkit
-    const doc = new PDFDocument({ size: 'A4' })
-    const images = await getImage()
-    const halfPageWidth = 595 / 2
-    // Add the first page (CAPA)  // Adjust image dimensions as needed
-    const comercialImagePath = images.comercialImage
-    const fadeLogoPath = images.fadelogo
-    const simpleLogoPath = images.simplelogo
+  const PDFDocument = pdfkit
+  const doc = new PDFDocument({ size: 'A4' })
+  const images = await getImage()
+  const halfPageWidth = 595 / 2
+  // Add the first page (CAPA)  // Adjust image dimensions as needed
+  const comercialImagePath = images.comercialImage
+  const fadeLogoPath = images.fadelogo
+  const simpleLogoPath = images.simplelogo
 
-    // Add the commercial image
-    doc.image(comercialImagePath, 0, 0, { width: 695, height: 500 }) // Adjust dimensions as needed
+  // Add the commercial image
+  doc.image(comercialImagePath, 0, 0, { width: 695, height: 500 }) // Adjust dimensions as needed
 
-    // Add the fade logo
-    doc.image(fadeLogoPath, 0, 430, { fit: [200, 200] }) // Maintain logo aspect ratio
+  // Add the fade logo
+  doc.image(fadeLogoPath, 0, 430, { fit: [200, 200] }) // Maintain logo aspect ratio
 
-    // Add the contract text (assuming `contract` is a string)
-    const contractFontSize = 24 // Adjust font size as needed
-    doc
-      .fontSize(contractFontSize)
-      .fill('#000000') // Adjust text color
-      .text(contract, 0, 580, { align: 'center' }) // Center align text
+  // Add the contract text (assuming `contract` is a string)
+  const contractFontSize = 24 // Adjust font size as needed
+  doc
+    .fontSize(contractFontSize)
+    .fill('#000000') // Adjust text color
+    .text(contract, 0, 580, { align: 'center' }) // Center align text
 
-    // Add the "RELATÓRIO DIÁRIO DE OPERAÇÃO" heading
-    const headingFontSize = 18 // Adjust font size as needed
-    doc
-      .fontSize(headingFontSize)
-      .fill('#000000') // Adjust text color
-      .text('RELATÓRIO DIÁRIO DE OPERAÇÃO', 0, 620, { align: 'center' }) // Center align text
+  // Add the "RELATÓRIO DIÁRIO DE OPERAÇÃO" heading
+  const headingFontSize = 18 // Adjust font size as needed
+  doc
+    .fontSize(headingFontSize)
+    .fill('#000000') // Adjust text color
+    .text('RELATÓRIO DIÁRIO DE OPERAÇÃO', 0, 620, { align: 'center' }) // Center align text
 
-    // Add the operator and period information (assuming `users` and `periodo` are strings)
-    const infoFontSize = 15 // Adjust font size as needed
-    doc
-      .fontSize(infoFontSize)
-      .fill('#000000') // Adjust text color
-      .text(`OPERADOR: ${filteredUsers}\n\nPERÍODO: ${periodo}`, 0, 700)
+  // Add the operator and period information (assuming `users` and `periodo` are strings)
+  const infoFontSize = 15 // Adjust font size as needed
+  doc
+    .fontSize(infoFontSize)
+    .fill('#000000') // Adjust text color
+    .text(`OPERADOR: ${filteredUsers}\n\nPERÍODO: ${periodo}`, 0, 700)
 
-    // Add the simple logo
-    doc.image(simpleLogoPath, 400, 650, { fit: [200, 200] }) // Maintain logo aspect ratio
+  // Add the simple logo
+  doc.image(simpleLogoPath, 400, 650, { fit: [200, 200] }) // Maintain logo aspect ratio
 
-    // Add the website link (assuming it's a string)
-    const linkFontSize = 13 // Adjust font size as needed// Adjust link color
-    doc.fontSize(linkFontSize).text(`www.dmsys.com.br`, 440, 800, {
-      link: 'http://dmsys.com.br',
-      align: 'right',
-      height: 50,
-      width: 120,
-    }) // Set link behavior and underline
+  // Add the website link (assuming it's a string)
+  const linkFontSize = 13 // Adjust font size as needed// Adjust link color
+  doc.fontSize(linkFontSize).text(`www.dmsys.com.br`, 440, 800, {
+    link: 'http://dmsys.com.br',
+    align: 'right',
+    height: 50,
+    width: 120,
+  }) // Set link behavior and underline
 
-    // Add the formatted date (assuming `dataformatada` is a string)
-    doc
-      .fontSize(linkFontSize)
-      .fill('#000000')
-      .text(dataformatada, 0, 800, { align: 'left', height: 50 }) // Right align text
-    // Create a content container
+  // Add the formatted date (assuming `dataformatada` is a string)
+  doc
+    .fontSize(linkFontSize)
+    .fill('#000000')
+    .text(dataformatada, 0, 800, { align: 'left', height: 50 }) // Right align text
+  // Create a content container
 
-    // Add the second page (OBJETIVO)
+  // Add the second page (OBJETIVO)
+  doc.addPage()
+  doc.image(images.techborder, 0, 122, { width: 90, height: 720 })
+  doc.image(images.bordercover, 0, 122, { width: 90, height: 720 })
+  const objectivetext =
+    'Este documento tem por objetivo apresentar, documentar e registrar todas as ocorrências, posturas e anomalias na operação diária do condomínio analisadas através do monitoramento das câmeras de vigilância (CFTV).'
+  doc.fontSize(28).fill('#001233').text('OBJETIVO', { align: 'center' })
+  doc
+    .fontSize(15)
+    .fill('#001233')
+    .text(objectivetext, 100, 200, { lineGap: 10 })
+
+  if (uploadedFileData.length > 0) {
     doc.addPage()
-    doc.image(images.techborder, 0, 122, { width: 90, height: 720 })
-    doc.image(images.bordercover, 0, 122, { width: 90, height: 720 })
-    const objectivetext =
-      'Este documento tem por objetivo apresentar, documentar e registrar todas as ocorrências, posturas e anomalias na operação diária do condomínio analisadas através do monitoramento das câmeras de vigilância (CFTV).'
-    doc.fontSize(28).fill('#001233').text('OBJETIVO', { align: 'center' })
     doc
-      .fontSize(15)
+      .fontSize(28)
       .fill('#001233')
-      .text(objectivetext, 100, 200, { lineGap: 10 })
+      .text('RELATÓRIO FOTOGRÁFICO', 40, 30, { align: 'center' })
 
-    if (uploadedFileData.length > 0) {
-      doc.addPage()
+    const base64Images = uploadedFileData
+    const imagesdescription = descriptions
+
+    // Calculate the maximum number of images per row based on page width
+    const imageWidth = 90
+    const imageMargin = 20
+
+    let x = imageMargin
+    let y = imageWidth
+
+    base64Images.forEach((base64Image, index) => {
+      // Convert base64 string to buffer
+      const imageBuffer = Buffer.from(base64Image, 'base64')
+      const imagedesc = imagesdescription[index]
+      // Add the image to the PDF
+
+      doc.image(imageBuffer, x, y, { width: 150, height: 150 })
+      doc.rect(x, y + 150, 150, 70).fill('#007bff') // Adjust the color as needed
+      // Add text within the rectangle
       doc
-        .fontSize(28)
-        .fill('#001233')
-        .text('RELATÓRIO FOTOGRÁFICO', 40, 30, { align: 'center' })
-
-      const base64Images = uploadedFileData
-      const imagesdescription = descriptions
-
-      // Calculate the maximum number of images per row based on page width
-      const imageWidth = 90
-      const imageMargin = 20
-
-      let x = imageMargin
-      let y = imageWidth
-
-      base64Images.forEach((base64Image, index) => {
-        // Convert base64 string to buffer
-        const imageBuffer = Buffer.from(base64Image, 'base64')
-        const imagedesc = imagesdescription[index]
-        // Add the image to the PDF
-
-        doc.image(imageBuffer, x, y, { width: 150, height: 150 })
-        doc.rect(x, y + 150, 150, 70).fill('#007bff') // Adjust the color as needed
-        // Add text within the rectangle
-        doc
-          .fontSize(10)
-          .fill('#fff')
-          .text(imagedesc, x + 5, y + 155, { width: 150 })
-        x += 200
-        if (index != 0) {
-          if ((index + 1) % 3 === 0) {
-            x = imageMargin
-            y += 230
-          }
-        }
-        if ((index + 1) % 9 === 0) {
-          doc.addPage()
-          doc
-            .fontSize(28)
-            .fill('#001233')
-            .text('RELATÓRIO FOTOGRÁFICO', 40, 30, { align: 'center' })
+        .fontSize(10)
+        .fill('#fff')
+        .text(imagedesc, x + 5, y + 155, { width: 150 })
+      x += 200
+      if (index != 0) {
+        if ((index + 1) % 3 === 0) {
           x = imageMargin
-          y = imageWidth
-        }
-      })
-    }
-    //POLICIA MILITAR
-    if (contract === 'Lead Américas') {
-      const rondasTable: {
-        title: string
-        headers: { label: string; align: string; headerAlign: string; }[]
-        rows: string[][]
-      } = {
-        title: 'RONDA',
-        headers: [
-          { label: 'HORÁRIO INICIO', align: 'center', headerAlign: 'center'},
-          { label: 'HORÁRIO TERMINO', align: 'center', headerAlign: 'center' },
-          { label: 'LOCAL', align: 'center', headerAlign: 'center' },
-          { label: 'RESPONSÁVEL', align: 'center', headerAlign: 'center' },
-          { label: 'OBSERVAÇÃO', align: 'center', headerAlign: 'center' },
-        ],
-        rows: [],
-        prepareHeader: () => doc.font('Helvetica-Bold'),
-      
-      }
-
-      const limpezaTable: {
-        title: string
-        headers: { label: string; align: string; headerAlign: string; }[]
-        rows: string[][]
-      } = {
-        title: 'LIMPEZA',
-        headers: [
-          { label: 'HORÁRIO', align: 'center', headerAlign: 'center'},
-          { label: 'LOCAL', align: 'center', headerAlign: 'center' },
-          { label: 'DATA', align: 'center', headerAlign: 'center' },
-        ],
-        rows: [],
-        prepareHeader: () => doc.font('Helvetica-Bold'),
-      }
-
-      for (const occurrence of ocurrence) {
-        if (occurrence.ocurrence_type === 'Limpeza') {
-          limpezaTable.rows.push([
-            occurrence.newHorario || '',
-            occurrence.local || '',
-            occurrence.newData || '',
-          ])
-        } else {
-          rondasTable.rows.push([
-            occurrence.newHorario || '',
-            occurrence.newTermino || '',
-            occurrence.local || '',
-            occurrence.responsavel || '',
-            occurrence.observacao || '',
-          ])
+          y += 230
         }
       }
-
-      if (rondasTable.rows.length > 0) {
+      if ((index + 1) % 9 === 0) {
         doc.addPage()
         doc
           .fontSize(28)
           .fill('#001233')
-          .text('RONDAS NO EMPREENDIMENTO', { align: 'center' })
-        await doc.table(rondasTable, {
-          width: 500,
-          align: 'center',
-          x: 50,
-          columnSpacing: 2,
-          divider: {
-            header: { 
-              disabled: false, 
-              width: 1, 
-              opacity: 1 
-            },
-            horizontal: { 
-              disabled: false, 
-              width: 1, 
-              opacity: 0.5 
-            },
-          },
-          prepareHeader: () => {
-            doc.font('Helvetica-Bold')
-               .fillColor('black')
-               .fontSize(8);
-          },
-          prepareCell: (cell, row, column) => {
-            const options = {
-              align: 'center',
-              valign: 'center',
-              lineBreak: false,
-              width: doc.widthOfString(cell),
-              height: 10
-            };
-            
-            return options;
-          },
-          prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
-            if (rectCell) {
-              // Alternate row colors (fix for both even and odd rows)
-              const rowColor = indexRow % 2 === 0 ? '#d9ecff' : '#b3d5f7';
-              
-              doc.rect(
-                rectCell.x,
-                rectCell.y,
-                rectCell.width,
-                rectCell.height
-              )
-              .fillAndStroke(rowColor, 'black')
-              .fillOpacity(1)
-              .fillColor('black');
-            }
-          }
-        });
+          .text('RELATÓRIO FOTOGRÁFICO', 40, 30, { align: 'center' })
+        x = imageMargin
+        y = imageWidth
       }
+    })
+  }
+  //POLICIA MILITAR
+  if (contract === 'Lead Américas') {
+    const rondasTable: {
+      title: string
+      headers: { label: string; align: string; headerAlign: string }[]
+      rows: string[][]
+    } = {
+      title: 'RONDA',
+      headers: [
+        { label: 'HORÁRIO INICIO', align: 'center', headerAlign: 'center' },
+        { label: 'HORÁRIO TERMINO', align: 'center', headerAlign: 'center' },
+        { label: 'LOCAL', align: 'center', headerAlign: 'center' },
+        { label: 'RESPONSÁVEL', align: 'center', headerAlign: 'center' },
+        { label: 'OBSERVAÇÃO', align: 'center', headerAlign: 'center' },
+      ],
+      rows: [],
+      prepareHeader: () => doc.font('Helvetica-Bold'),
+    }
 
-      if (limpezaTable.rows.length > 0) {
-        doc.moveDown(15)
-        await doc.table(limpezaTable, {
-          width: 500,
-          align: 'center',
-          x: 50,
-          columnSpacing: 2,
-          divider: {
-            header: { 
-              disabled: false, 
-              width: 1, 
-              opacity: 1 
-            },
-            horizontal: { 
-              disabled: false, 
-              width: 1, 
-              opacity: 0.5 
-            },
-          },
-          prepareHeader: () => {
-            doc.font('Helvetica-Bold')
-               .fillColor('black')
-               .fontSize(8);
-          },
-          prepareCell: (cell, row, column) => {
-            const options = {
-              align: 'center',
-              valign: 'center',
-              lineBreak: false,
-              width: doc.widthOfString(cell),
-              height: 10
-            };
-            
-            return options;
-          },
-          prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
-            if (rectCell) {
-              // Alternate row colors (fix for both even and odd rows)
-              const rowColor = indexRow % 2 === 0 ? '#d9ecff' : '#b3d5f7';
-              
-              doc.rect(
-                rectCell.x,
-                rectCell.y,
-                rectCell.width,
-                rectCell.height
-              )
-              .fillAndStroke(rowColor, 'black')
-              .fillOpacity(1)
-              .fillColor('black');
-            }
-          }
-        });
+    const limpezaTable: {
+      title: string
+      headers: { label: string; align: string; headerAlign: string }[]
+      rows: string[][]
+    } = {
+      title: 'LIMPEZA',
+      headers: [
+        { label: 'HORÁRIO', align: 'center', headerAlign: 'center' },
+        { label: 'LOCAL', align: 'center', headerAlign: 'center' },
+        { label: 'DATA', align: 'center', headerAlign: 'center' },
+      ],
+      rows: [],
+      prepareHeader: () => doc.font('Helvetica-Bold'),
+    }
+
+    for (const occurrence of ocurrence) {
+      if (occurrence.ocurrence_type === 'Limpeza') {
+        limpezaTable.rows.push([
+          occurrence.newHorario || '',
+          occurrence.local || '',
+          occurrence.newData || '',
+        ])
+      } else {
+        rondasTable.rows.push([
+          occurrence.newHorario || '',
+          occurrence.newTermino || '',
+          occurrence.local || '',
+          occurrence.responsavel || '',
+          occurrence.observacao || '',
+        ])
       }
     }
-if(contract === "Lead Américas") {
-// Page setup and title section
-doc.registerFont('Segoe UI', './fonts/segoeuithibd.ttf');
-doc.addPage();
-doc.fontSize(28).fillColor('#001233').text('CHECKLIST ELEVADORES', { align: 'center' });
-function formatBlockNumber(bloco) {
-  if (bloco === 'outros') {
-    return "PNE";
-  }
-  
-  // Manually pad with zero for older JavaScript versions
-  const paddedBloco = bloco.length === 1 ? '0' + bloco : bloco;
-  return `BL0${paddedBloco}`;
-}
-// Function to generate consistent block colors before table rendering
-function generateBlockColors(addinfo) {
-  const blockColors = {};
-  const uniqueBlocks = [...new Set(addinfo.map(elevador => elevador.bloco))];
-  
-  uniqueBlocks.forEach((bloco, index) => {
-    // Use a predefined palette of blue shades
-    const bluePalette = [
-      '#E6F2FF', // Very light blue
-      '#B3D9FF', // Light blue
-      '#80C1FF', // Medium light blue
-      '#4DA6FF', // Medium blue
-      '#1A8CFF', // Medium dark blue
-      '#0073E6', // Dark blue
-      '#005CB3'  // Very dark blue
-    ];
-    
-    // Cycle through the palette if we have more blocks than colors
-    blockColors[bloco] = bluePalette[index % bluePalette.length];
-  });
-  
-  return blockColors;
-}
-// Define table structure
-const elevadorTable = {
-  headers: [
-    { label: 'ELEVADOR', property: 'elevadorFullName', align: 'center', headerAlign: 'center'},
-    { label: 'BLOCO', property: 'bloco', align: 'center', headerAlign: 'center' },
-    { label: 'CLASSE', property: 'classe', align: 'center', headerAlign: 'center' },
-    { label: 'STATUS', property: 'status', align: 'center', headerAlign: 'center' },
-    { label: 'INTERFONE', property: 'interfone', align: 'center', headerAlign: 'center' },
-    { label: 'CÂMERAS', property: 'cameras', align: 'center', headerAlign: 'center' },
-    { label: 'OBSERVAÇÃO', property: 'observacao', align: 'center', headerAlign: 'center' }
-  ],
-  rows: [],
-  prepareHeader: () => doc.font('Helvetica-Bold'),
-};
 
-// Populate table rows
-const blockElevatorCounts = {};
-const blockInoperanteElevatorCounts = {};
-let prevbloco = null;
-
-for (const elevador of addinfo) {
-  // Set default values for empty fields
-  elevador.observacao = elevador.observacao || '-';
-  elevador.interfone = elevador.interfone || '-';
-  elevador.cameras = elevador.cameras || '-';
-
-  // Format block number
-  elevador.bloco = formatBlockNumber(elevador.bloco);
-
-  // Add separator row between different blocks
-  if (prevbloco !== null && elevador.bloco !== prevbloco) {
-    elevadorTable.rows.push([
-      '', '', '', '', '', '', ''
-    ]);
-  }
-
-  elevadorTable.rows.push([
-    elevador.elevadorFullName,
-    elevador.bloco,
-    elevador.classe,
-    elevador.status,
-    elevador.interfone,
-    elevador.cameras,
-    elevador.observacao,
-  ]);
-
-  prevbloco = elevador.bloco;
-  // Count both operante and inoperante elevators for each block
-  if (elevador.status === 'Operante') {
-    blockElevatorCounts[elevador.bloco] = (blockElevatorCounts[elevador.bloco] || 0) + 1;
-  } else if (elevador.status === 'Inoperante') {
-    blockInoperanteElevatorCounts[elevador.bloco] = (blockInoperanteElevatorCounts[elevador.bloco] || 0) + 1;
-  }
-}
-
-// Generate block colors
-const blockColors = generateBlockColors(addinfo);
-
-// Render the table
-await doc.table(elevadorTable, {
-  width: 500,
-  align: 'center',
-  x: 50,
-  columnSpacing: 2,
-  divider: {
-    header: { 
-      disabled: false, 
-      width: 1, 
-      opacity: 1 
-    },
-    horizontal: { disabled: false, width: 1, opacity: 0.5 },
-  },
-  prepareHeader: () => {
-    doc.font('Helvetica-Bold')
-       .fillColor('black')
-       .fontSize(8);
-  },
-  prepareCell: (cell, row, column) => {
-    const options = {
-      align: 'center',
-      valign: 'center',
-      lineBreak: false,
-      width: doc.widthOfString(cell),
-      height: 10
-    };
-    
-    return options;
-  },
-  prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
-    // Existing block color logic
-    if (rectCell) {
-      const bloco = row[1];
-      const blocColor = bloco ? blockColors[bloco] : 'white';
-      
-      doc.rect(
-        rectCell.x,
-        rectCell.y,
-        rectCell.width,
-        rectCell.height
-      )
-      .fillOpacity(0.3)
-      .fillAndStroke(blocColor, 'black')
-      .fillOpacity(1)
-      .fillColor('black');
-    }
-    if (indexRow > 0) {
-      const currentBloco = row[1];
-      const previousBloco = elevadorTable.rows[indexRow - 1][1];
-     
-      if (currentBloco !== previousBloco) {
-        // Color the entire separator row
-        if (row[0] === '' && row[1] === '' && row[2] === '') {
-          doc
-            .fillOpacity(0.2)
-            .fillColor('#0047AB')
-            .rect(rectRow.x, rectRow.y, rectRow.width, rectRow.height)
-            .fill()
-            .fillOpacity(1);
-        }
-      }
-    }
-    // Existing block separator logic
-    if (indexColumn === 0 && indexRow > 0) {
-      const currentBloco = row[1];
-      const previousBloco = elevadorTable.rows[indexRow - 1][1];
-     
-      if (currentBloco !== previousBloco) {
-        doc.fillColor('#0047AB').rect(rectRow.x, rectRow.y - 2, rectRow.width, 2).fill();
-        doc.fillColor('black');
-      }
-    }
-  }
-});
-doc.addPage();
-doc.moveDown(13)
-// Bar chart with improved styling
-const chartX = 50;
-const chartY = doc.y + 50;
-const barWidth = 70;
-const barSpacing = 20;
-const chartHeight = 250;
-
-// Calculate max value for scaling the chart
-const allCounts = [...Object.values(blockElevatorCounts), ...Object.values(blockInoperanteElevatorCounts)];
-const maxValue = Math.max(...allCounts, 1);
-
-// Chart title with more emphasis
-doc
-  .fontSize(16)
-  .fillColor('#001233')
-  .font('Helvetica-Bold')
-  .text('Elevadores por Bloco', chartX, chartY - 40, { align: 'center' });
-
-// Add a more distinct legend
-const legendY = chartY + chartHeight + 25;
-doc
-  .fontSize(10)
-  .fillColor('#000000')
-  .font('Helvetica');
-
-doc.rect(chartX, legendY, 15, 15).fillColor('#0047ab').fill();
-doc.text('Operante', chartX + 20, legendY + 2);
-
-doc.rect(chartX + 100, legendY, 15, 15).fillColor('#999999').fill();
-doc.text('Inoperante', chartX + 120, legendY + 2);
-
-// Draw bars with improved visual hierarchy
-let currentX = chartX;
-const allBlocks = new Set([...Object.keys(blockElevatorCounts), ...Object.keys(blockInoperanteElevatorCounts)]);
-
-for (const block of allBlocks) {
-  const operanteCount = blockElevatorCounts[block] || 0;
-  const inoperanteCount = blockInoperanteElevatorCounts[block] || 0;
-  
-  // Draw operante bar with gradient and shadow effect
-  if (operanteCount > 0) {
-    const barHeight = (operanteCount / maxValue) * chartHeight;
-    doc
-      .fillColor('#0047ab')
-      .opacity(0.8)
-      .rect(currentX, chartY + chartHeight - barHeight, barWidth / 2, barHeight)
-      .fill();
-    
-    doc
-      .fillColor('#000000')
-      .opacity(1)
-      .fontSize(9)
-      .text(operanteCount.toString(), currentX, chartY + chartHeight - barHeight - 15, {
-        width: barWidth / 2,
-        align: 'center',
-      });
-  }
-  
-  // Draw inoperante bar with gradient and shadow effect
-  if (inoperanteCount > 0) {
-    const barHeight = (inoperanteCount / maxValue) * chartHeight;
-    doc
-      .fillColor('#999999')
-      .opacity(0.8)
-      .rect(currentX + barWidth / 2, chartY + chartHeight - barHeight, barWidth / 2, barHeight)
-      .fill();
-    
-    doc
-      .fillColor('#000000')
-      .opacity(1)
-      .fontSize(9)
-      .text(inoperanteCount.toString(), currentX + barWidth / 2, chartY + chartHeight - barHeight - 15, {
-        width: barWidth / 2,
-        align: 'center',
-      });
-  }
-  
-  // Block label with improved typography
-  doc
-    .fillColor('#333333')
-    .fontSize(10)
-    .text(block, currentX, chartY + chartHeight + 5, {
-      width: barWidth,
-      align: 'center',
-    });
-  
-  currentX += barWidth + barSpacing;
-}
-}
-if (contract === 'Union Square') {
-  // Constants for layout
-  const imageMargin = 20;
-  const imageWidth = 90;
-
-  // Ensure unionTableEntries has the right structure
-  const entriesByBloco = unionTableEntries.reduce((acc, entry) => {
-    // Make sure bloco is correctly getting the value
-    const blocoKey = entry.bloco;
-    
-    // Debug
-  
-    if (!acc[blocoKey]) {
-      acc[blocoKey] = [];
-    }
-    acc[blocoKey].push(entry);
-    return acc;
-  }, {});
-
-  // Debug output of grouping
- 
-  // Sort entries by time within each bloco
-  Object.values(entriesByBloco).forEach((entries) => {
-    entries.sort(
-      (a, b) => new Date(a.time).getTime() - new Date(b.time).getTime(),
-    );
-  });
-
-  // Process each bloco - only create pages for blocos that have images
-  for (const [bloco, entries] of Object.entries(entriesByBloco)) {
-    // Filter entries to ensure they have images
-    const entriesWithImages = entries.filter(entry => entry.images && entry.images.length > 0);
-    
-    if (entriesWithImages.length === 0) {
-      continue; // Skip blocos with no images
-    }
-    
-    // Get bloco number from the string (e.g., "bloco1" -> "1")
-    const blocoNumber = bloco.replace(/\D/g, '');
-  
-    // Add new page for this bloco
-    doc.addPage();
-
-    // Initialize positioning for images
-    let x = imageMargin;
-    let y = imageWidth;
-
-    // Add page title
-    doc
-      .fontSize(28)
-      .fill('#001233')
-      .text(`RELATÓRIO FOTOGRÁFICO BL${blocoNumber}`, 40, 30, {
-        align: 'center',
-      });
-
-    // Process all images from entries
-    let imageIndex = 0;
-
-    for (const entry of entriesWithImages) {
-      if (entry.images && entry.images.length > 0) {
-
-        for (const image of entry.images) {
-          // Create image description
-          let timeStr = entry.time.toString();
-          timeStr = timeStr.split('Z');
-          let imageDesc;
-          if (entry.observation) {
-            imageDesc = `${timeStr[0]}: ${entry.observation}`;
-          } else {
-            imageDesc = timeStr[0];
-          }
-
-          // Check if we need a new page for this bloco
-          if (imageIndex > 0 && imageIndex % 9 === 0) {
-            doc.addPage();
-            doc
-              .fontSize(28)
-              .fill('#001233')
-              .text(`RELATORIO FOTOGRAFICO BL${blocoNumber}`, 40, 30, {
-                align: 'center',
-              });
-            x = imageMargin;
-            y = imageWidth;
-          }
-
-          try {
-            // Convert base64 to Buffer
-      
-            const imageBuffer = Buffer.from(image.data, 'base64');
-
-            // Add image
-            doc.image(imageBuffer, x, y, { width: 150, height: 150 });
-
-            // Add blue rectangle with description
-            doc.rect(x, y + 150, 150, 70).fill('#007bff');
-
-            // Add description text
-            doc
-              .fontSize(10)
-              .fill('#fff')
-              .text(imageDesc, x + 5, y + 155, { width: 140 });
-
-            // Update positioning
-            x += 200;
-
-            // Move to next row if needed
-            if ((imageIndex + 1) % 3 === 0) {
-              x = imageMargin;
-              y += 230;
-            }
-
-            imageIndex++;
-          } catch (error) {
-            console.error('Error adding image to PDF:', error, image);
-            continue;
-          }
-        }
-      }
-    }
-  }
-}
-    if (contract === 'Centro Metropolitano') {
+    if (rondasTable.rows.length > 0) {
       doc.addPage()
       doc
         .fontSize(28)
         .fill('#001233')
-        .text('POLICIA MILITAR', { align: 'center' })
-      const table: {
-        title: string
-        headers: { label: string; align: string; headerAlign: string; }[]
-        rows: string[][]
-      } = {
-        headers: [
-          { label: 'HORÁRIO', align: 'center', headerAlign: 'center'},
-          { label: 'LOCAL', align: 'center', headerAlign: 'center' },
-          { label: 'OBSEV', align: 'center', headerAlign: 'center' },
-        ],
-        rows: ocurrences.map((ocurrence) => [
-          ocurrence.newHorario || '',
-          ocurrence.local || '',
-          ocurrence.observacao || '',
-        ]),
-        prepareHeader: () => doc.font('Helvetica-Bold'),
-      }
-      await doc.table(table, {
-          width: 500,
-          align: 'center',
-          x: 50,
-          columnSpacing: 2,
-          divider: {
-            header: { 
-              disabled: false, 
-              width: 1, 
-              opacity: 1 
-            },
-            horizontal: { 
-              disabled: false, 
-              width: 1, 
-              opacity: 0.5 
-            },
+        .text('RONDAS NO EMPREENDIMENTO', { align: 'center' })
+      await doc.table(rondasTable, {
+        width: 500,
+        align: 'center',
+        x: 50,
+        columnSpacing: 2,
+        divider: {
+          header: {
+            disabled: false,
+            width: 1,
+            opacity: 1,
           },
-          prepareHeader: () => {
-            doc.font('Helvetica-Bold')
-               .fillColor('black')
-               .fontSize(8);
+          horizontal: {
+            disabled: false,
+            width: 1,
+            opacity: 0.5,
           },
-          prepareCell: (cell, row, column) => {
-            const options = {
-              align: 'center',
-              valign: 'center',
-              lineBreak: false,
-              width: doc.widthOfString(cell),
-              height: 10
-            };
-            
-            return options;
-          },
-          prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
-            if (rectCell) {
-              // Alternate row colors (fix for both even and odd rows)
-              const rowColor = indexRow % 2 === 0 ? '#d9ecff' : '#b3d5f7';
-              
-              doc.rect(
-                rectCell.x,
-                rectCell.y,
-                rectCell.width,
-                rectCell.height
-              )
+        },
+        prepareHeader: () => {
+          doc.font('Helvetica-Bold').fillColor('black').fontSize(8)
+        },
+        prepareCell: (cell, row, column) => {
+          const options = {
+            align: 'center',
+            valign: 'center',
+            lineBreak: false,
+            width: doc.widthOfString(cell),
+            height: 10,
+          }
+
+          return options
+        },
+        prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
+          if (rectCell) {
+            // Alternate row colors (fix for both even and odd rows)
+            const rowColor = indexRow % 2 === 0 ? '#d9ecff' : '#b3d5f7'
+
+            doc
+              .rect(rectCell.x, rectCell.y, rectCell.width, rectCell.height)
               .fillAndStroke(rowColor, 'black')
               .fillOpacity(1)
-              .fillColor('black');
+              .fillColor('black')
+          }
+        },
+      })
+    }
+
+    if (limpezaTable.rows.length > 0) {
+      doc.moveDown(15)
+      await doc.table(limpezaTable, {
+        width: 500,
+        align: 'center',
+        x: 50,
+        columnSpacing: 2,
+        divider: {
+          header: {
+            disabled: false,
+            width: 1,
+            opacity: 1,
+          },
+          horizontal: {
+            disabled: false,
+            width: 1,
+            opacity: 0.5,
+          },
+        },
+        prepareHeader: () => {
+          doc.font('Helvetica-Bold').fillColor('black').fontSize(8)
+        },
+        prepareCell: (cell, row, column) => {
+          const options = {
+            align: 'center',
+            valign: 'center',
+            lineBreak: false,
+            width: doc.widthOfString(cell),
+            height: 10,
+          }
+
+          return options
+        },
+        prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
+          if (rectCell) {
+            // Alternate row colors (fix for both even and odd rows)
+            const rowColor = indexRow % 2 === 0 ? '#d9ecff' : '#b3d5f7'
+
+            doc
+              .rect(rectCell.x, rectCell.y, rectCell.width, rectCell.height)
+              .fillAndStroke(rowColor, 'black')
+              .fillOpacity(1)
+              .fillColor('black')
+          }
+        },
+      })
+    }
+  }
+  if (contract === 'Lead Américas') {
+    // Page setup and title section
+    doc.registerFont('Segoe UI', './fonts/segoeuithibd.ttf')
+    doc.addPage()
+    doc
+      .fontSize(28)
+      .fillColor('#001233')
+      .text('CHECKLIST ELEVADORES', { align: 'center' })
+    function formatBlockNumber(bloco) {
+      if (bloco === 'outros') {
+        return 'PNE'
+      }
+
+      // Manually pad with zero for older JavaScript versions
+      const paddedBloco = bloco.length === 1 ? '0' + bloco : bloco
+      return `BL0${paddedBloco}`
+    }
+    // Function to generate consistent block colors before table rendering
+    function generateBlockColors(addinfo) {
+      const blockColors = {}
+      const uniqueBlocks = [
+        ...new Set(addinfo.map((elevador) => elevador.bloco)),
+      ]
+
+      uniqueBlocks.forEach((bloco, index) => {
+        // Use a predefined palette of blue shades
+        const bluePalette = [
+          '#E6F2FF', // Very light blue
+          '#B3D9FF', // Light blue
+          '#80C1FF', // Medium light blue
+          '#4DA6FF', // Medium blue
+          '#1A8CFF', // Medium dark blue
+          '#0073E6', // Dark blue
+          '#005CB3', // Very dark blue
+        ]
+
+        // Cycle through the palette if we have more blocks than colors
+        blockColors[bloco] = bluePalette[index % bluePalette.length]
+      })
+
+      return blockColors
+    }
+    // Define table structure
+    const elevadorTable = {
+      headers: [
+        {
+          label: 'ELEVADOR',
+          property: 'elevadorFullName',
+          align: 'center',
+          headerAlign: 'center',
+        },
+        {
+          label: 'BLOCO',
+          property: 'bloco',
+          align: 'center',
+          headerAlign: 'center',
+        },
+        {
+          label: 'CLASSE',
+          property: 'classe',
+          align: 'center',
+          headerAlign: 'center',
+        },
+        {
+          label: 'STATUS',
+          property: 'status',
+          align: 'center',
+          headerAlign: 'center',
+        },
+        {
+          label: 'INTERFONE',
+          property: 'interfone',
+          align: 'center',
+          headerAlign: 'center',
+        },
+        {
+          label: 'CÂMERAS',
+          property: 'cameras',
+          align: 'center',
+          headerAlign: 'center',
+        },
+        {
+          label: 'OBSERVAÇÃO',
+          property: 'observacao',
+          align: 'center',
+          headerAlign: 'center',
+        },
+      ],
+      rows: [],
+      prepareHeader: () => doc.font('Helvetica-Bold'),
+    }
+
+    // Populate table rows
+    const blockElevatorCounts = {}
+    const blockInoperanteElevatorCounts = {}
+    let prevbloco = null
+
+    for (const elevador of addinfo) {
+      // Set default values for empty fields
+      elevador.observacao = elevador.observacao || '-'
+      elevador.interfone = elevador.interfone || '-'
+      elevador.cameras = elevador.cameras || '-'
+
+      // Format block number
+      elevador.bloco = formatBlockNumber(elevador.bloco)
+
+      // Add separator row between different blocks
+      if (prevbloco !== null && elevador.bloco !== prevbloco) {
+        elevadorTable.rows.push(['', '', '', '', '', '', ''])
+      }
+
+      elevadorTable.rows.push([
+        elevador.elevadorFullName,
+        elevador.bloco,
+        elevador.classe,
+        elevador.status,
+        elevador.interfone,
+        elevador.cameras,
+        elevador.observacao,
+      ])
+
+      prevbloco = elevador.bloco
+      // Count both operante and inoperante elevators for each block
+      if (elevador.status === 'Operante') {
+        blockElevatorCounts[elevador.bloco] =
+          (blockElevatorCounts[elevador.bloco] || 0) + 1
+      } else if (elevador.status === 'Inoperante') {
+        blockInoperanteElevatorCounts[elevador.bloco] =
+          (blockInoperanteElevatorCounts[elevador.bloco] || 0) + 1
+      }
+    }
+
+    // Generate block colors
+    const blockColors = generateBlockColors(addinfo)
+
+    // Render the table
+    await doc.table(elevadorTable, {
+      width: 500,
+      align: 'center',
+      x: 50,
+      columnSpacing: 2,
+      divider: {
+        header: {
+          disabled: false,
+          width: 1,
+          opacity: 1,
+        },
+        horizontal: { disabled: false, width: 1, opacity: 0.5 },
+      },
+      prepareHeader: () => {
+        doc.font('Helvetica-Bold').fillColor('black').fontSize(8)
+      },
+      prepareCell: (cell, row, column) => {
+        const options = {
+          align: 'center',
+          valign: 'center',
+          lineBreak: false,
+          width: doc.widthOfString(cell),
+          height: 10,
+        }
+
+        return options
+      },
+      prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
+        // Existing block color logic
+        if (rectCell) {
+          const bloco = row[1]
+          const blocColor = bloco ? blockColors[bloco] : 'white'
+
+          doc
+            .rect(rectCell.x, rectCell.y, rectCell.width, rectCell.height)
+            .fillOpacity(0.3)
+            .fillAndStroke(blocColor, 'black')
+            .fillOpacity(1)
+            .fillColor('black')
+        }
+        if (indexRow > 0) {
+          const currentBloco = row[1]
+          const previousBloco = elevadorTable.rows[indexRow - 1][1]
+
+          if (currentBloco !== previousBloco) {
+            // Color the entire separator row
+            if (row[0] === '' && row[1] === '' && row[2] === '') {
+              doc
+                .fillOpacity(0.2)
+                .fillColor('#0047AB')
+                .rect(rectRow.x, rectRow.y, rectRow.width, rectRow.height)
+                .fill()
+                .fillOpacity(1)
             }
           }
-        });
+        }
+        // Existing block separator logic
+        if (indexColumn === 0 && indexRow > 0) {
+          const currentBloco = row[1]
+          const previousBloco = elevadorTable.rows[indexRow - 1][1]
+
+          if (currentBloco !== previousBloco) {
+            doc
+              .fillColor('#0047AB')
+              .rect(rectRow.x, rectRow.y - 2, rectRow.width, 2)
+              .fill()
+            doc.fillColor('black')
+          }
+        }
+      },
+    })
+    doc.addPage()
+    doc.moveDown(13)
+    // Bar chart with improved styling
+    const chartX = 50
+    const chartY = doc.y + 50
+    const barWidth = 70
+    const barSpacing = 20
+    const chartHeight = 250
+
+    // Calculate max value for scaling the chart
+    const allCounts = [
+      ...Object.values(blockElevatorCounts),
+      ...Object.values(blockInoperanteElevatorCounts),
+    ]
+    const maxValue = Math.max(...allCounts, 1)
+
+    // Chart title with more emphasis
+    doc
+      .fontSize(16)
+      .fillColor('#001233')
+      .font('Helvetica-Bold')
+      .text('Elevadores por Bloco', chartX, chartY - 40, { align: 'center' })
+
+    // Add a more distinct legend
+    const legendY = chartY + chartHeight + 25
+    doc.fontSize(10).fillColor('#000000').font('Helvetica')
+
+    doc.rect(chartX, legendY, 15, 15).fillColor('#0047ab').fill()
+    doc.text('Operante', chartX + 20, legendY + 2)
+
+    doc
+      .rect(chartX + 100, legendY, 15, 15)
+      .fillColor('#999999')
+      .fill()
+    doc.text('Inoperante', chartX + 120, legendY + 2)
+
+    // Draw bars with improved visual hierarchy
+    let currentX = chartX
+    const allBlocks = new Set([
+      ...Object.keys(blockElevatorCounts),
+      ...Object.keys(blockInoperanteElevatorCounts),
+    ])
+
+    for (const block of allBlocks) {
+      const operanteCount = blockElevatorCounts[block] || 0
+      const inoperanteCount = blockInoperanteElevatorCounts[block] || 0
+
+      // Draw operante bar with gradient and shadow effect
+      if (operanteCount > 0) {
+        const barHeight = (operanteCount / maxValue) * chartHeight
+        doc
+          .fillColor('#0047ab')
+          .opacity(0.8)
+          .rect(
+            currentX,
+            chartY + chartHeight - barHeight,
+            barWidth / 2,
+            barHeight,
+          )
+          .fill()
+
+        doc
+          .fillColor('#000000')
+          .opacity(1)
+          .fontSize(9)
+          .text(
+            operanteCount.toString(),
+            currentX,
+            chartY + chartHeight - barHeight - 15,
+            {
+              width: barWidth / 2,
+              align: 'center',
+            },
+          )
+      }
+
+      // Draw inoperante bar with gradient and shadow effect
+      if (inoperanteCount > 0) {
+        const barHeight = (inoperanteCount / maxValue) * chartHeight
+        doc
+          .fillColor('#999999')
+          .opacity(0.8)
+          .rect(
+            currentX + barWidth / 2,
+            chartY + chartHeight - barHeight,
+            barWidth / 2,
+            barHeight,
+          )
+          .fill()
+
+        doc
+          .fillColor('#000000')
+          .opacity(1)
+          .fontSize(9)
+          .text(
+            inoperanteCount.toString(),
+            currentX + barWidth / 2,
+            chartY + chartHeight - barHeight - 15,
+            {
+              width: barWidth / 2,
+              align: 'center',
+            },
+          )
+      }
+
+      // Block label with improved typography
+      doc
+        .fillColor('#333333')
+        .fontSize(10)
+        .text(block, currentX, chartY + chartHeight + 5, {
+          width: barWidth,
+          align: 'center',
+        })
+
+      currentX += barWidth + barSpacing
     }
+  }
+  if (contract === 'Union Square') {
+    // Constants for layout
+    const imageMargin = 20
+    const imageWidth = 90
+
+    // Ensure unionTableEntries has the right structure
+    const entriesByBloco = unionTableEntries.reduce((acc, entry) => {
+      // Make sure bloco is correctly getting the value
+      const blocoKey = entry.bloco
+
+      // Debug
+
+      if (!acc[blocoKey]) {
+        acc[blocoKey] = []
+      }
+      acc[blocoKey].push(entry)
+      return acc
+    }, {})
+
+    // Debug output of grouping
+
+    // Sort entries by time within each bloco
+    Object.values(entriesByBloco).forEach((entries) => {
+      entries.sort(
+        (a, b) => new Date(a.time).getTime() - new Date(b.time).getTime(),
+      )
+    })
+
+    // Process each bloco - only create pages for blocos that have images
+    for (const [bloco, entries] of Object.entries(entriesByBloco)) {
+      // Filter entries to ensure they have images
+      const entriesWithImages = entries.filter(
+        (entry) => entry.images && entry.images.length > 0,
+      )
+
+      if (entriesWithImages.length === 0) {
+        continue // Skip blocos with no images
+      }
+
+      // Get bloco number from the string (e.g., "bloco1" -> "1")
+      const blocoNumber = bloco.replace(/\D/g, '')
+
+      // Add new page for this bloco
+      doc.addPage()
+
+      // Initialize positioning for images
+      let x = imageMargin
+      let y = imageWidth
+
+      // Add page title
+      doc
+        .fontSize(28)
+        .fill('#001233')
+        .text(`RELATÓRIO FOTOGRÁFICO BL${blocoNumber}`, 40, 30, {
+          align: 'center',
+        })
+
+      // Process all images from entries
+      let imageIndex = 0
+
+      for (const entry of entriesWithImages) {
+        if (entry.images && entry.images.length > 0) {
+          for (const image of entry.images) {
+            // Create image description
+            let timeStr = entry.time.toString()
+            timeStr = timeStr.split('Z')
+            let imageDesc
+            if (entry.observation) {
+              imageDesc = `${timeStr[0]}: ${entry.observation}`
+            } else {
+              imageDesc = timeStr[0]
+            }
+
+            // Check if we need a new page for this bloco
+            if (imageIndex > 0 && imageIndex % 9 === 0) {
+              doc.addPage()
+              doc
+                .fontSize(28)
+                .fill('#001233')
+                .text(`RELATORIO FOTOGRAFICO BL${blocoNumber}`, 40, 30, {
+                  align: 'center',
+                })
+              x = imageMargin
+              y = imageWidth
+            }
+
+            try {
+              // Convert base64 to Buffer
+
+              const imageBuffer = Buffer.from(image.data, 'base64')
+
+              // Add image
+              doc.image(imageBuffer, x, y, { width: 150, height: 150 })
+
+              // Add blue rectangle with description
+              doc.rect(x, y + 150, 150, 70).fill('#007bff')
+
+              // Add description text
+              doc
+                .fontSize(10)
+                .fill('#fff')
+                .text(imageDesc, x + 5, y + 155, { width: 140 })
+
+              // Update positioning
+              x += 200
+
+              // Move to next row if needed
+              if ((imageIndex + 1) % 3 === 0) {
+                x = imageMargin
+                y += 230
+              }
+
+              imageIndex++
+            } catch (error) {
+              console.error('Error adding image to PDF:', error, image)
+              continue
+            }
+          }
+        }
+      }
+    }
+  }
+  if (contract === 'Centro Metropolitano') {
     doc.addPage()
     doc
       .fontSize(28)
       .fill('#001233')
-      .text('CONSIDERACOES FINAIS', { align: 'center' })
-    doc.rect(0, doc.y, doc.page.width, 50).fill('#fff')
-    doc.y += 50 // Adjust the y-coordinate to account for the added space
-    doc.fontSize(13).fill('black').text(duty.consideracoes, { align: 'center' })
-    doc.fontSize(8).text(`ID ÚNICO: ${duty.id}`, 440, 800, {
-      align: 'right',
-      height: 50,
-      width: 120,
-    })
+      .text('POLICIA MILITAR', { align: 'center' })
+    const table: {
+      title: string
+      headers: { label: string; align: string; headerAlign: string }[]
+      rows: string[][]
+    } = {
+      headers: [
+        { label: 'HORÁRIO', align: 'center', headerAlign: 'center' },
+        { label: 'LOCAL', align: 'center', headerAlign: 'center' },
+        { label: 'OBSEV', align: 'center', headerAlign: 'center' },
+      ],
+      rows: ocurrences.map((ocurrence) => [
+        ocurrence.newHorario || '',
+        ocurrence.local || '',
+        ocurrence.observacao || '',
+      ]),
+      prepareHeader: () => doc.font('Helvetica-Bold'),
+    }
+    await doc.table(table, {
+      width: 500,
+      align: 'center',
+      x: 50,
+      columnSpacing: 2,
+      divider: {
+        header: {
+          disabled: false,
+          width: 1,
+          opacity: 1,
+        },
+        horizontal: {
+          disabled: false,
+          width: 1,
+          opacity: 0.5,
+        },
+      },
+      prepareHeader: () => {
+        doc.font('Helvetica-Bold').fillColor('black').fontSize(8)
+      },
+      prepareCell: (cell, row, column) => {
+        const options = {
+          align: 'center',
+          valign: 'center',
+          lineBreak: false,
+          width: doc.widthOfString(cell),
+          height: 10,
+        }
 
-    //Finalize o arquivo e salve na pasta
-    const filedate = formatDateForFilename(data)
-    console.log('Criado')
-    //Se não houver pasta crie uma recursivamente
-    const gendocsPath = path.join(__dirname, '/', 'gendocs')
-    if (!fs.existsSync(gendocsPath)) {
-      fs.mkdirSync(gendocsPath, { recursive: true })
-    }
-    //Salve o arquivo com um nome dinamico
-    const filePath = `${gendocsPath}/Relatorio ${contract} ${filedate} ${dutyid}.pdf`
-    const generatePdf = async (doc, filePath): Promise<void> => {
-      return new Promise<void>((resolve, reject) => {
-        doc.pipe(fs.createWriteStream(filePath))
-        doc.on('end', () => resolve())
-        doc.on('error', (err) => reject(err))
-        doc.end()
-      })
-    }
-    unionTableEntries = []
-    await generatePdf(doc, filePath)
-    doc.end()
-    
-    return new Promise((resolve, reject) => {
-      const buffers: Buffer[] = [];
-      doc.on('data', buffers.push.bind(buffers));
-      doc.on('end', () => resolve(Buffer.concat(buffers)));
-      doc.on('error', reject);
-      doc.end();
+        return options
+      },
+      prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
+        if (rectCell) {
+          // Alternate row colors (fix for both even and odd rows)
+          const rowColor = indexRow % 2 === 0 ? '#d9ecff' : '#b3d5f7'
+
+          doc
+            .rect(rectCell.x, rectCell.y, rectCell.width, rectCell.height)
+            .fillAndStroke(rowColor, 'black')
+            .fillOpacity(1)
+            .fillColor('black')
+        }
+      },
+    })
+  }
+  doc.addPage()
+  doc
+    .fontSize(28)
+    .fill('#001233')
+    .text('CONSIDERACOES FINAIS', { align: 'center' })
+  doc.rect(0, doc.y, doc.page.width, 50).fill('#fff')
+  doc.y += 50 // Adjust the y-coordinate to account for the added space
+  doc.fontSize(13).fill('black').text(duty.consideracoes, { align: 'center' })
+  doc.fontSize(8).text(`ID ÚNICO: ${duty.id}`, 440, 800, {
+    align: 'right',
+    height: 50,
+    width: 120,
+  })
+
+  //Finalize o arquivo e salve na pasta
+  const filedate = formatDateForFilename(data)
+  //Se não houver pasta crie uma recursivamente
+  const gendocsPath = path.join(__dirname, '/', 'gendocs')
+  if (!fs.existsSync(gendocsPath)) {
+    fs.mkdirSync(gendocsPath, { recursive: true })
+  }
+  //Salve o arquivo com um nome dinamico
+  console.log("Gerando PDF...")
+  const filePath = `${gendocsPath}/Relatorio ${contract} ${filedate} ${dutyid}.pdf`
+  // Write the PDF to the file
+  unionTableEntries = []
+  return new Promise((resolve, reject) => {
+    const writeStream = fs.createWriteStream(filePath);
+    doc.pipe(writeStream);
+
+    writeStream.on('finish', () => {
+      console.log("PDF successfully written to:", filePath);
+      resolve(filePath); // Resolve with the file path
     });
+
+    writeStream.on('error', (err) => {
+      console.error("Error writing PDF:", err);
+      reject(err); // Reject on error
+    });
+
+    doc.on('error', (err) => {
+      console.error("Error generating PDF:", err);
+      reject(err); // Reject on PDF generation error
+    });
+
+    doc.end(); // Finalize the PDF
+  });
 }
 
 export async function sendPdf(request: FastifyRequest, reply: FastifyReply) {
   try {
-    if (!archpath) {
-      while (!archpath) {
-        if (!uploadedFileData) {
-          break
-        }
-      }
-      return reply
-        .status(500)
-        .send({ message: 'Global archpath variable is not set.' })
+    // Extract parameters from the request
+    const { id, contract, created_at, token } = request.query as {
+      id: string
+      contract: string
+      created_at: string
+      token?: string
     }
-    // Check for file existence
-    try {
-      await fs.promises.access(archpath, fs.promises.constants.R_OK)
-    } catch (err) {
-      if (err.code === 'ENOENT') {
-        return reply.status(404).send({ message: 'File not found' })
-      } else {
-        throw err
-      }
-    }
-    // Send the file
-    let newfilepath = archpath.split('/').pop()
-    lockAcquired = false
-    uploadedFileData = []
-    descriptions = []
 
-    return reply
-      .download(newfilepath)
-      .header('Access-Control-Expose-Headers', 'Content-Disposition')
+    // Validate required parameters
+    if (!id || !contract || !created_at) {
+      return reply.code(400).send({
+        error: 'Bad Request',
+        message:
+          'Missing required parameters: id, contract, and created_at are all required',
+      })
+    }
+
+    // Reuse the getPdfReport logic to handle file retrieval and streaming
+    return await getPdfReport(
+      {
+        params: { id },
+        query: { contract, created_at, token },
+      } as unknown as FastifyRequest,
+      reply,
+    )
   } catch (error) {
     console.error('Error sending PDF:', error)
-    reply.status(500).send({ message: 'Failed to send PDF.' })
+    return reply.status(500).send({ message: 'Failed to send PDF.' })
   }
 }
