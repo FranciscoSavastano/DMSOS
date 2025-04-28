@@ -1117,7 +1117,7 @@ export async function CreatePdf(duty: any, auth: string) {
 
 export async function sendPdf(request: FastifyRequest, reply: FastifyReply) {
   try {
-    console.log(request.body)
+    console.log(request.query)
     // Extract parameters from the request
     const { id, contract, created_at, token } = request.query as {
       id: string
