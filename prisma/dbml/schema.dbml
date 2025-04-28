@@ -171,6 +171,7 @@ Table dia_obras {
   termino DateTime
   horas_gastas Float [not null]
   supervisor_id String [not null]
+  equipe Json[] [not null]
   supervisor users [not null]
   profissionais ProfissionalNaObra [not null]
   atividades Atividade [not null]
@@ -182,8 +183,14 @@ Table Atividade {
   obra obras [not null]
   dia_obra_id Int
   dia_obra dia_obras
+  inicio DateTime
+  termino DateTime
+  horas_previstas Float
+  horas_gastas Float
   interferencia String
   materiais String
+  equipe Json[] [not null]
+  descricao String [not null]
   profissionais ProfissionalNaAtividade [not null]
 }
 
