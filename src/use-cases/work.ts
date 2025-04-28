@@ -29,7 +29,7 @@ interface RegisterUseCaseResponse {
 
 export class CreateWorkUseCase {
   constructor(private readonly workRepository: WorkRepository) {}
- 
+  
   async execute({
     cliente_id,
     gerente_id,

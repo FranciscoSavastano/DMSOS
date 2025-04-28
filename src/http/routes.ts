@@ -36,6 +36,7 @@ import { createWork } from './controllers/work'
 import { readAllWorks } from './controllers/read-all-works'
 import { readWork } from './controllers/read-work'
 import { deleteWork } from './controllers/delete-work'
+import { createActivity } from './controllers/activity'
 
 export async function appRoutes(app: FastifyInstance) {
   app.post('/v1/users', register)
@@ -104,6 +105,8 @@ export async function appRoutes(app: FastifyInstance) {
   //Obra
   app.post('/v1/obra', createWork)
   
+  app.post('/v1/obra/activity', createActivity)
+
   app.post('/v1/obra/read', readWork)
 
   app.get('/v1/obra/readAll', readAllWorks)

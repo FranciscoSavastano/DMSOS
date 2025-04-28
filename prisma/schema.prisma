@@ -204,11 +204,11 @@ model DiaObra {
   inicio  DateTime
   termino DateTime?
   horas_gastas  Float
-  supervisor_id String    
+  supervisor_id String 
+  equipe        Json[] @default([])   
   supervisor    User      @relation(fields: [supervisor_id], references: [id])
   profissionais ProfissionalNaObra[]
   atividades    Atividade[]
-
   @@map("dia_obras")
 }
 
@@ -218,8 +218,14 @@ model Atividade {
   obra      Obra  @relation(fields: [obra_id], references: [id])
   dia_obra_id   Int?
   dia_obra      DiaObra?  @relation(fields: [dia_obra_id], references: [id])
+  inicio        DateTime?
+  termino       DateTime?
+  horas_previstas Float?
+  horas_gastas  Float?
   interferencia   String?
   materiais       String?
+  equipe        Json[] @default([])
+  descricao      String
   profissionais ProfissionalNaAtividade[]
 }
 // Tabela de relação para o muitos-para-muitos

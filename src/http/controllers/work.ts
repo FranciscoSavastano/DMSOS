@@ -3,7 +3,6 @@ import { type FastifyRequest, type FastifyReply } from 'fastify'
 import { string, z } from 'zod'
 
 export async function createWork(request: FastifyRequest, reply: FastifyReply) {
-  console.log(request.body)
   const registerBodySchema = z
     .object({
       cliente_id: z.string(),
