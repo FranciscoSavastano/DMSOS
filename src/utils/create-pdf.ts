@@ -84,6 +84,23 @@ export async function initWrite(
   if (!contentType?.startsWith('multipart/form-data')) {
     return reply.status(400).send({ message: 'Invalid content type' })
   }
+
+  // Check if a previous upload is in progress
+  if (uploadedFileData.length > 0) {
+    const startTime = Date.now()
+    let wait = true
+
+    while (wait && Date.now() - startTime < 900) {
+      // Wait for up to 900ms
+      console.log('Waiting for previous upload to complete...')
+    }
+
+    if (Date.now() - startTime >= 1500) {
+      console.log('Timeout occurred. Clearing previous data.')
+      uploadedFileData = []
+    }
+  }
+
   const files = request.files()
 
   uploadPromise = new Promise<void>(async (resolve, reject) => {
