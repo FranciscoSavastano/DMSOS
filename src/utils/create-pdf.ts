@@ -18,12 +18,53 @@ let sendemailpromise: Promise<unknown>
 let pdfCreationPromise: Promise<unknown>
 let descWritePromise: Promise<unknown>
 let archpath: string
-let startTime: number
-let unionTableEntries = []
 
-export function startWait(): number {
-  startTime = Date.now()
-  return startTime
+let unionTableEntries = []
+export function convertToConventionalDate(dateStr: string): string {
+  try {
+    // Parse the date string into a JavaScript Date object
+    const date = new Date(dateStr);
+
+    // Check if the date is valid
+    if (isNaN(date.getTime())) {
+      throw new Error('Invalid date format');
+    }
+
+    // Extract day, month, and year
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+    const year = date.getFullYear();
+
+    // Return the formatted date
+    return `${day}/${month}/${year}`;
+  } catch (error) {
+    console.error('Error converting date:', error);
+    return 'Invalid Date';
+  }
+}
+export function extractTimeFromISO(dateStr: string | Date): string {
+  try {
+    // Ensure dateStr is a string
+    if (dateStr instanceof Date) {
+      dateStr = dateStr.toISOString(); // Convert Date object to ISO string
+    }
+
+    if (typeof dateStr !== 'string') {
+      throw new Error('Invalid input: dateStr must be a string or Date object');
+    }
+
+  
+    // Match the time portion (HH:mm) from the ISO 8601 string
+    const match = dateStr.match(/T(\d{2}:\d{2})/);
+    if (match && match[1]) {
+      return match[1]; // Return the extracted time
+    }
+
+    throw new Error('Invalid ISO 8601 format');
+  } catch (error) {
+    console.error('Error extracting time:', error);
+    return 'Invalid Time';
+  }
 }
 async function addPlantaoOperadorEmailsToBcc(prisma, duty, bcc) {
   try {
@@ -65,40 +106,49 @@ let lockAcquired = false
 let uploadPromise: Promise<unknown>
 let descriptionPromise: Promise<unknown>
 let state = 0
-
+let startTime = 0
+    
 export async function initWrite(
   request: FastifyRequest,
   reply: FastifyReply,
 ): Promise<void> {
+
   if (lockAcquired) {
+    if (Date.now() - startTime >= 19500) {
+      console.log('Timeout occurred. Clearing previous data.')
+      uploadedFileData = []
+      descriptions = [] // Clear previous data
+    }else {
+    
+    console.log("Retornando cliente com 429")
     return reply
       .code(429)
       .header('Retry-After', '0.5')
       .send({ message: 'Outro upload em progresso, seu pedido está em fila' })
+    }
   }
-  state++ // deve ser 1
+  startTime = Date.now() // Start the timer
   lockAcquired = true
-
+  state++ // deve ser 1
   const contentType = request.headers['content-type']
 
   if (!contentType?.startsWith('multipart/form-data')) {
     return reply.status(400).send({ message: 'Invalid content type' })
   }
-
+  //Never should enter this part, as the lock is aquired, last resort
   // Check if a previous upload is in progress
   if (uploadedFileData.length > 0) {
-    const startTime = Date.now()
     let wait = true
-
+    let printed = 0
     while (wait && Date.now() - startTime < 900) {
       // Wait for up to 900ms
-      console.log('Waiting for previous upload to complete...')
+      if (printed < 1){
+        console.log('Waiting for previous upload to complete...')
+        printed++
+      }
     }
 
-    if (Date.now() - startTime >= 1500) {
-      console.log('Timeout occurred. Clearing previous data.')
-      uploadedFileData = []
-    }
+    
   }
 
   const files = request.files()
@@ -126,7 +176,6 @@ export async function initWrite(
 
   await uploadPromise // Wait for the upload to finish
   state++ // deve ser 2
-  lockAcquired = false
   return reply.send({ message: 'Files uploaded successfully' })
 }
 
@@ -361,7 +410,8 @@ export async function CreatePdf(duty: any, auth: string) {
 
     const base64Images = uploadedFileData
     const imagesdescription = descriptions
-
+    uploadedFileData = [] // Clear the array after processing
+    descriptions = [] // Clear the array after processing
     // Calculate the maximum number of images per row based on page width
     const imageWidth = 90
     const imageMargin = 20
@@ -433,18 +483,17 @@ export async function CreatePdf(duty: any, auth: string) {
       rows: [],
       prepareHeader: () => doc.font('Helvetica-Bold'),
     }
-
-    for (const occurrence of ocurrence) {
+    for (const occurrence of ocurrences) {
       if (occurrence.ocurrence_type === 'Limpeza') {
         limpezaTable.rows.push([
-          occurrence.newHorario || '',
+          extractTimeFromISO(occurrence.horario) || '',
           occurrence.local || '',
-          occurrence.newData || '',
+          convertToConventionalDate(occurrence.horario) || '',
         ])
       } else {
         rondasTable.rows.push([
-          occurrence.newHorario || '',
-          occurrence.newTermino || '',
+          extractTimeFromISO(occurrence.horario) || '',
+          extractTimeFromISO(occurrence.termino) || '',
           occurrence.local || '',
           occurrence.responsavel || '',
           occurrence.observacao || '',
@@ -1088,7 +1137,6 @@ export async function CreatePdf(duty: any, auth: string) {
     fs.mkdirSync(gendocsPath, { recursive: true })
   }
   //Salve o arquivo com um nome dinamico
-  console.log("Gerando PDF...")
   const filePath = `${gendocsPath}/Relatorio ${contract} ${filedate} ${dutyid}.pdf`
   // Write the PDF to the file
   unionTableEntries = []
@@ -1097,7 +1145,6 @@ export async function CreatePdf(duty: any, auth: string) {
     doc.pipe(writeStream);
 
     writeStream.on('finish', () => {
-      console.log("PDF successfully written to:", filePath);
       resolve(filePath); // Resolve with the file path
     });
 
@@ -1117,8 +1164,7 @@ export async function CreatePdf(duty: any, auth: string) {
 
 export async function sendPdf(request: FastifyRequest, reply: FastifyReply) {
   try {
-    console.log(request.query)
-    // Extract parameters from the request
+     // Extract parameters from the request
     const { id, contract, created_at, token } = request.query as {
       id: string
       contract: string
@@ -1134,7 +1180,7 @@ export async function sendPdf(request: FastifyRequest, reply: FastifyReply) {
           'Missing required parameters: id, contract, and created_at are all required',
       })
     }
-
+    lockAcquired = false
     // Reuse the getPdfReport logic to handle file retrieval and streaming
     return await getPdfReport(
       {

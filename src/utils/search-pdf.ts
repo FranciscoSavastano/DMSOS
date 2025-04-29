@@ -43,11 +43,9 @@ interface PDFRequestParams {
         })
       }
           let token_payload: { sub: string }
-          console.log(token)
           try {
             token_payload = verify(token, env.JWT_SECRET) as { sub: string }
-            console.log(token_payload)
-          } catch (error) {
+         } catch (error) {
             console.log(error)
             throw new InvalidJwtTokenError()
           }
@@ -65,13 +63,10 @@ interface PDFRequestParams {
         const gendocsPath = path.join(__dirname, '/../', 'build', 'gendocs')
         // Create the exact filename based on your pattern
         const fileName = `Relatorio ${contract} ${filedate} ${id}.pdf`
-        console.log(fileName)
         const filePath = path.join(gendocsPath, fileName)
-        console.log(filePath)
         
         // Check if the file exists
         const fileExists = await exists(filePath)
-        console.log(fileExists)
         if (!fileExists) {
           request.log.error(`PDF file not found: ${filePath}`)
           return reply.code(404).send({

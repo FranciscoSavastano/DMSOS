@@ -94,7 +94,7 @@ Table plantoes {
   contrato String [not null]
   ocorrencia ocorrencias [not null]
   revisao revisoes [not null]
-  informacoes_adicionais Json[] [not null]
+  informacoes_adicionais Json
   consideracoes String [not null, default: '']
   created_at DateTime [default: `now()`, not null]
   updated_at DateTime [not null]

@@ -19,6 +19,7 @@ export class PrismaDutyRepository implements DutyRepository {
     contrato: string;
     consideracoes?: string;
     operadoresNomes: string[]
+    informacoes_adicionais?: any
     operadorIds: string[]; // Array of User IDs to connect
   }) {
     const duty = await prisma.plantao.create({
@@ -29,6 +30,7 @@ export class PrismaDutyRepository implements DutyRepository {
         horario_rf: data.horario_rf,
         contrato: data.contrato,
         consideracoes: data.consideracoes || "",
+        informacoes_adicionais: data.informacoes_adicionais || null,
         // Create the connections in the join table
         operadores: {
           create: data.operadorIds.map(operadorId => ({

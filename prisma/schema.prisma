@@ -123,7 +123,7 @@ model Plantao {
   contrato              String
   ocorrencia            Ocorrencia[]
   revisao               Revisao[]
-  informacoes_adicionais Json[]
+  informacoes_adicionais Json?            
   consideracoes         String             @default("")
   created_at            DateTime           @default(now())
   updated_at            DateTime           @updatedAt

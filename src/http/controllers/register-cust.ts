@@ -57,7 +57,6 @@ export async function registerCust(
     if (err instanceof InvalidCpf) {
       return await reply.status(400).send({ message: err.message })
     }
-    console.log(err)
     throw err
   }
 }

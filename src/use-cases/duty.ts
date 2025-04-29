@@ -71,7 +71,7 @@ export class CreateDutyUseCase {
       operadoresNomes,
       operadorIds: operadorIds // Pass the array of IDs with the matching property name
     });
-    
+  
     for (const ocorrencia of ocurrence) {
       const newOccurrence = await this.dutyRepository.createOcurrence({
         plantao: {

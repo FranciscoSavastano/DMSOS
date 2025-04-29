@@ -64,7 +64,6 @@ export async function authenticate(
       .status(200)
       .send({ user, accessToken })
   } catch (err: unknown) {
-    console.log('Regular user auth failed, trying customer auth:', err)
     
     try {
       // Try to authenticate as a customer
@@ -108,7 +107,6 @@ export async function authenticate(
         .status(200)
         .send({ user, accessToken })
     } catch (customerErr) {
-      console.log('Customer auth also failed:', customerErr)
       
       // If both authentications fail with invalid credentials
       if (err instanceof InvalidCredentialsError || customerErr instanceof InvalidCredentialsError) {

@@ -46,7 +46,6 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
     informacoes_adicionais,
     operadorIds,
   } = registerBodySchema;
-
   try {
     const registerDutyCase = makeCreateDutyUseCase();
     const { duty, ocurrences } = await registerDutyCase.execute({
@@ -61,14 +60,12 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
       bearerAuth,
       operadorIds,
     });
-    console.log("Duty created successfully Sending to pdf...");
     const pdfBuffer = await CreatePdf(duty, bearerAuth);
-    console.log('PDF created successfully!');
+    
     // Send email with the PDF buffer
     const emailto = "jonas.vilas@dmsys.com.br";
     const subject = `Relatório Diário ${contrato}`;
     const message = `Relatório do contrato ${contrato} na data de ${moment(data_inicio).format('DD/MM/YYYY')}`;
-    console.log('PDF created successfully at:', pdfBuffer);
     let bcc = ["francisco.pereira@dmsys.com.br", "anne.nascimento@dmsys.com.br"]
 
     // Send email with the PDF attachment
@@ -85,7 +82,6 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
         },
       ],
     });
-    console.log('Email sent successfully!');
     return reply.status(201).send({ duty, ocurrences });
   } catch (err) {
     console.error(err);
