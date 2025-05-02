@@ -9,7 +9,11 @@ import cors from '@fastify/cors'
 import { dirname, join } from 'path'
 import '@fastify/static'
 import { fastifyStatic } from '@fastify/static'
-export const app = fastify()
+
+export const app = fastify({
+  bodyLimit: 50 * 1024 * 1024, // Set the limit to 50MB
+})
+
 const allowedOrigins = [
   'http://127.0.0.1:5500', // For local development
   'http://192.168.10.246',
@@ -47,7 +51,11 @@ app.register(fastifyJwt, {
   },
   decode: { complete: true },
 })
-app.register(multipart)
+app.register(multipart, {
+  limits: {
+    fileSize: 50 * 1024 * 1024, // Optional: Set the file size limit to 50MB for multipart requests
+  },
+})
 app.register(fastifyCookie)
 app.register(appRoutes)
 app.setErrorHandler((error, _, reply) => {
