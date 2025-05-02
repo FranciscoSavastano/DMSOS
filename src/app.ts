@@ -16,6 +16,7 @@ export const app = fastify({
 
 const allowedOrigins = [
   'http://127.0.0.1:5500', // For local development
+  'http://127.0.0.1',
   'http://192.168.10.246',
   'http://192.168.10.246:80',
   'http://dmsys.app.ci',
@@ -73,7 +74,12 @@ app.setErrorHandler((error, _, reply) => {
 
   reply.status(500).send({ message: 'Internal server error' })
 })
-
+console.log('===== VERIFICAÇÃO DO FUSO HORÁRIO =====');
+console.log(`Fuso horário configurado: ${process.env.TZ || 'Não definido'}`);
+console.log(`Data e hora atual: ${new Date().toString()}`);
+console.log(`Offset em horas: ${new Date().getTimezoneOffset() / -60}`);
+console.log(`Timezone do Intl: ${Intl.DateTimeFormat().resolvedOptions().timeZone}`);
+console.log('======================================');
 app.listen({ port: 3333, host: '0.0.0.0' }, (err, address) => {
   if (err) {
     console.error(err)
