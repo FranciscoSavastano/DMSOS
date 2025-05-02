@@ -114,7 +114,7 @@ export async function initWrite(
 ): Promise<void> {
 
   if (lockAcquired) {
-    if (Date.now() - startTime >= 19500) {
+    if (Date.now() - startTime >= 49500) {
       console.log('Timeout occurred. Clearing previous data.')
       uploadedFileData = []
       descriptions = [] // Clear previous data
