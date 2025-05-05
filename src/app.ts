@@ -48,7 +48,7 @@ app.register(fastifyJwt, {
     signed: false,
   },
   sign: {
-    expiresIn: '14h', // Default for access tokens
+    expiresIn: '24h', // Default for access tokens
   },
   decode: { complete: true },
 })
