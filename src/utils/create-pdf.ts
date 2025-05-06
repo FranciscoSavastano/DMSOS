@@ -1,4 +1,6 @@
 import pdfkit from 'pdfkit-table'
+import sharp from 'sharp';
+
 import fs from 'fs'
 import path from 'path'
 import moment from 'moment-timezone'
@@ -59,7 +61,6 @@ export function extractTimeFromISO(dateStr: string | Date): string {
     if (match && match[1]) {
       return match[1]; // Return the extracted time
     }
-
     throw new Error('Invalid ISO 8601 format');
   } catch (error) {
     console.error('Error extracting time:', error);
@@ -114,7 +115,7 @@ export async function initWrite(
 ): Promise<void> {
 
   if (lockAcquired) {
-    if (Date.now() - startTime >= 49500) {
+    if (Date.now() - startTime >= 58500) {
       console.log('Timeout occurred. Clearing previous data.')
       uploadedFileData = []
       descriptions = [] // Clear previous data
@@ -282,6 +283,20 @@ function formatDateForFilename(createdAt: Date): string {
   return formattedDate.replace(/[/:]/g, '_')
 }
 
+async function compressImage(base64Image: string, width: number, height: number): Promise<Buffer> {
+  try {
+    const imageBuffer = Buffer.from(base64Image, 'base64');
+    const compressedImage = await sharp(imageBuffer)
+      //.resize(width, height, { fit: 'inside' }) // Resize the image to fit within the specified dimensions
+      .jpeg({ quality: 45 }) // Compress the image with 80% quality
+      .toBuffer();
+    return compressedImage;
+  } catch (error) {
+    console.error('Error compressing image:', error);
+    throw error;
+  }
+}
+
 export async function CreatePdf(duty: any, auth: string) {
   await uploadPromise
   await descWritePromise
@@ -400,56 +415,54 @@ export async function CreatePdf(duty: any, auth: string) {
     .fontSize(15)
     .fill('#001233')
     .text(objectivetext, 100, 200, { lineGap: 10 })
-
-  if (uploadedFileData.length > 0) {
-    doc.addPage()
-    doc
-      .fontSize(28)
-      .fill('#001233')
-      .text('RELATÓRIO FOTOGRÁFICO', 40, 30, { align: 'center' })
-
-    const base64Images = uploadedFileData
-    const imagesdescription = descriptions
-    uploadedFileData = [] // Clear the array after processing
-    descriptions = [] // Clear the array after processing
-    // Calculate the maximum number of images per row based on page width
-    const imageWidth = 90
-    const imageMargin = 20
-
-    let x = imageMargin
-    let y = imageWidth
-
-    base64Images.forEach((base64Image, index) => {
-      // Convert base64 string to buffer
-      const imageBuffer = Buffer.from(base64Image, 'base64')
-      const imagedesc = imagesdescription[index]
-      // Add the image to the PDF
-
-      doc.image(imageBuffer, x, y, { width: 150, height: 150 })
-      doc.rect(x, y + 150, 150, 70).fill('#007bff') // Adjust the color as needed
-      // Add text within the rectangle
-      doc
-        .fontSize(10)
-        .fill('#fff')
-        .text(imagedesc, x + 5, y + 155, { width: 150 })
-      x += 200
-      if (index != 0) {
-        if ((index + 1) % 3 === 0) {
-          x = imageMargin
-          y += 230
+    if (uploadedFileData.length > 0) {
+      doc.addPage()
+        .fontSize(28)
+        .fill('#001233')
+        .text('RELATÓRIO FOTOGRÁFICO', 40, 30, { align: 'center' });
+    
+      const base64Images = uploadedFileData;
+      const imagesdescription = descriptions;
+      uploadedFileData = []; // Clear the array after processing
+      descriptions = []; // Clear the array after processing
+    
+      const imageWidth = 150; // Target width for compressed images
+      const imageHeight = 150; // Target height for compressed images
+      const imageMargin = 20;
+    
+      let x = imageMargin;
+      let y = imageWidth;
+    
+      for (const [index, base64Image] of base64Images.entries()) {
+        try {
+          // Compress the image
+          const compressedImageBuffer = await compressImage(base64Image, imageWidth, imageHeight);
+    
+          // Add the compressed image to the PDF
+          const imagedesc = imagesdescription[index];
+          doc.image(compressedImageBuffer, x, y, { width: imageWidth, height: imageHeight });
+          doc.rect(x, y + imageHeight, imageWidth, 70).fill('#007bff'); // Add a blue rectangle for the description
+          doc.fontSize(10).fill('#fff').text(imagedesc, x + 5, y + imageHeight + 5, { width: imageWidth });
+    
+          x += imageWidth + 50; // Move to the next column
+          if ((index + 1) % 3 === 0) {
+            x = imageMargin;
+            y += imageHeight + 100; // Move to the next row
+          }
+          if ((index + 1) % 9 === 0) {
+            doc.addPage()
+              .fontSize(28)
+              .fill('#001233')
+              .text('RELATÓRIO FOTOGRÁFICO', 40, 30, { align: 'center' });
+            x = imageMargin;
+            y = imageWidth;
+          }
+        } catch (error) {
+          console.error('Error processing image:', error);
+          continue; // Skip this image if an error occurs
         }
       }
-      if ((index + 1) % 9 === 0) {
-        doc.addPage()
-        doc
-          .fontSize(28)
-          .fill('#001233')
-          .text('RELATÓRIO FOTOGRÁFICO', 40, 30, { align: 'center' })
-        x = imageMargin
-        y = imageWidth
-      }
-    })
-  }
+    }
   //POLICIA MILITAR
   if (contract === 'Lead Américas') {
     const rondasTable: {
@@ -1063,8 +1076,9 @@ export async function CreatePdf(duty: any, auth: string) {
         { label: 'LOCAL', align: 'center', headerAlign: 'center' },
         { label: 'OBSEV', align: 'center', headerAlign: 'center' },
       ],
+      
       rows: ocurrences.map((ocurrence) => [
-        ocurrence.newHorario || '',
+        extractTimeFromISO(ocurrence.horario) || '',
         ocurrence.local || '',
         ocurrence.observacao || '',
       ]),
