@@ -39,7 +39,7 @@ export async function authenticate(
       {
         sign: {
           sub: user?.id,
-          expiresIn: '4h',
+          expiresIn: '19h',
         },
       },
     )
@@ -49,7 +49,7 @@ export async function authenticate(
       {
         sign: {
           sub: user?.id,
-          expiresIn: '7d',
+          expiresIn: '19h',
         },
       },
     )
