@@ -63,16 +63,16 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
     const pdfBuffer = await CreatePdf(duty, bearerAuth);
     
     // Send email with the PDF buffer
-    //const emailto = "jonas.vilas@dmsys.com.br"; //Uncomment for live
-    const emailto = "francisco.pereira@dmsys.com.br"; //Test email
+    const emailto = "jonas.vilas@dmsys.com.br"; //Uncomment for live
+    //const emailto = "francisco.pereira@dmsys.com.br"; //Test email
     const subject = `Relatório Diário ${contrato}`;
     const message = `Relatório do contrato ${contrato} na data de ${moment(data_inicio).format('DD/MM/YYYY')}`;
-    //let bcc = ["francisco.pereira@dmsys.com.br", "anne.nascimento@dmsys.com.br"] //Uncomment for live 
+    let bcc = ["francisco.pereira@dmsys.com.br", "anne.nascimento@dmsys.com.br"] //Uncomment for live 
 
     // Send email with the PDF attachment
     await sendEmail({
       to: emailto,
-      //bcc: bcc, // Uncomment for live
+      bcc: bcc, // Uncomment for live
       subject,
       message,
       attachments: [
