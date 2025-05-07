@@ -1144,37 +1144,85 @@ export async function CreatePdf(duty: any, auth: string) {
     width: 120,
   })
 
-  //Finalize o arquivo e salve na pasta
+  // Finalize o arquivo e salve na pasta
   const filedate = formatDateForFilename(data)
-  //Se não houver pasta crie uma recursivamente
+  // Se não houver pasta crie uma recursivamente
   const gendocsPath = path.join(__dirname, '/', 'gendocs')
   if (!fs.existsSync(gendocsPath)) {
     fs.mkdirSync(gendocsPath, { recursive: true })
   }
-  //Salve o arquivo com um nome dinamico
+  
+  // Nome do arquivo
   const filePath = `${gendocsPath}/Relatorio ${contract} ${filedate} ${dutyid}.pdf`
-  // Write the PDF to the file
+  
+  // Resetando variável global
   unionTableEntries = []
-  return new Promise((resolve, reject) => {
-    const writeStream = fs.createWriteStream(filePath);
-    doc.pipe(writeStream);
+  
+  return new Promise(async (resolve, reject) => {
+    try {
+      // Gerando o PDF normalmente com PDFKit
+      // (A compressão básica já está habilitada por padrão)
+      const writeStream = fs.createWriteStream(filePath);
+      doc.pipe(writeStream);
 
-    writeStream.on('finish', () => {
-      resolve(filePath); // Resolve with the file path
-    });
+      writeStream.on('finish', async () => {
+        try {
+          // Comprimindo o PDF gerado com pdf-lib
+          await compressPdfWithPdfLib(filePath);
+          resolve(filePath);
+        } catch (err) {
+          console.error("Erro na compressão do PDF:", err);
+          // Retornar o arquivo original caso a compressão falhe
+          resolve(filePath);
+        }
+      });
 
-    writeStream.on('error', (err) => {
-      console.error("Error writing PDF:", err);
-      reject(err); // Reject on error
-    });
+      writeStream.on('error', (err) => {
+        console.error("Error writing PDF:", err);
+        reject(err);
+      });
 
-    doc.on('error', (err) => {
-      console.error("Error generating PDF:", err);
-      reject(err); // Reject on PDF generation error
-    });
+      doc.on('error', (err) => {
+        console.error("Error generating PDF:", err);
+        reject(err);
+      });
 
-    doc.end(); // Finalize the PDF
+      doc.end(); // Finalize the PDF
+    } catch (err) {
+      console.error("Erro geral:", err);
+      reject(err);
+    }
   });
+
+// Função para comprimir o PDF usando pdf-lib
+async function compressPdfWithPdfLib(filePath) {
+  const { PDFDocument } = require('pdf-lib');
+  const fs = require('fs');
+  
+  // Ler o arquivo PDF original
+  const pdfBytes = fs.readFileSync(filePath);
+  
+  // Carregar o documento
+  const pdfDoc = await PDFDocument.load(pdfBytes, {
+    // Opções para ignorar falhas de validação de PDF
+    ignoreEncryption: true,
+    updateMetadata: false,
+  });
+
+  // Comprimir e salvar o PDF
+  // A compressão é feita automaticamente pelo pdf-lib
+  const compressedBytes = await pdfDoc.save({
+    addDefaultPage: false,
+    useObjectStreams: true,  // Ajuda na compressão
+  });
+  
+  // Salvar o PDF comprimido no mesmo arquivo
+  fs.writeFileSync(filePath, compressedBytes);
+  
+  console.log(`PDF comprimido salvo em ${filePath}`);
+  
+  return filePath;
+}
 }
 
 export async function sendPdf(request: FastifyRequest, reply: FastifyReply) {
