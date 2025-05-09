@@ -113,6 +113,18 @@ export async function appRoutes(app: FastifyInstance) {
 
   app.delete('/v1/obra/delete', deleteWork)
 
+  //Dia-obra
+
+  app.post('/v1/obra/dia', createWorkDay)
+
+  app.post('/v1/obra/dia/read', readWorkDay)
+
+  app.get('/v1/obra/dia/readAll', readAllWorkDays)
+
+  //app.patch('/v1/obra/dia/update', updateWorkDay) nenhuma nescessidade no momento de adicionar este endpoint
+
+  app.delete('/v1/obra/dia/delete', deleteWorkDay)
+  
   //Outros
   
   app.get('/v1/sessions/verify', verifySession)

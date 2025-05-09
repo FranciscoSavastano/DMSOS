@@ -1,4 +1,4 @@
-import type { Prisma, Obra, Atividade } from '@prisma/client'
+import type { Prisma, Obra, Atividade, DiaObra } from '@prisma/client'
 
 export interface IUpdateObra {
   id: string
@@ -26,6 +26,7 @@ export interface IUpdateObra {
 export interface WorkRepository {
   create: (data: Prisma.ObraCreateInput) => Promise<Obra | null>
   createActivity: (data: Prisma.AtividadeCreateInput) => Promise<Atividade | null>
+  createWorkDay: (data: Prisma.DiaObraCreateInput) => Promise<DiaObra | null>
   findById: (id: number) => Promise<Obra | null>
   read: (id: number) => Promise<Obra | null>
   readAllWorks: () => Promise<Obra[]>

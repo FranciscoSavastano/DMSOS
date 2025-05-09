@@ -3,6 +3,7 @@ import type { Obra} from '@prisma/client'
 import { verify } from 'jsonwebtoken'
 import env from '@/config/env'
 import { InvalidJwtTokenError } from './errors/invalid-jwt-token-error'
+import { UnknownProposalNumberError } from './errors/unknown-proposal'
 
 interface RegisterUseCaseRequest {
   cliente_id: string
@@ -50,7 +51,11 @@ export class CreateWorkUseCase {
     } catch (error) {
       throw new InvalidJwtTokenError()
     }
-    
+    //Verificar se numero da proposta segue o padrao PR ## - ##[A-Z], exemplo PR 99 - 12B
+    const regex = /^PR \d{2} - \d{2}[A-Z]$/
+    if (!regex.test(numproposta)) {
+      throw new UnknownProposalNumberError();
+    }
     const work = await this.workRepository.create({
       cliente_id,
       gerente_id,

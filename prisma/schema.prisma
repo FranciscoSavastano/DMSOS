@@ -205,6 +205,7 @@ model DiaObra {
   termino DateTime?
   horas_gastas  Float
   supervisor_id String 
+  observacao String?
   equipe        Json[] @default([])   
   supervisor    User      @relation(fields: [supervisor_id], references: [id])
   profissionais ProfissionalNaObra[]
@@ -227,6 +228,8 @@ model Atividade {
   equipe        Json[] @default([])
   descricao      String
   profissionais ProfissionalNaAtividade[]
+  
+  @@map("atividades")
 }
 // Tabela de relação para o muitos-para-muitos
 model ProfissionalNaObra {

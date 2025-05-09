@@ -159,7 +159,7 @@ Table obras {
   created_at DateTime [default: `now()`, not null]
   updated_at DateTime [not null]
   dia_obra dia_obras [not null]
-  atividades Atividade [not null]
+  atividades atividades [not null]
 }
 
 Table dia_obras {
@@ -171,13 +171,14 @@ Table dia_obras {
   termino DateTime
   horas_gastas Float [not null]
   supervisor_id String [not null]
+  observacao String
   equipe Json[] [not null]
   supervisor users [not null]
   profissionais ProfissionalNaObra [not null]
-  atividades Atividade [not null]
+  atividades atividades [not null]
 }
 
-Table Atividade {
+Table atividades {
   id Int [increment, unique, not null]
   obra_id Int [not null]
   obra obras [not null]
@@ -209,7 +210,7 @@ Table ProfissionalNaAtividade {
   profissional_id String [not null]
   profissional users [not null]
   atividade_id Int [not null]
-  atividade Atividade [not null]
+  atividade atividades [not null]
 
   indexes {
     (profissional_id, atividade_id) [pk]
@@ -286,9 +287,9 @@ Ref: dia_obras.obra_id > obras.id
 
 Ref: dia_obras.supervisor_id > users.id
 
-Ref: Atividade.obra_id > obras.id
+Ref: atividades.obra_id > obras.id
 
-Ref: Atividade.dia_obra_id > dia_obras.id
+Ref: atividades.dia_obra_id > dia_obras.id
 
 Ref: ProfissionalNaObra.profissional_id > users.id
 
@@ -296,7 +297,7 @@ Ref: ProfissionalNaObra.dia_obra_id > dia_obras.id
 
 Ref: ProfissionalNaAtividade.profissional_id > users.id
 
-Ref: ProfissionalNaAtividade.atividade_id > Atividade.id
+Ref: ProfissionalNaAtividade.atividade_id > atividades.id
 
 Ref: Ocurrence_type.contract_id > clientes.id
 

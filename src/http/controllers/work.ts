@@ -1,6 +1,7 @@
+import { UnknownProposalNumberError } from '@/use-cases/errors/unknown-proposal'
 import { makeCreateWorkUseCase } from '@/use-cases/factories/make-create-work-use-case'
 import { type FastifyRequest, type FastifyReply } from 'fastify'
-import { string, z } from 'zod'
+import { string, unknown, z } from 'zod'
 
 export async function createWork(request: FastifyRequest, reply: FastifyReply) {
   const registerBodySchema = z
@@ -61,6 +62,16 @@ export async function createWork(request: FastifyRequest, reply: FastifyReply) {
     })
     return await reply.status(201).send({ work })
   } catch (err: unknown) {
+    if(err instanceof UnknownProposalNumberError) {
+      return await reply.status(400).send({
+        error: 'Bad Request',
+        message: err.getMessage(),
+      })
+    }
+    else {
+      throw err
+    }
+    //Redundancia de erro, mas é para garantir que o erro seja tratado corretamente
     throw err
   }
 }
