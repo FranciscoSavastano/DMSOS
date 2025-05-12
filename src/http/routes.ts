@@ -37,6 +37,7 @@ import { readAllWorks } from './controllers/read-all-works'
 import { readWork } from './controllers/read-work'
 import { deleteWork } from './controllers/delete-work'
 import { createActivity } from './controllers/activity'
+import { createWorkDay } from './controllers/work-day'
 
 export async function appRoutes(app: FastifyInstance) {
   app.post('/v1/users', register)
@@ -117,13 +118,14 @@ export async function appRoutes(app: FastifyInstance) {
 
   app.post('/v1/obra/dia', createWorkDay)
 
-  app.post('/v1/obra/dia/read', readWorkDay)
+  //#TODO
+  //app.post('/v1/obra/dia/read', readWorkDay)
 
-  app.get('/v1/obra/dia/readAll', readAllWorkDays)
+  //app.get('/v1/obra/dia/readAll', readAllWorkDays)
 
   //app.patch('/v1/obra/dia/update', updateWorkDay) nenhuma nescessidade no momento de adicionar este endpoint
 
-  app.delete('/v1/obra/dia/delete', deleteWorkDay)
+  //app.delete('/v1/obra/dia/delete', deleteWorkDay)
   
   //Outros
   
