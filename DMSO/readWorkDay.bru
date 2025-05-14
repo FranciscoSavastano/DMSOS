@@ -1,0 +1,21 @@
+meta {
+  name: readWorkDay
+  type: http
+  seq: 35
+}
+
+post {
+  url: 127.0.0.1:3333/v1/obra/dia/read
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4YjMzMGMyNS1hNzUxLTQ3NTAtOWY4NC0xZmExMzdiMjgzYjUiLCJpYXQiOjE3NDcwNDkzMjEsImV4cCI6MTc0NzExNzcyMX0.61OwS000hGYxA-hLmPQpQWxeILIe17yohGjDdY6I4mg
+}
+
+body:json {
+  {
+    "id": 2
+  }
+}

@@ -1,9 +1,10 @@
+import { makeCreateWorkDayUseCase } from "@/use-cases/factories/make-create-work-day-use-case";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { z } from "zod";
 
 export async function createWorkDay(request : FastifyRequest, reply : FastifyReply) {
     const registerBodySchema = z.object({
-        obra_id: z.string(),
+        obra_id: z.number(),
         data: z.string().datetime(),
         inicio: z.string().datetime(),
         termino: z.string().datetime().optional(),
@@ -48,7 +49,7 @@ export async function createWorkDay(request : FastifyRequest, reply : FastifyRep
             equipe,
             bearerAuth,
         })
-        return reply.status(201).send({ workDay })
+        return reply.status(201).send(workDay)
     } catch (error) {
         if (error instanceof Error) {
             return reply.status(400).send({ message: error.message })

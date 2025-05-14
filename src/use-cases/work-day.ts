@@ -1,5 +1,8 @@
 import { DiaObra } from "@prisma/client"
 import { InvalidJwtTokenError } from "./errors/invalid-jwt-token-error"
+import { verify } from "jsonwebtoken"
+import env from "@/config/env"
+import { WorkRepository } from "@/repositories/works-repository"
 
 interface RegisterUseCaseRequest {
     obra_id: string
@@ -21,7 +24,7 @@ interface RegisterUseCaseResponse {
     workDay: DiaObra
 }
 
-interface WorkDayRepository {
+export class CreateWorkDayUseCase {
     constructor(private readonly workRepository: WorkRepository) {}
       
     async execute({
@@ -42,22 +45,19 @@ interface WorkDayRepository {
           throw new InvalidJwtTokenError()
         }
        
-        const work = await this.workRepository.createWorkDay({
-          cliente_id,
-          gerente_id,
-          nome,
-          inicio,
-          termino,
-          numproposta,
-          horas_previstas,
-          hh_previstas,
-          equipe,
-          tipoDias,
-          disciplinas,
+        const workDay = await this.workRepository.createWorkDay({
+            obra_id,
+            data,
+            inicio,
+            termino,
+            horas_gastas,
+            supervisor_id,
+            observacao,
+            equipe
         });
         
         
-        return { work }
+        return { workDay }
       }
       
 }

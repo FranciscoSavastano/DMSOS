@@ -1,0 +1,39 @@
+meta {
+  name: createWorkDay
+  type: http
+  seq: 34
+}
+
+post {
+  url: 127.0.0.1:3333/v1/obra/dia
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4YjMzMGMyNS1hNzUxLTQ3NTAtOWY4NC0xZmExMzdiMjgzYjUiLCJpYXQiOjE3NDcwNDkzMjEsImV4cCI6MTc0NzExNzcyMX0.61OwS000hGYxA-hLmPQpQWxeILIe17yohGjDdY6I4mg
+}
+
+body:json {
+  {
+    "obra_id": 1,
+    "data": "2025-04-22T00:00:00Z",
+    "inicio": "2025-05-15T10:30:30Z",
+    "termino": "2025-05-15T14:30:30Z",
+    "horas_gastas": 6,
+    "supervisor_id": "8b330c25-a751-4750-9f84-1fa137b283b5",
+    "observacao": "teste obse",
+    "equipe": [
+      {
+        "cargo": "Desenvolvedor",
+        "quantidade": 1,
+        "tempoDiario": 8
+      },
+      {
+        "cargo": "Analista de Dados",
+        "quantidade": 2,
+        "tempoDiario": 6
+      }
+    ]
+  }
+}

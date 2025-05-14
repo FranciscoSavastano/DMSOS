@@ -67,23 +67,6 @@ export class PrismaWorkRepository implements WorkRepository {
     return activity
   }
 
-  async createWorkDay(
-    data: Prisma.DiaObraCreateInput & { obra_id: number },
-  ) {
-    const { obra_id, ...rest } = data // Exclude work_id from the data object
-
-    const workDay = await prisma.diaObra.create({
-      data: {
-        ...rest, // Spread the remaining fields
-        obra: {
-          connect: { id: obra_id }, // Use work_id only in the connect clause
-        },
-      },
-    })
-
-    return workDay
-  }
-
   async read(id: number) {
     const work = await prisma.obra.findUnique({
       where: {
@@ -187,4 +170,89 @@ export class PrismaWorkRepository implements WorkRepository {
 
     return true
   }
+
+  //Work Day
+
+  async createWorkDay(
+    data: Prisma.DiaObraCreateInput & { obra_id: number, supervisor_id: string },
+  ) {
+    const { obra_id, supervisor_id, ...rest } = data // Exclude work_id from the data object
+
+    const workDay = await prisma.diaObra.create({
+      data: {
+        ...rest, // Spread the remaining fields
+        obra: {
+          connect: { id: obra_id }, // Use work_id only in the connect clause
+        },
+        supervisor: {
+          connect: {id: supervisor_id}
+        }
+      },
+    })
+
+    return workDay
+  }
+
+  async readWorkDay(id: number) {
+    const workDay = await prisma.diaObra.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        obra: true,
+        supervisor: true,
+      },
+    })
+
+    return workDay
+  }
+
+  async readAllWorkDays() {
+    const workDays = await prisma.diaObra.findMany({
+      include: {
+        obra: true,
+        supervisor: true,
+      },
+    })
+
+    return workDays
+  }
+
+  async readAllWorkDaysByWorkId(workId: number) {
+    const workDays = await prisma.diaObra.findMany({
+      where: {
+        obra_id: workId,
+      },
+      include: {
+        obra: true,
+        supervisor: true,
+      },
+    })
+
+    return workDays
+  }
+
+  async updateWorkDay(id: number, data: Prisma.DiaObraUpdateInput) {
+    const workDay = await prisma.diaObra.update({
+      where: { id },
+      data,
+      include: {
+        obra: true,
+        supervisor: true,
+      },
+    })
+
+    return workDay
+  }
+
+  async deleteWorkDay(id: number) {
+    await prisma.diaObra.delete({
+      where: {
+        id,
+      },
+    })
+
+    return true
+  }
+
 }
