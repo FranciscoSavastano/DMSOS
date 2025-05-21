@@ -70,12 +70,12 @@ export function generateRandomPassword() {
   return password.split('').sort(() => 0.5 - Math.random()).join('');
 }
 async function sendRegisterEmail(emailto: string, nome: string, senha: string, tipo: string, contrato?: string) {
-  let baseDir;
-  if (process.env.NODE_ENV === 'production') {
-    baseDir = path.resolve(process.cwd(), 'public/assets');
-  } else {
-    baseDir = path.join(__dirname, '../../public/assets');
-  }
+let baseDir;
+if (process.env.NODE_ENV === 'production') {
+  baseDir = path.join(process.cwd(), 'public', 'assets');
+} else {
+  baseDir = path.join(process.cwd(), 'public', 'assets');
+}
 
   // Only create file streams when needed to avoid them being consumed prematurely
   if (tipo !== "Cliente") {
