@@ -427,42 +427,65 @@ export async function CreatePdf(duty: any, auth: string) {
       descriptions = []; // Clear the array after processing
     
       const imageWidth = 150; // Target width for compressed images
-      const imageHeight = 150; // Target height for compressed images
+      const imageHeight = 120; // Target height for compressed images
       const imageMargin = 20;
     
       let x = imageMargin;
       let y = imageWidth;
     
       for (const [index, base64Image] of base64Images.entries()) {
-        try {
-          // Compress the image
-          const compressedImageBuffer = await compressImage(base64Image, imageWidth, imageHeight);
-    
-          // Add the compressed image to the PDF
-          const imagedesc = imagesdescription[index];
-          doc.image(compressedImageBuffer, x, y, { width: imageWidth, height: imageHeight });
-          doc.rect(x, y + imageHeight, imageWidth, 70).fill('#007bff'); // Add a blue rectangle for the description
-          doc.fontSize(10).fill('#fff').text(imagedesc, x + 5, y + imageHeight + 5, { width: imageWidth });
-    
-          x += imageWidth + 50; // Move to the next column
-          if ((index + 1) % 3 === 0) {
-            x = imageMargin;
-            y += imageHeight + 100; // Move to the next row
-          }
-          if ((index + 1) % 9 === 0) {
-            doc.addPage()
-              .fontSize(28)
-              .fill('#001233')
-              .text('RELATÓRIO FOTOGRÁFICO', 40, 30, { align: 'center' });
-            x = imageMargin;
-            y = imageWidth;
-          }
-        } catch (error) {
-          console.error('Error processing image:', error);
-          continue; // Skip this image if an error occurs
-        }
-      }
+  try {
+    // Compress the image
+    const compressedImageBuffer = await compressImage(base64Image, imageWidth, imageHeight);
+
+    // Add the compressed image to the PDF
+    const imagedesc = imagesdescription[index];
+    doc.image(compressedImageBuffer, x, y, { width: imageWidth, height: imageHeight });
+    doc.rect(x, y + imageHeight, imageWidth, 70).fill('#007bff'); // Add a blue rectangle for the description
+    doc.fontSize(10).fill('#fff').text(imagedesc, x + 5, y + imageHeight + 5, { width: imageWidth });
+
+    x += imageWidth + 50; // Move to the next column
+    if ((index + 1) % 3 === 0) {
+      x = imageMargin;
+      y += imageHeight + 100; // Move to the next row
     }
+    if ((index + 1) % 9 === 0) {
+      doc.addPage()
+        .fontSize(28)
+        .fill('#001233')
+        .text('RELATÓRIO FOTOGRÁFICO', 40, 30, { align: 'center' });
+      x = imageMargin;
+      y = imageWidth;
+    }
+  } catch (error) {
+    console.error('Error processing image (trying fallback):', error);
+    try {
+      // Fallback: try to add the original image buffer
+      const originalImageBuffer = Buffer.from(base64Image, 'base64');
+      const imagedesc = imagesdescription[index];
+      doc.image(originalImageBuffer, x, y, { width: imageWidth, height: imageHeight });
+      doc.rect(x, y + imageHeight, imageWidth, 70).fill('#007bff');
+      doc.fontSize(10).fill('#fff').text(imagedesc, x + 5, y + imageHeight + 5, { width: imageWidth });
+
+      x += imageWidth + 50;
+      if ((index + 1) % 3 === 0) {
+        x = imageMargin;
+        y += imageHeight + 100;
+      }
+      if ((index + 1) % 9 === 0) {
+        doc.addPage()
+          .fontSize(28)
+          .fill('#001233')
+          .text('RELATÓRIO FOTOGRÁFICO', 40, 30, { align: 'center' });
+        x = imageMargin;
+        y = imageWidth;
+      }
+    } catch (fallbackError) {
+      console.error('Fallback image rendering also failed:', fallbackError);
+      continue; // Skip this image if both attempts fail
+    }
+  }
+  }
   //POLICIA MILITAR
   if (contract === 'Lead Américas') {
     const rondasTable: {
@@ -1222,7 +1245,8 @@ async function compressPdfWithPdfLib(filePath) {
   console.log(`PDF comprimido salvo em ${filePath}`);
   
   return filePath;
-}
+  }
+  }
 }
 
 export async function sendPdf(request: FastifyRequest, reply: FastifyReply) {
