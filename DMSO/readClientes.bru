@@ -5,7 +5,11 @@ meta {
 }
 
 get {
-  url: 127.0.0.1:3333/clientes/readAll
+  url: 127.0.0.1:3333/v1/clientes/readAll
   body: none
-  auth: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NDc4Mjk5ODYsImV4cCI6MTc0NzgzMDU4Niwic3ViIjoiZnJhbmNpc2NvLnBlcmVpcmFAZG1zeXMuY29tLmJyIn0.B1mV00jf9RYBjttUgPYJUYuLKCwd0UUpjBO2GUm7H9o
 }

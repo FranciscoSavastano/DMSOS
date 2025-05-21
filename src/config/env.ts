@@ -13,9 +13,7 @@ const envSchema = z.object({
   EMAIL_USER: z.string(),
   EMAIL_PASSWORD: z.string(),
 })
-
 const _env = envSchema.safeParse(process.env)
-
 if (!_env.success) {
   console.error('🚨 Invalid environment variables:', _env.error.format())
   throw new Error('Invalid environment variables!')

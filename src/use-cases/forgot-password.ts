@@ -19,18 +19,17 @@ export class ForgotPasswordUseCase {
     }
 
     const passwordToken = sign({}, process.env.JWT_SECRET, {
-      subject: user.email,
+      subject: user.id,
       expiresIn: '10m',
     })
+      const url = `${process.env.FRONTEND_URL}/register.html?newpassword=${passwordToken}`
 
-    const url = process.env.FRONTEND_URL + '/reset-password/' + passwordToken
+      const message = `Você solicitou a recuperação de senha. \n\n Por favor, clique abaixo para alterá-la. O link vai expirar em 10 minutos. \n\n${url}`
 
-    const message = `Você solicitou a recuperação de senha. \n\n Por favor, clique abaixo para alterá-la. O link vai expirar em 10 minutos. \n\n${url}`
-
-    const html = `Você solicitou a recuperação de senha. \n\n Por favor, clique abaixo para alterá-la. O link vai expirar em 10 minutos. \n<a href=${url}>Clique aqui para recuperar senha</a>`
-
-    try {
-      await sendEmail({
+      const html = `Você solicitou a recuperação de senha. \n\n Por favor, clique abaixo para alterá-la. O link vai expirar em 10 minutos. \n<a href="${url}">Clique aqui para recuperar senha</a>`
+      if(user.email){
+      try {
+        await sendEmail({
         to: user.email,
         subject: 'Recuperação de senha',
         message,
@@ -39,5 +38,8 @@ export class ForgotPasswordUseCase {
     } catch (error) {
       console.log(error)
     }
+  }else{
+    return
+  }
   }
 }

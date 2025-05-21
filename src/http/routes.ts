@@ -41,6 +41,7 @@ import { createWorkDay } from './controllers/work-day'
 import { readWorkDay } from './controllers/read-work-day'
 import { readAllWorkDay } from './controllers/read-all-work-day'
 import { readAllWorkDays } from './controllers/read-all-work-days'
+import { readUserByAuth } from './controllers/read-user-by-auth'
 
 export async function appRoutes(app: FastifyInstance) {
   app.post('/v1/users', register)
@@ -88,6 +89,8 @@ export async function appRoutes(app: FastifyInstance) {
 
   //Outros
 
+  app.get('/v1/user/readUserByAuth', readUserByAuth)
+  
   app.post('/v1/users/forgot-password', forgotPassword)
 
   app.patch('/v1/users/reset-password', resetPassword)

@@ -7,7 +7,7 @@ RUN npm install
 RUN apk update
 RUN apk add --no-cache openssl
 
-COPY .env .
+#COPY .env .
 COPY . .
 
 # Create the directory where your generated docs will live

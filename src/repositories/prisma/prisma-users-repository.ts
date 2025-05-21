@@ -59,7 +59,7 @@ export class PrismaUsersRepository implements UsersRepository {
   }
 
   async update({ id, data }: IUpdateUser) {
-    const user = await prisma.user.update({
+      const user = await prisma.user.update({
       where: { id },
       data,
     })

@@ -50,12 +50,11 @@ export class UpdateUserUseCase {
       is_new,
       email,
     }
-
     // Only add password_digest if password is provided
     if (password) {
       updateData.password_digest = await hash(password, 10)
     }
-
+    
     const token_user = await this.usersRepository.update({
       id: token_payload.sub,
       data: updateData,

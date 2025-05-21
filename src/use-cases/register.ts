@@ -15,6 +15,8 @@ import { PrismaUsersRepository } from '@/repositories/prisma/prisma-users-reposi
 import { sendEmail } from '@/utils/send-email'
 import path from 'path'
 import { content } from 'pdfkit/js/page'
+import { FastifyReply, FastifyRequest } from 'fastify'
+import { z } from 'zod'
 
 interface RegisterUseCaseRequest {
   nome: string
@@ -42,7 +44,7 @@ interface RegisterUseCaseCustRequest {
 interface RegisterUseCaseCustResponse {
   user: Cliente
 }
-function generateRandomPassword() {
+export function generateRandomPassword() {
   const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   const lowercase = 'abcdefghijklmnopqrstuvwxyz';
   const numbers = '0123456789';
@@ -136,6 +138,8 @@ async function sendRegisterEmail(emailto: string, nome: string, senha: string, t
   }
   // Note: No explicit action for "Cliente" type
 }
+
+
 export class RegisterUseCase {
   constructor(private readonly usersRepository: UsersRepository) {}
 

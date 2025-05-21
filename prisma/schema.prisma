@@ -174,10 +174,10 @@ model Revisao {
 model Obra {
   id          Int      @id @default(autoincrement())
   cliente_id  String
-  cliente     Cliente  @relation(fields: [cliente_id], references: [id])
+  cliente     Cliente  @relation(fields: [cliente_id], references: [id], onDelete: Cascade)
   // Relação com o gerente (um-para-muitos)
   gerente_id  String
-  gerente     User     @relation("ObraGerente", fields: [gerente_id], references: [id])
+  gerente     User     @relation("ObraGerente", fields: [gerente_id], references: [id], onDelete: Cascade)
   // Relação muitos-para-muitos com os profissionais
   // Outros campos da obra...
   nome        String

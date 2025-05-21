@@ -175,15 +175,13 @@ Table dia_obras {
   equipe Json[] [not null]
   supervisor users [not null]
   profissionais ProfissionalNaObra [not null]
-  atividades atividades [not null]
+  atividadeNaObra AtividadeNoDiaObra [not null]
 }
 
 Table atividades {
   id Int [increment, unique, not null]
   obra_id Int [not null]
   obra obras [not null]
-  dia_obra_id Int
-  dia_obra dia_obras
   inicio DateTime
   termino DateTime
   horas_previstas Float
@@ -193,6 +191,18 @@ Table atividades {
   equipe Json[] [not null]
   descricao String [not null]
   profissionais ProfissionalNaAtividade [not null]
+  atividadeNaObra AtividadeNoDiaObra [not null]
+}
+
+Table AtividadeNoDiaObra {
+  dia_obra_id Int [not null]
+  dia_obra dia_obras [not null]
+  atividade_id Int [not null]
+  atividade atividades [not null]
+
+  indexes {
+    (dia_obra_id, atividade_id) [pk]
+  }
 }
 
 Table ProfissionalNaObra {
@@ -279,9 +289,9 @@ Ref: revisoes.cliente_id > clientes.id
 
 Ref: revisoes.user_id > users.id
 
-Ref: obras.cliente_id > clientes.id
+Ref: obras.cliente_id > clientes.id [delete: Cascade]
 
-Ref: obras.gerente_id > users.id
+Ref: obras.gerente_id > users.id [delete: Cascade]
 
 Ref: dia_obras.obra_id > obras.id
 
@@ -289,7 +299,9 @@ Ref: dia_obras.supervisor_id > users.id
 
 Ref: atividades.obra_id > obras.id
 
-Ref: atividades.dia_obra_id > dia_obras.id
+Ref: AtividadeNoDiaObra.dia_obra_id > dia_obras.id
+
+Ref: AtividadeNoDiaObra.atividade_id > atividades.id
 
 Ref: ProfissionalNaObra.profissional_id > users.id
 
