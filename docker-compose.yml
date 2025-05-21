@@ -26,3 +26,7 @@ services:
 volumes:
   db:
     driver: local
+
+networks:
+  my_app_network:
+    external: true
