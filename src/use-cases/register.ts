@@ -76,7 +76,7 @@ if (process.env.NODE_ENV === 'production') {
 } else {
   baseDir = path.join(process.cwd(), 'public', 'assets');
 }
-
+  console.log("Cadastro com sucesso, enviando email para: ", emailto)
   // Only create file streams when needed to avoid them being consumed prematurely
   if (tipo !== "Cliente") {
     const subject = "Acesso à Plataforma DMSYS";
