@@ -7,17 +7,11 @@ export async function createActivity(request: FastifyRequest, reply: FastifyRepl
         .object({
             work_id: z.number(),
             nome: z.string(),
-            inicio: z.string(),
+            inicio: z.date(),
             termino: z.string().optional(),
             horas_previstas: z.number(),
-            equipe: z.array(
-                z.object({
-                    cargo: z.string(),
-                    quantidade: z.number(),
-                    tempoGasto: z.number(),
-                })
-            ),
-        materiais: z.string().array(),
+            materiais: z.string().array(),
+            checklist: z.string().array(),
         })
         .parse(request.body)
         const createActivityHeadersSchema = z
