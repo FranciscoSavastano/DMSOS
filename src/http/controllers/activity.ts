@@ -7,11 +7,12 @@ export async function createActivity(request: FastifyRequest, reply: FastifyRepl
         .object({
             work_id: z.number(),
             nome: z.string(),
-            inicio: z.date(),
-            termino: z.string().optional(),
+            inicio: z.string().datetime(),
+            termino: z.string().datetime().optional(),
             horas_previstas: z.number(),
             materiais: z.string().array(),
             checklist: z.string().array(),
+            descricao: z.string().optional(),
         })
         .parse(request.body)
         const createActivityHeadersSchema = z
@@ -29,6 +30,8 @@ export async function createActivity(request: FastifyRequest, reply: FastifyRepl
         materiais,
         equipe,
         tipoDias,
+        checklist,
+        descricao,
     } = registerBodySchema
     try {
         const registerActivityCase = makeCreateActivityUseCase()
@@ -41,6 +44,8 @@ export async function createActivity(request: FastifyRequest, reply: FastifyRepl
             materiais,
             equipe,
             tipoDias,
+            checklist,
+            descricao,
             bearerAuth,
         })
         return reply.status(201).send({ activity })

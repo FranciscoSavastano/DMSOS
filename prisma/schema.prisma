@@ -217,12 +217,14 @@ model Atividade {
   id   Int    @unique @default(autoincrement())
   obra_id   Int
   obra      Obra  @relation(fields: [obra_id], references: [id])
+  nome      String
   inicio        DateTime?
   termino       DateTime?
   horas_previstas Float?
   horas_gastas  Float?
   interferencia   String?
-  materiais       String?
+  materiais       String[]
+  checklist        String[]
   equipe        Json[] @default([])
   descricao      String
   profissionais ProfissionalNaAtividade[]

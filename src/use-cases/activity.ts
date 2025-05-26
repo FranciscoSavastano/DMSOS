@@ -32,6 +32,8 @@ interface RegisterUseCaseRequest {
         tempoGasto: number;
     }[];
     materiais: string[];
+    checklist: string[];
+    descricao?: string;
     bearerAuth: string;
 }
 
@@ -51,6 +53,8 @@ export class CreateActivityUseCase {
         tipoDias,
         equipe,
         materiais,
+        checklist,
+        descricao,
         bearerAuth,
     }: RegisterUseCaseRequest): Promise<RegisterUseCaseResponse> {
         const token = bearerAuth.split(" ")[1];
@@ -64,6 +68,12 @@ export class CreateActivityUseCase {
         if (!work) {
             throw new WorkIdNotFoundError();
         }
+        if (materiais.length === 0 || materiais === undefined) {
+            materiais = ["Sem materiais"];
+        }
+        if (checklist.length === 0 || checklist === undefined) {
+            checklist = [];
+        }
         const activity = await this.workRepository.createActivity({
             work_id,
             nome,
@@ -73,6 +83,9 @@ export class CreateActivityUseCase {
             tipoDias,
             equipe,
             materiais,
+            checklist,
+            descricao,
+
         });
         return { activity };
     }

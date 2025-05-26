@@ -1,0 +1,26 @@
+meta {
+  name: createActivity
+  type: http
+  seq: 38
+}
+
+post {
+  url: 127.0.0.1:3333/v1/obra/activity
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwY2ZlYTJiYy1jNDkyLTQ3ZDUtODk3MS0xYjNiYzNjZTdmMWYiLCJpYXQiOjE3NDgyNjk4NTksImV4cCI6MTc0ODMzODI1OX0.qP2j2ltHMvniII2tI7-7hSweyge9RWGPj8PGfJQyA4w
+}
+
+body:json {
+  {
+    "work_id": 12,
+    "nome": "Atividade 2",
+    "inicio": "2202-04-27T00:00:00.000Z",
+    "horas_previstas": 21,
+    "materiais": [ "Afasd", "Rasda", "sakdasj", "sada" ],
+    "checklist": [ "Passar tubulação", "passar cabo", "instalar facial" ]
+  }
+}

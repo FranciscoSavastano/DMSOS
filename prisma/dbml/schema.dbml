@@ -182,12 +182,14 @@ Table atividades {
   id Int [increment, unique, not null]
   obra_id Int [not null]
   obra obras [not null]
+  nome String [not null]
   inicio DateTime
   termino DateTime
   horas_previstas Float
   horas_gastas Float
   interferencia String
-  materiais String
+  materiais String[] [not null]
+  checklist String[] [not null]
   equipe Json[] [not null]
   descricao String [not null]
   profissionais ProfissionalNaAtividade [not null]
