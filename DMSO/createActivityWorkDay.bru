@@ -1,11 +1,11 @@
 meta {
-  name: readAllWorkDaysByWID
+  name: createActivityWorkDay
   type: http
-  seq: 37
+  seq: 39
 }
 
 post {
-  url: 127.0.0.1:3333/v1/obra/dia/readAllWorkDaysByWID
+  url: 127.0.0.1:3333/v1/obra/dia/createActivityWorkDay
   body: json
   auth: bearer
 }
@@ -16,6 +16,7 @@ auth:bearer {
 
 body:json {
   {
-    "id": 1
+    "activity_id": 1,
+    "work_day_id": 22
   }
 }

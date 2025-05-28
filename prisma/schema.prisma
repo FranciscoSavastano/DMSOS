@@ -199,7 +199,7 @@ model Obra {
 model DiaObra {
   id    Int  @unique @default(autoincrement())
   obra_id     Int
-  obra        Obra    @relation(fields: [obra_id], references: [id])
+  obra        Obra    @relation(fields: [obra_id], references: [id], onDelete: Cascade)
   data  DateTime
   inicio  DateTime
   termino DateTime?
@@ -207,7 +207,7 @@ model DiaObra {
   supervisor_id String 
   observacao String?
   equipe        Json[] @default([])   
-  supervisor    User      @relation(fields: [supervisor_id], references: [id])
+  supervisor    User      @relation(fields: [supervisor_id], references: [id], onDelete: Cascade)
   profissionais ProfissionalNaObra[]
   atividadeNaObra AtividadeNoDiaObra[]
   @@map("dia_obras")
@@ -216,7 +216,7 @@ model DiaObra {
 model Atividade {
   id   Int    @unique @default(autoincrement())
   obra_id   Int
-  obra      Obra  @relation(fields: [obra_id], references: [id])
+  obra      Obra  @relation(fields: [obra_id], references: [id], onDelete: Cascade)
   nome      String
   inicio        DateTime?
   termino       DateTime?
@@ -233,10 +233,13 @@ model Atividade {
 }
 model AtividadeNoDiaObra {
   dia_obra_id Int
-  dia_obra    DiaObra   @relation(fields: [dia_obra_id], references: [id])
+  dia_obra    DiaObra   @relation(fields: [dia_obra_id], references: [id], onDelete: Cascade)
   
   atividade_id        Int
-  atividade           Atividade   @relation(fields: [atividade_id], references: [id])
+  atividade           Atividade   @relation(fields: [atividade_id], references: [id], onDelete: Cascade)
+
+  concluidos     String[] @default([])
+  horas_gastas  Float? @default(0.0)
   @@id([dia_obra_id, atividade_id])
 }
 

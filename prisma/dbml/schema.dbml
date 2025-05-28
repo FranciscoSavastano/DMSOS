@@ -295,15 +295,15 @@ Ref: obras.cliente_id > clientes.id [delete: Cascade]
 
 Ref: obras.gerente_id > users.id [delete: Cascade]
 
-Ref: dia_obras.obra_id > obras.id
+Ref: dia_obras.obra_id > obras.id [delete: Cascade]
 
-Ref: dia_obras.supervisor_id > users.id
+Ref: dia_obras.supervisor_id > users.id [delete: Cascade]
 
-Ref: atividades.obra_id > obras.id
+Ref: atividades.obra_id > obras.id [delete: Cascade]
 
-Ref: AtividadeNoDiaObra.dia_obra_id > dia_obras.id
+Ref: AtividadeNoDiaObra.dia_obra_id > dia_obras.id [delete: Cascade]
 
-Ref: AtividadeNoDiaObra.atividade_id > atividades.id
+Ref: AtividadeNoDiaObra.atividade_id > atividades.id [delete: Cascade]
 
 Ref: ProfissionalNaObra.profissional_id > users.id
 

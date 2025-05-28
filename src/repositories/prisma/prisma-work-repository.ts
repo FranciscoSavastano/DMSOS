@@ -67,6 +67,26 @@ export class PrismaWorkRepository implements WorkRepository {
     return activity
   }
 
+  async createActivityWithWork(
+    data: Prisma.AtividadeNoDiaObraCreateInput & { work_day_id: number, activity_id: number } // Assuming atividade_id is part of the rest
+  ) {
+    const { work_day_id, activity_id } = data // Exclude work_id from the data object
+    console.log(work_day_id)
+    console.log(activity_id)
+    const activity = await prisma.atividadeNoDiaObra.create({
+      data: {
+        dia_obra: {
+          connect: { id: work_day_id }, // Use work_id only in the connect clause
+        },
+        atividade: {
+          connect: { id: activity_id}, // Assuming atividade_id is part of the rest
+        },
+      },
+    })
+
+    return activity
+  }
+
   async read(id: number) {
     const work = await prisma.obra.findUnique({
       where: {

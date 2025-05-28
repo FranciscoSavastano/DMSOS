@@ -42,6 +42,7 @@ import { readWorkDay } from './controllers/read-work-day'
 import { readAllWorkDay } from './controllers/read-all-work-day'
 import { readAllWorkDays } from './controllers/read-all-work-days'
 import { readUserByAuth } from './controllers/read-user-by-auth'
+import { createActivityWorkDay } from './controllers/activity-workDay'
 
 export async function appRoutes(app: FastifyInstance) {
   app.post('/v1/users', register)
@@ -129,6 +130,8 @@ export async function appRoutes(app: FastifyInstance) {
   app.post('/v1/obra/dia/readAllWorkDaysByWID', readAllWorkDays)
 
   app.get('/v1/obra/dia/readAll', readAllWorkDay)
+
+  app.post('/v1/obra/dia/createActivityWorkDay', createActivityWorkDay)
 
   //#TODO
 
