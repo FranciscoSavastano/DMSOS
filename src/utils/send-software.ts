@@ -39,7 +39,6 @@ const exists = promisify(fs.exists)
         
         // Set appropriate headers for .exe file download
         reply.header('Content-Type', 'application/vnd.microsoft.portable-executable')
-        reply.header('Content-Length', fs.statSync(filePath).size)
         reply.header('Content-Disposition', `attachment; filename="${fileName}"`)
         reply.header('Content-Custom-Header', `attachment; filename="${fileName}"`)
         
