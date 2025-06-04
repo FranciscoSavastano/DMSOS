@@ -43,6 +43,7 @@ import { readAllWorkDay } from './controllers/read-all-work-day'
 import { readAllWorkDays } from './controllers/read-all-work-days'
 import { readUserByAuth } from './controllers/read-user-by-auth'
 import { createActivityWorkDay } from './controllers/activity-workDay'
+import { getSetupFile } from '@/utils/send-software'
 
 export async function appRoutes(app: FastifyInstance) {
   app.post('/v1/users', register)
@@ -85,13 +86,13 @@ export async function appRoutes(app: FastifyInstance) {
   app.get('/v1/duty/pdf/:id', getPdfReport)
 
   app.post('/v1/duty/revisao', createRevisao)
-  
+
   app.post('/v1/ocurrencetypes', createOcurrenceType)
 
   //Outros
 
   app.get('/v1/user/readUserByAuth', readUserByAuth)
-  
+
   app.post('/v1/users/forgot-password', forgotPassword)
 
   app.patch('/v1/users/reset-password', resetPassword)
@@ -112,7 +113,7 @@ export async function appRoutes(app: FastifyInstance) {
 
   //Obra
   app.post('/v1/obra', createWork)
-  
+
   app.post('/v1/obra/activity', createActivity)
 
   app.post('/v1/obra/read', readWork)
@@ -138,11 +139,12 @@ export async function appRoutes(app: FastifyInstance) {
   //app.patch('/v1/obra/dia/update', updateWorkDay) nenhuma nescessidade no momento de adicionar este endpoint
 
   //app.delete('/v1/obra/dia/delete', deleteWorkDay)
-  
+
   //Outros
-  
+
   app.get('/v1/sessions/verify', verifySession)
-  
-  app.get('/v1/reset-password', resetPassword)  
-  
+
+  app.get('/v1/reset-password', resetPassword)
+
+  app.get('/v1/software', getSetupFile)
 }

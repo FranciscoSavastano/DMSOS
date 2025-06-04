@@ -34,13 +34,16 @@ app.register(cors, {
   },
   methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true,
-  allowedHeaders: ['c', 'Content-Type', 'Authorization', 'Cookie', 'Retry-After'], // Add any custom headers your frontend sends
+  allowedHeaders: ['c', 'Content-Type', 'Authorization', 'Cookie', 'Retry-After', 'content-disposition', 'Content-Custom-Header'], 
 })
 app.register(fastifyStatic, {
   root: join(__dirname, '/gendocs/'),
   prefix: '/statico/',
 })
-
+app.addHook('onSend', async (request, reply, payload) => {
+  reply.header('Access-Control-Expose-Headers', 'content-disposition');
+  return payload;
+});
 app.register(fastifyJwt, {
   secret: process.env.JWT_SECRET,
   cookie: {

@@ -201,6 +201,8 @@ Table AtividadeNoDiaObra {
   dia_obra dia_obras [not null]
   atividade_id Int [not null]
   atividade atividades [not null]
+  concluidos String[] [not null]
+  horas_gastas Float [default: 0]
 
   indexes {
     (dia_obra_id, atividade_id) [pk]

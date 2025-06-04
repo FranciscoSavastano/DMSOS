@@ -68,13 +68,14 @@ export class PrismaWorkRepository implements WorkRepository {
   }
 
   async createActivityWithWork(
-    data: Prisma.AtividadeNoDiaObraCreateInput & { work_day_id: number, activity_id: number } // Assuming atividade_id is part of the rest
+    data: Prisma.AtividadeNoDiaObraCreateInput & { work_day_id: number, activity_id: number} // Assuming atividade_id is part of the rest
   ) {
-    const { work_day_id, activity_id } = data // Exclude work_id from the data object
+    const { work_day_id, activity_id, ...rest } = data // Exclude work_id from the data object
     console.log(work_day_id)
     console.log(activity_id)
     const activity = await prisma.atividadeNoDiaObra.create({
       data: {
+        ...rest,
         dia_obra: {
           connect: { id: work_day_id }, // Use work_id only in the connect clause
         },
@@ -124,6 +125,8 @@ export class PrismaWorkRepository implements WorkRepository {
       include: {
         cliente: true,
         gerente: true,
+        atividades: true,
+        dia_obra: true,
       },
     })
 
@@ -221,6 +224,7 @@ export class PrismaWorkRepository implements WorkRepository {
       include: {
         obra: true,
         supervisor: true,
+        atividadeNaObra: true,
       },
     })
 
@@ -232,6 +236,7 @@ export class PrismaWorkRepository implements WorkRepository {
       include: {
         obra: true,
         supervisor: true,
+        atividadeNaObra: true,
       },
     })
 
@@ -246,6 +251,7 @@ export class PrismaWorkRepository implements WorkRepository {
       include: {
         obra: true,
         supervisor: true,
+        atividadeNaObra: true,
       },
     })
 

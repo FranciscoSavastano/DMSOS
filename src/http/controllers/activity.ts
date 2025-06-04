@@ -7,7 +7,7 @@ export async function createActivity(request: FastifyRequest, reply: FastifyRepl
         .object({
             work_id: z.number(),
             nome: z.string(),
-            inicio: z.string().datetime(),
+            inicio: z.string().datetime().optional(),
             termino: z.string().datetime().optional(),
             horas_previstas: z.number(),
             materiais: z.string().array(),
