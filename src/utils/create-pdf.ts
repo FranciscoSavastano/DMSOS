@@ -313,6 +313,7 @@ export async function CreatePdf(duty: any, auth: string) {
     .filter((name) => name !== null)
 
   const data = duty.created_at
+  const relatorioData = duty.data_inicio
   const contract = duty.contrato
   const addinfo = duty.informacoes_adicionais
   const dutyid = duty.id
@@ -1159,7 +1160,7 @@ export async function CreatePdf(duty: any, auth: string) {
   })
 
   // Finalize o arquivo e salve na pasta
-  const filedate = formatDateForFilename(data)
+  const filedate = formatDateForFilename(relatorioData)
   // Se não houver pasta crie uma recursivamente
   const gendocsPath = path.join(__dirname, '/', 'gendocs')
   if (!fs.existsSync(gendocsPath)) {
