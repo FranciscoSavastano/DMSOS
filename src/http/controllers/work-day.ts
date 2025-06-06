@@ -4,7 +4,6 @@ import { z } from "zod";
 
 export async function createWorkDay(request : FastifyRequest, reply : FastifyReply) {
     //Debug do body
-    console.log(request.body)
     const registerBodySchema = z.object({
         obra_id: z.number(),
         data: z.string().datetime(),

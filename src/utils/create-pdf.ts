@@ -1243,23 +1243,25 @@ async function compressPdfWithPdfLib(filePath) {
 export async function sendPdf(request: FastifyRequest, reply: FastifyReply) {
   try {
      // Extract parameters from the request
-    const { id, contract, created_at, token } = request.query as {
+    const { id, contract, data_inicio, token } = request.query as {
       id: string
       contract: string
-      created_at: string
+      data_inicio: string
       token?: string
     }
-
     // Validate required parameters
-    if (!id || !contract || !created_at) {
+    lockAcquired = false
+    console.log(id, contract, data_inicio, token)
+    if (!id || !contract || !data_inicio) {
+      console.log("Missing required parameters")
       return reply.code(400).send({
         error: 'Bad Request',
         message:
-          'Missing required parameters: id, contract, and created_at are all required',
+          'Missing required parameters: id, contract, and data_inicio are all required',
       })
     }
-    lockAcquired = false
     // Reuse the getPdfReport logic to handle file retrieval and streaming
+    const created_at = data_inicio
     return await getPdfReport(
       {
         params: { id },

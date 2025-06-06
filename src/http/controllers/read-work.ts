@@ -5,7 +5,6 @@ import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
 export async function readWork(request: FastifyRequest, reply: FastifyReply) {
-  console.log(request.body)
   const readWorkBodySchema = z
     .object({
       id: z.number(),

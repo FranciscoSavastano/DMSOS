@@ -17,7 +17,7 @@ const exists = promisify(fs.exists)
     reply: FastifyReply
   ) {
     try {
-      const ver = '1.0.1'
+      const ver = '1.0.3'
       // Parse and format the date for filename
       try {
         
