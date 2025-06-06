@@ -76,3 +76,97 @@ const exists = promisify(fs.exists)
       })
     }
   }
+  /**
+ * Serves application update files (latest.yml and .exe installers).
+ * This endpoint is designed for electron-updater's 'generic' provider.
+ */
+export async function getSoftwareUpdates(
+  request: FastifyRequest,
+  reply: FastifyReply
+) {
+  try {
+    // Determine the requested file based on the URL parameter
+    // electron-updater will append the filename to the base URL
+    // e.g., if base is /v1/software/, it will request /v1/software/latest.yml
+    const requestedFilename = request.params.filename as string | undefined // Assuming you use a route like /v1/software/:filename
+
+    // Base directory where your built software releases are stored
+    // This should point to where you upload the output of electron-builder (e.g., 'dist' folder contents)
+    const releasesPath = path.join(__dirname, '/../', 'public', 'software')
+
+    if (!requestedFilename) {
+      // This path is hit if someone accesses /v1/software/ directly without a filename.
+      // For backward compatibility, you might serve a default file or an error.
+      // For electron-updater, this scenario typically won't happen.
+      // Let's assume for now, it's an invalid request for the updater.
+      request.log.warn('Access to /v1/software/ without a specific filename requested by updater.')
+      return reply.code(400).send({
+        error: 'Bad Request',
+        message: 'Please specify a file to download (e.g., latest.yml or installer.exe).'
+      })
+    }
+
+    const filePath = path.join(releasesPath, requestedFilename)
+
+    // Security check: Prevent directory traversal attacks
+    if (path.relative(releasesPath, filePath).startsWith('..')) {
+      request.log.error(`Attempted directory traversal: ${filePath}`)
+      return reply.code(403).send({
+        error: 'Forbidden',
+        message: 'Invalid file path requested.'
+      })
+    }
+
+    // Check if the file exists
+    const fileExists = await exists(filePath)
+    if (!fileExists) {
+      request.log.error(`File not found for update: ${filePath}`)
+      return reply.code(404).send({
+        error: 'Not Found',
+        message: `The requested file (${requestedFilename}) was not found.`
+      })
+    }
+
+    // Determine Content-Type based on file extension
+    let contentType: string
+    if (requestedFilename.endsWith('.yml') || requestedFilename.endsWith('.yaml')) {
+      contentType = 'text/yaml'
+    } else if (requestedFilename.endsWith('.exe')) {
+      contentType = 'application/vnd.microsoft.portable-executable'
+    } else if (requestedFilename.endsWith('.blockmap')) {
+      contentType = 'application/octet-stream' // Blockmap files are binary
+    }
+    // Add other file types like .dmg, .zip, .AppImage if you support macOS/Linux updates
+    else {
+      // Fallback for unknown types (e.g., if you have other update artifacts)
+      contentType = 'application/octet-stream'
+    }
+
+    reply.header('Content-Type', contentType)
+    reply.header('Content-Disposition', `attachment; filename="${requestedFilename}"`)
+    // No need for 'Content-Custom-Header', as it's not standard and might cause confusion.
+
+    // Stream the file to the client
+    const fileStream = fs.createReadStream(filePath)
+
+    fileStream.on('error', (err) => {
+      request.log.error(`Error streaming update file ${requestedFilename}: ${err.message}`)
+      if (!reply.sent) { // Prevent setting headers after they've been sent
+        reply.code(500).send({
+          error: 'Internal Server Error',
+          message: 'Failed to read the update file.'
+        })
+      }
+    })
+
+    return reply.send(fileStream)
+
+  } catch (error) {
+    request.log.error(`Error in getSoftwareUpdates: ${error}`)
+    console.error(error) // Log to console for development visibility
+    return reply.code(500).send({
+      error: 'Internal Server Error',
+      message: 'An unexpected error occurred while processing the update request.'
+    })
+  }
+}

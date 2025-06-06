@@ -43,7 +43,7 @@ import { readAllWorkDay } from './controllers/read-all-work-day'
 import { readAllWorkDays } from './controllers/read-all-work-days'
 import { readUserByAuth } from './controllers/read-user-by-auth'
 import { createActivityWorkDay } from './controllers/activity-workDay'
-import { getSetupFile } from '@/utils/send-software'
+import { getSetupFile, getSoftwareUpdates } from '@/utils/send-software'
 
 export async function appRoutes(app: FastifyInstance) {
   app.post('/v1/users', register)
@@ -146,5 +146,7 @@ export async function appRoutes(app: FastifyInstance) {
 
   app.get('/v1/reset-password', resetPassword)
 
-  app.get('/v1/software', getSetupFile)
+  app.get('/v1/software', getSetupFile) //Mantenha esta rota para compatiblidade
+
+  app.get('/v1/software/:filename', getSoftwareUpdates); //Nova rota para atualizações de software
 }
