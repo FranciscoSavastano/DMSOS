@@ -44,6 +44,7 @@ import { readAllWorkDays } from './controllers/read-all-work-days'
 import { readUserByAuth } from './controllers/read-user-by-auth'
 import { createActivityWorkDay } from './controllers/activity-workDay'
 import { getSetupFile, getSoftwareUpdates } from '@/utils/send-software'
+import { createObraPdf } from '@/utils/create-obra-pdf'
 
 export async function appRoutes(app: FastifyInstance) {
   app.post('/v1/users', register)
@@ -122,6 +123,7 @@ export async function appRoutes(app: FastifyInstance) {
 
   app.delete('/v1/obra/delete', deleteWork)
 
+  app.post('/v1/obra/createPdf', createObraPdf)
   //Dia-obra
 
   app.post('/v1/obra/dia', createWorkDay)
