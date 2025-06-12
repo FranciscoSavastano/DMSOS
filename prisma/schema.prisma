@@ -234,12 +234,13 @@ model Atividade {
 model AtividadeNoDiaObra {
   dia_obra_id Int
   dia_obra    DiaObra   @relation(fields: [dia_obra_id], references: [id], onDelete: Cascade)
-  
   atividade_id        Int
   atividade           Atividade   @relation(fields: [atividade_id], references: [id], onDelete: Cascade)
-
   concluidos     String[] @default([])
+  interferencias String?
+  imagens        Bytes[] @default([])
   horas_gastas  Float? @default(0.0)
+  checklist_porcentagem String?
   @@id([dia_obra_id, atividade_id])
 }
 

@@ -202,7 +202,10 @@ Table AtividadeNoDiaObra {
   atividade_id Int [not null]
   atividade atividades [not null]
   concluidos String[] [not null]
+  interferencias String
+  imagens Bytes[] [not null]
   horas_gastas Float [default: 0]
+  checklist_porcentagem String
 
   indexes {
     (dia_obra_id, atividade_id) [pk]

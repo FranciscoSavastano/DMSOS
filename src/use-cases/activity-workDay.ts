@@ -6,6 +6,9 @@ interface RegisterUseCaseRequest {
     work_day_id: number;
     concluidos: any;
     horas_gastas: number;
+    interferencias?: string;
+    imagens?: any;
+    checklist_porcentagem?: string;
 }
 
 interface RegisterUseCaseResponse {
@@ -14,18 +17,24 @@ interface RegisterUseCaseResponse {
 
 export class CreateActivityWorkDayUseCase {
     constructor(private readonly workRepository: WorkRepository) {}
-
+    
     async execute({
         activity_id,
         work_day_id,
         concluidos,
         horas_gastas,
+        interferencias,
+        imagens,
+        checklist_porcentagem,
     }: RegisterUseCaseRequest): Promise<RegisterUseCaseResponse> {
         const activityWorkDay = await this.workRepository.createActivityWithWork({
             activity_id,
             work_day_id,
+            interferencias,
             concluidos,
+            imagens,
             horas_gastas,
+            checklist_porcentagem,
         });
 
         return { activityWorkDay };

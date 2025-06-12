@@ -5,12 +5,14 @@ import pdfkit from 'pdfkit-table'
 import path from "path";
 import sharp from 'sharp';
 import fs from 'fs'
+const watermarkPath = path.join('./src/utils/pdf-img/logo.png'); // Adjust path as needed
 
 export async function createObraPdf(request: FastifyRequest, reply: FastifyReply){
     try {
         const createObraPdfBodySchema = z.object({
             id: z.number(),
             diaObraId: z.number().optional(),
+            assinatura: z.boolean().optional(),
         }).parse(request.body);
         const createObraPdfHeadersSchema = z
             .object({
@@ -18,7 +20,7 @@ export async function createObraPdf(request: FastifyRequest, reply: FastifyReply
             })
             .parse(request.headers);
         const { authorization: bearerAuth } = createObraPdfHeadersSchema;
-        const { id, diaObraId } = createObraPdfBodySchema;
+        const { id, diaObraId, assinatura } = createObraPdfBodySchema;
         //Get information about the obra
         const obraResponse = axios.post('http://127.0.0.1:3333/v1/obra/read', {
             id: id,
@@ -47,6 +49,7 @@ export async function createObraPdf(request: FastifyRequest, reply: FastifyReply
         console.log('Dia Obra data:', diaObraData.data.workDay.workDay);
     //Crie o PDF com os dados da obra
         const doc = new pdfkit();
+//For each page, set a background image company logo
 doc.fontSize(25).text('Relatório Diario de Obra', { align: 'center' });
 // Add a horizontal line
 doc.moveTo(50, 100)
@@ -78,7 +81,7 @@ doc.moveDown(0.5);
 if (responseData.equipe && responseData.equipe.length > 0) {
   const equipeTable = {
     headers: ['Cargo', 'Quantidade', 'Tempo Diário'],
-    rows: responseData.equipe.map(e => [e.cargo, e.quantidade, e.tempoDiario])
+    rows: responseData.equipe.map(e => [e.cargo, e.quantidade, e.tempoDiario + " horas"]),
   };
   await doc.table(equipeTable, { width: 200 });
 } else {
@@ -94,7 +97,6 @@ if (diaObra) {
     doc.fontSize(14).text(`Sem informações da obra`, 320, 170, { align: 'left', width: 220 });
 }
 
-doc.moveDown(6);
 // Get all dias da obra
 const diasObra = diaObraData.data.workDay.workDay;
 
@@ -102,30 +104,99 @@ const diasObra = diaObraData.data.workDay.workDay;
 const diasSelecionados = diaObraId
   ? diasObra.filter(dia => dia.id === diaObraId)
   : diasObra;
-
+let first = true;
 if (diasSelecionados && diasSelecionados.length > 0) {
   for (const dia of diasSelecionados) {
-    doc.addPage();
-    doc.fontSize(16).text(`Dia da Obra: ${new Date(dia.data).toLocaleDateString()}`, { underline: true });
-    doc.fontSize(12).text(`Observação: ${dia.observacao || '-'}`);
-    doc.moveDown();
-
     if (dia.atividadeNaObra && dia.atividadeNaObra.length > 0) {
       for (const atvDia of dia.atividadeNaObra) {
         // Find the atividade details by id
         const atividade = responseData.atividades.find(a => a.id === atvDia.atividade_id);
         if (atividade) {
-          doc.fontSize(13).text(`Atividade: ${atividade.nome}`);
-          doc.fontSize(11).text(`Descrição: ${atividade.descricao || '-'}`);
+          if(first) {
+            doc.fontSize(13).text(`Atividade: ${atividade.nome}`, 60, 290);
+            first = false;
         } else {
-          doc.fontSize(13).text(`Atividade ID: ${atvDia.atividade_id}`);
+            //Check if is near the end of the page
+            console.log('Current Y position:', doc.y);
+            if (doc.y > 700) {
+              doc.addPage();
+            }
+            doc.moveTo(50, doc.y + 10)
+            .lineTo(550, doc.y + 10)
+            .stroke();
+            doc.fontSize(13).text(`Atividade: ${atividade.nome}`, 60, doc.y + 20);
+          }
+           doc.fontSize(11).text(`Descrição: ${atividade.descricao || '-'}`, 60, doc.y + 10);
+        } else {
+          doc.fontSize(13).text(`Atividade ID: ${atvDia.atividade_id}`, 60, 310);
+          doc.fontSize(11).text('Descrição: Atividade não encontrada', 60, doc.y + 10);
         }
-        doc.fontSize(11).text(`Concluídos: ${(atvDia.concluidos && atvDia.concluidos.length > 0) ? atvDia.concluidos.join(', ') : '-'}`);
-        doc.fontSize(11).text(`Horas gastas: ${atvDia.horas_gastas ?? '-'}`);
-        doc.moveDown();
+        //Check if is near the end of the page
+        if (doc.y > 700) {
+          doc.addPage();
+        }
+        doc.fontSize(11).text(`Checklist concluidas: ${(atvDia.concluidos && atvDia.concluidos.length > 0) ? atvDia.concluidos.join(', ') : '-'}`, 60, doc.y + 10);
+        doc.fontSize(11).text(`Interferencias: ${atvDia.interferencias ?? '-'}`, 60, doc.y + 10);
+        doc.fontSize(11).text(`Anexos:`, 60, doc.y + 10);
+        //Images
+        if (atvDia.imagens && atvDia.imagens.length > 0) {
+  const imageWidth = 80;   // Adjust as needed
+  const imageHeight = 60;  // Adjust as needed
+  let imgX = 60;           // Starting x position
+  const imgY = doc.y + 10; // y position below the last text
+
+for (const img of atvDia.imagens) {
+   try {
+    const buffer = Buffer.isBuffer(img) ? img : Buffer.from(img.data);
+    doc.image(buffer, imgX, imgY, { width: imageWidth, height: imageHeight });
+    imgX += imageWidth + 10;
+   } catch (err) {
+      console.error('Erro ao inserir imagem:', err);
+    }
+  }
+  // Move the cursor below the images for the next content
+  doc.y = imgY + imageHeight + 10;
+  // Porcentagem do checklist
+  // Porcentagem do checklist (Progress Bar)
+const percentStr = atvDia.checklist_porcentagem ?? "0";
+const percent = Math.max(0, Math.min(100, parseInt(percentStr, 10) || 0)); // Clamp between 0 and 100
+
+const barX = 60;
+const barY = doc.y + 10;
+const barWidth = 200;
+const barHeight = 18;
+const radius = 8;
+
+// Draw background bar
+doc.save()
+  .roundedRect(barX, barY, barWidth, barHeight, radius)
+  .fill('#e0e0e0');
+
+// Draw filled bar (progress)
+const fillWidth = (barWidth * percent) / 100;
+doc
+  .roundedRect(barX, barY, fillWidth, barHeight, radius)
+  .fill('#4caf50');
+
+// Draw percentage text centered in the bar
+doc
+  .fillColor('#000')
+  .fontSize(11)
+  .text(`${percent}%`, barX, barY + 2, {
+    width: barWidth,
+    align: 'center',
+    height: barHeight,
+    valign: 'center'
+  });
+
+doc.restore();
+
+// Move cursor below the bar for next content
+doc.y = barY + barHeight + 10;
+}
       }
     } else {
-      doc.fontSize(12).text('Nenhuma atividade registrada para este dia.');
+      doc.fontSize(12).text('Nenhuma atividade registrada para este dia.', 60, 310);
     }
     doc.moveDown(2);
   }

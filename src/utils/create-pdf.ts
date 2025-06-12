@@ -263,7 +263,7 @@ function determinePeriod(created_at: Date): string {
   const momenthour = moment(created_at)
   const createdAt = momenthour.tz('America/Sao_Paulo')
   const hour = createdAt.hour()
-  return hour >= 18 || hour < 6 ? 'Noturno' : 'Diurno'
+  return hour >= 19 || hour < 7 ? 'Noturno' : 'Diurno'
 }
 
 function formatarData(created_at: Date): string {
@@ -416,6 +416,7 @@ export async function CreatePdf(duty: any, auth: string) {
     .fontSize(15)
     .fill('#001233')
     .text(objectivetext, 100, 200, { lineGap: 10 })
+    //Adicione a terceira pagina se houver imagebs
     if (uploadedFileData.length > 0) {
       doc.addPage()
         .fontSize(28)
@@ -428,7 +429,7 @@ export async function CreatePdf(duty: any, auth: string) {
       descriptions = []; // Clear the array after processing
     
       const imageWidth = 150; // Target width for compressed images
-      const imageHeight = 150; // Target height for compressed images
+      const imageHeight = 120; // Target height for compressed images
       const imageMargin = 20;
     
       let x = imageMargin;
@@ -451,12 +452,12 @@ export async function CreatePdf(duty: any, auth: string) {
             y += imageHeight + 100; // Move to the next row
           }
           if ((index + 1) % 9 === 0) {
+            x = imageMargin;
+            y = imageWidth; // Reset position for a new page
             doc.addPage()
               .fontSize(28)
               .fill('#001233')
               .text('RELATÓRIO FOTOGRÁFICO', 40, 30, { align: 'center' });
-            x = imageMargin;
-            y = imageWidth;
           }
         } catch (error) {
           console.error('Error processing image:', error);
