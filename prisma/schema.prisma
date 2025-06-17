@@ -29,7 +29,6 @@ model User {
   last_login         DateTime?
   created_at         DateTime             @default(now())
   updated_at         DateTime             @updatedAt
-  last_seen_at       DateTime? 
   user_role          String
   AuthenticationAudit AuthenticationAudit[]
   OS                 OS[]
@@ -60,7 +59,6 @@ model Cliente {
   last_login            DateTime?
   created_at            DateTime  @default(now())
   updated_at            DateTime  @updatedAt
-  last_seen_at   DateTime? 
   equipamento Equipamento[]
   tipo_ocorrencias Ocurrence_types[]
   obra          Obra[]
