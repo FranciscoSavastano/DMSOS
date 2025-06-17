@@ -5,65 +5,69 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "linux-musl", "linux-musl-openssl-3.0.x"]
 }
+
 generator dbml {
   provider = "prisma-dbml-generator"
 }
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id                 String               @id @default(uuid())
-  cpf                String               @unique
-  nome               String
-  email              String?               @unique 
-  password_digest    String
-  homem_hora         Float?                @default(0.0)
-  is_new             Boolean              @default(true)
-  contrato           String               @default("Nenhum")
-  tentativas_de_login Int                  @default(0)
-  last_login         DateTime?
-  created_at         DateTime             @default(now())
-  updated_at         DateTime             @updatedAt
-  user_role          String
-  AuthenticationAudit AuthenticationAudit[]
-  OS                 OS[]
-    // Obras que este usuário gerencia
-  obrasGerenciadas Obra[] @relation("ObraGerente")
-  obrasSupervisionadas DiaObra[]
+  id                     String                    @id @default(uuid())
+  cpf                    String                    @unique
+  nome                   String
+  email                  String?                   @unique
+  password_digest        String
+  homem_hora             Float?                    @default(0.0)
+  is_new                 Boolean                   @default(true)
+  contrato               String                    @default("Nenhum")
+  tentativas_de_login    Int                       @default(0)
+  last_login             DateTime?
+  created_at             DateTime                  @default(now())
+  updated_at             DateTime                  @updatedAt
+  user_role              String
+  AuthenticationAudit    AuthenticationAudit[]
+  OS                     OS[]
+  // Obras que este usuário gerencia
+  obrasGerenciadas       Obra[]                    @relation("ObraGerente")
+  obrasSupervisionadas   DiaObra[]
   // Obras em que este usuário trabalha como profissional
-  obrasParticipadas ProfissionalNaObra[]
-  plantoes           PlantaoOperador[]    // Changed to reference the join table
-  atividadesParticipadas    ProfissionalNaAtividade[]
-  revisao             Revisao[]
+  obrasParticipadas      ProfissionalNaObra[]
+  plantoes               PlantaoOperador[] // Changed to reference the join table
+  atividadesParticipadas ProfissionalNaAtividade[]
+  revisao                Revisao[]
+
   @@map("users")
 }
 
 model Cliente {
-  id              String         @id @default(uuid())
-  nome            String
-  responsavel     String      @default("")
-  telefone        String      @default("")
-  email           String      @unique
-  password_digest String      @default("")
-  endereco        String      @default("")
-  cnpj            String      @unique
-  is_new          Boolean     @default(true)
-  user_role       String      @default("Cliente")
-  tentativas_de_login   Int       @default(0)
-  services        String[]    @default(["Nenhum"])
-  last_login            DateTime?
-  created_at            DateTime  @default(now())
-  updated_at            DateTime  @updatedAt
-  equipamento Equipamento[]
-  tipo_ocorrencias Ocurrence_types[]
-  obra          Obra[]
+  id                  String                        @id @default(uuid())
+  nome                String
+  responsavel         String                        @default("")
+  telefone            String                        @default("")
+  email               String                        @unique
+  password_digest     String                        @default("")
+  endereco            String                        @default("")
+  cnpj                String                        @unique
+  is_new              Boolean                       @default(true)
+  user_role           String                        @default("Cliente")
+  tentativas_de_login Int                           @default(0)
+  services            String[]                      @default(["Nenhum"])
+  last_login          DateTime?
+  created_at          DateTime                      @default(now())
+  updated_at          DateTime                      @updatedAt
+  equipamento         Equipamento[]
+  tipo_ocorrencias    Ocurrence_types[]
+  obra                Obra[]
   AuthenticationAudit AuthenticationAuditCustomer[]
-  revisao           Revisao[]
+  revisao             Revisao[]
+
   @@map("clientes")
 }
 
@@ -73,7 +77,7 @@ model AuthenticationAudit {
   remote_port String?
   browser     String?
   status      AUTHENTICATION_STATUS
-  user_id String?
+  user_id     String?
   tecnico     User?                 @relation(fields: [user_id], references: [id], onDelete: Cascade)
   created_at  DateTime              @default(now())
 
@@ -86,13 +90,12 @@ model AuthenticationAuditCustomer {
   remote_port String?
   browser     String?
   status      AUTHENTICATION_STATUS
-  cliente_id String?
-  cliente     Cliente?                 @relation(fields: [cliente_id], references: [id], onDelete: Cascade)
+  cliente_id  String?
+  cliente     Cliente?              @relation(fields: [cliente_id], references: [id], onDelete: Cascade)
   created_at  DateTime              @default(now())
 
   @@map("authentication_audit_customer")
 }
-
 
 enum UserType {
   TECNICO
@@ -100,38 +103,40 @@ enum UserType {
 }
 
 model OS {
-  id                    Int       @id @default(autoincrement())
-  tipo_manutencao       String
-  titulo                String    
-  sistema               String
-  tecnico_id            String
-  data                  DateTime
-  inicio                DateTime
-  termino               DateTime
-  descricao_tarefa      String
-  anexos                String
-  equipamento           Equipamento[]
-  tecnico               User    @relation(fields: [tecnico_id], references: [id], onDelete: Cascade)
+  id               Int           @id @default(autoincrement())
+  tipo_manutencao  String
+  titulo           String
+  sistema          String
+  tecnico_id       String
+  data             DateTime
+  inicio           DateTime
+  termino          DateTime
+  descricao_tarefa String
+  anexos           String
+  equipamento      Equipamento[]
+  tecnico          User          @relation(fields: [tecnico_id], references: [id], onDelete: Cascade)
+
   @@map("OS")
 }
 
 model Plantao {
-  id                    Int                @id @default(autoincrement())
-  data_inicio           DateTime           @default(now())
-  data_fim              DateTime
-  horario_rf            DateTime
-  contrato              String
-  ocorrencia            Ocorrencia[]
-  revisao               Revisao[]
-  informacoes_adicionais Json?            
-  consideracoes         String             @default("")
-  created_at            DateTime           @default(now())
-  updated_at            DateTime           @updatedAt
-  operadoresNomes         String[]
-  operadores            PlantaoOperador[]  // Changed to reference the join table
+  id                     Int               @id @default(autoincrement())
+  data_inicio            DateTime          @default(now())
+  data_fim               DateTime
+  horario_rf             DateTime
+  contrato               String
+  ocorrencia             Ocorrencia[]
+  revisao                Revisao[]
+  informacoes_adicionais Json?
+  consideracoes          String            @default("")
+  created_at             DateTime          @default(now())
+  updated_at             DateTime          @updatedAt
+  operadoresNomes        String[]
+  operadores             PlantaoOperador[] // Changed to reference the join table
 
   @@map("plantoes")
 }
+
 model PlantaoOperador {
   plantao    Plantao @relation(fields: [plantaoId], references: [id], onDelete: Cascade)
   plantaoId  Int
@@ -141,106 +146,114 @@ model PlantaoOperador {
   @@id([plantaoId, operadorId])
   @@map("plantao_operador")
 }
+
 model Ocorrencia {
-  id                    Int         @id @default(autoincrement())
-  plantao_id            Int
-  plantao               Plantao     @relation(fields: [plantao_id], references: [id], onDelete: Cascade)
-  ocurrence_type        String      @default("Padrao")
-  descricao             String?      
-  horario            DateTime?
-  termino            DateTime?
-  data               DateTime       @default(now()) 
-  local              String?     
-  observacao         String?     
-  acao               String?
-  responsavel        String?
+  id             Int       @id @default(autoincrement())
+  plantao_id     Int
+  plantao        Plantao   @relation(fields: [plantao_id], references: [id], onDelete: Cascade)
+  ocurrence_type String    @default("Padrao")
+  descricao      String?
+  horario        DateTime?
+  termino        DateTime?
+  data           DateTime  @default(now())
+  local          String?
+  observacao     String?
+  acao           String?
+  responsavel    String?
+
   @@map("ocorrencias")
 }
 
 model Revisao {
-  id Int   @id @default(autoincrement())
-  plantao_id Int
-  plantao Plantao @relation(fields: [plantao_id], references: [id])
-  cliente_id String?
-  cliente Cliente? @relation(fields: [cliente_id], references: [id])
-  user_id    String?
-  user    User?   @relation(fields: [user_id], references: [id])
+  id              Int      @id @default(autoincrement())
+  plantao_id      Int
+  plantao         Plantao  @relation(fields: [plantao_id], references: [id])
+  cliente_id      String?
+  cliente         Cliente? @relation(fields: [cliente_id], references: [id])
+  user_id         String?
+  user            User?    @relation(fields: [user_id], references: [id])
   nomeSolicitante String
   solicitacao     String
   isSolved        Boolean  @default(false)
+
   @@map("revisoes")
 }
 
 model Obra {
-  id          Int      @id @default(autoincrement())
-  cliente_id  String
-  cliente     Cliente  @relation(fields: [cliente_id], references: [id], onDelete: Cascade)
+  id              Int         @id @default(autoincrement())
+  cliente_id      String
+  cliente         Cliente     @relation(fields: [cliente_id], references: [id], onDelete: Cascade)
   // Relação com o gerente (um-para-muitos)
-  gerente_id  String
-  gerente     User     @relation("ObraGerente", fields: [gerente_id], references: [id], onDelete: Cascade)
+  gerente_id      String
+  gerente         User        @relation("ObraGerente", fields: [gerente_id], references: [id], onDelete: Cascade)
   // Relação muitos-para-muitos com os profissionais
   // Outros campos da obra...
-  nome        String
-  inicio        DateTime
-  termino       DateTime? 
-  numproposta  String   
-  disciplinas   String[]
-  horas_previstas  Float
-  hh_previstas     Float @default(0)
-  tipoDias        String @default("util")
-  equipe        Json[] @default([])
-  created_at            DateTime           @default(now())
-  updated_at            DateTime           @updatedAt
-  dia_obra     DiaObra[]
-  atividades    Atividade[]
+  nome            String
+  inicio          DateTime
+  termino         DateTime?
+  numproposta     String
+  disciplinas     String[]
+  horas_previstas Float
+  hh_previstas    Float       @default(0)
+  tipoDias        String      @default("util")
+  equipe          Json[]      @default([])
+  created_at      DateTime    @default(now())
+  updated_at      DateTime    @updatedAt
+  dia_obra        DiaObra[]
+  atividades      Atividade[]
+
   @@map("obras")
 }
 
 model DiaObra {
-  id    Int  @unique @default(autoincrement())
-  obra_id     Int
-  obra        Obra    @relation(fields: [obra_id], references: [id], onDelete: Cascade)
-  data  DateTime
-  inicio  DateTime
-  termino DateTime?
-  horas_gastas  Float
-  supervisor_id String 
-  observacao String?
-  equipe        Json[] @default([])   
-  supervisor    User      @relation(fields: [supervisor_id], references: [id], onDelete: Cascade)
-  profissionais ProfissionalNaObra[]
+  id              Int                  @unique @default(autoincrement())
+  obra_id         Int
+  obra            Obra                 @relation(fields: [obra_id], references: [id], onDelete: Cascade)
+  data            DateTime
+  inicio          DateTime
+  termino         DateTime?
+  horas_gastas    Float
+  supervisor_id   String
+  observacao      String?
+  equipe          Json[]               @default([])
+  supervisor      User                 @relation(fields: [supervisor_id], references: [id], onDelete: Cascade)
+  profissionais   ProfissionalNaObra[]
   atividadeNaObra AtividadeNoDiaObra[]
+
   @@map("dia_obras")
 }
 
 model Atividade {
-  id   Int    @unique @default(autoincrement())
-  obra_id   Int
-  obra      Obra  @relation(fields: [obra_id], references: [id], onDelete: Cascade)
-  nome      String
-  inicio        DateTime?
-  termino       DateTime?
+  id              Int                       @unique @default(autoincrement())
+  obra_id         Int
+  obra            Obra                      @relation(fields: [obra_id], references: [id], onDelete: Cascade)
+  nome            String
+  inicio          DateTime?
+  termino         DateTime?
   horas_previstas Float?
-  horas_gastas  Float?
+  horas_gastas    Float?
   interferencia   String?
   materiais       String[]
-  checklist        String[]
-  equipe        Json[] @default([])
-  descricao      String
-  profissionais ProfissionalNaAtividade[]
+  checklist       String[]
+  equipe          Json[]                    @default([])
+  descricao       String
+  profissionais   ProfissionalNaAtividade[]
   atividadeNaObra AtividadeNoDiaObra[]
+
   @@map("atividades")
 }
+
 model AtividadeNoDiaObra {
-  dia_obra_id Int
-  dia_obra    DiaObra   @relation(fields: [dia_obra_id], references: [id], onDelete: Cascade)
-  atividade_id        Int
-  atividade           Atividade   @relation(fields: [atividade_id], references: [id], onDelete: Cascade)
-  concluidos     String[] @default([])
-  interferencias String?
-  imagens        Bytes[] @default([])
-  horas_gastas  Float? @default(0.0)
+  dia_obra_id           Int
+  dia_obra              DiaObra   @relation(fields: [dia_obra_id], references: [id], onDelete: Cascade)
+  atividade_id          Int
+  atividade             Atividade @relation(fields: [atividade_id], references: [id], onDelete: Cascade)
+  concluidos            String[]  @default([])
+  interferencias        String?
+  imagens               Bytes[]   @default([])
+  horas_gastas          Float?    @default(0.0)
   checklist_porcentagem String?
+
   @@id([dia_obra_id, atividade_id])
 }
 
@@ -248,54 +261,57 @@ model AtividadeNoDiaObra {
 model ProfissionalNaObra {
   profissional_id String
   profissional    User   @relation(fields: [profissional_id], references: [id])
-  
-  dia_obra_id        Int
-  dia_obra           DiaObra   @relation(fields: [dia_obra_id], references: [id])
+
+  dia_obra_id Int
+  dia_obra    DiaObra @relation(fields: [dia_obra_id], references: [id])
+
   @@id([profissional_id, dia_obra_id])
 }
 
 model ProfissionalNaAtividade {
-  profissional_id  String
-  profissional      User    @relation(fields: [profissional_id], references: [id])
+  profissional_id String
+  profissional    User   @relation(fields: [profissional_id], references: [id])
 
-  atividade_id      Int
-  atividade       Atividade  @relation(fields: [atividade_id], references: [id])
+  atividade_id Int
+  atividade    Atividade @relation(fields: [atividade_id], references: [id])
 
   @@id([profissional_id, atividade_id])
 }
+
 model Ocurrence_types {
-  id              Int           @default(autoincrement()) @id
-  type            String
-  subtypes        String[]
-  contract_id     String
-  contract        Cliente   @relation(fields: [contract_id], references: [id])        
+  id          Int      @id @default(autoincrement())
+  type        String
+  subtypes    String[]
+  contract_id String
+  contract    Cliente  @relation(fields: [contract_id], references: [id])
+
   @@map("Ocurrence_type")
 }
 
 model Marca {
-  id                    Int        @id  @default(autoincrement())
-  marca                 String     @unique
-  telefone              String    
-  email                 String
-  site                  String
-  equipamento           Equipamento[]
+  id          Int           @id @default(autoincrement())
+  marca       String        @unique
+  telefone    String
+  email       String
+  site        String
+  equipamento Equipamento[]
+
   @@map("marcas")
 }
 
 model Equipamento {
-  id                    Int         @id  @default(autoincrement())
-  id_os                 Int         @unique
-  nome                  String
-  modelo                String
-  marca_nome            String
-  cliente_id            String
-  ip                    String
-  mac                   String
-  NS                    String
-  marca                 Marca       @relation(fields: [marca_nome], references: [marca])
-  cliente               Cliente     @relation(fields: [cliente_id], references: [id])
-  os                    OS          @relation(fields: [id_os], references: [id])
-
+  id         Int     @id @default(autoincrement())
+  id_os      Int     @unique
+  nome       String
+  modelo     String
+  marca_nome String
+  cliente_id String
+  ip         String
+  mac        String
+  NS         String
+  marca      Marca   @relation(fields: [marca_nome], references: [marca])
+  cliente    Cliente @relation(fields: [cliente_id], references: [id])
+  os         OS      @relation(fields: [id_os], references: [id])
 }
 
 enum AUTHENTICATION_STATUS {

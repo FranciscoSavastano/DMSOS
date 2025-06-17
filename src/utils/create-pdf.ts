@@ -447,7 +447,8 @@ export async function CreatePdf(duty: any, auth: string) {
           let imagedesc = imagesdescription[index].substring(0, 100);
           if(imagedesc.length > 99) {
           imagedesc += "..."
-            extendedDescriptions.push("Ocorrencia " + index + 1 + ":" + imagesdescription[index] + "\n");
+            let newindex = index + 1;
+            extendedDescriptions.push("Ocorrencia " + newindex + 1 + ":" + imagesdescription[index] + "\n");
           }
           doc.image(compressedImageBuffer, x, y, { width: imageWidth, height: imageHeight });
           doc.rect(x, y + imageHeight, imageWidth, 70).fill('#007bff'); // Add a blue rectangle for the description
