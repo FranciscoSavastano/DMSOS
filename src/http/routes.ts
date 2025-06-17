@@ -45,6 +45,7 @@ import { readUserByAuth } from './controllers/read-user-by-auth'
 import { createActivityWorkDay } from './controllers/activity-workDay'
 import { getSetupFile, getSoftwareUpdates } from '@/utils/send-software'
 import { createObraPdf } from '@/utils/create-obra-pdf'
+import { updateWork } from '@/http/controllers/update-work'
 
 export async function appRoutes(app: FastifyInstance) {
   app.post('/v1/users', register)
@@ -114,6 +115,8 @@ export async function appRoutes(app: FastifyInstance) {
 
   //Obra
   app.post('/v1/obra', createWork)
+
+  app.patch('/v1/obra/update', updateWork)
 
   app.post('/v1/obra/activity', createActivity)
 

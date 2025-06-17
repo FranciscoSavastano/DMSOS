@@ -3,37 +3,40 @@ import { DutyIdNotFoundError } from '@/use-cases/errors/duty-id-not-found-error'
 import { makeUpdateDutyUseCase } from '@/use-cases/factories/make-update-duty-use-case'
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
+import { WorkIdNotFoundError } from '@/use-cases/errors/work-id-not-found-error'
+import { makeUpdateWorkUseCase } from '@/use-cases/factories/make-update-work-use-case'
 
-export async function updateDuty(request: FastifyRequest, reply: FastifyReply) {
-  const updateDutyBodySchema = z
+export async function updateWork(request: FastifyRequest, reply: FastifyReply) {
+  const updateWorkBodySchema = z
     .object({
       id: z.number(),
       data_inicio: z.string().datetime().optional(),
       data_fim: z.string().datetime().optional(),
       horario_rf: z.string().datetime().optional(),
+      termino: z.string().datetime().optional(),
     })
     .parse(request.body)
 
-  const updateDutyHeadersSchema = z
+  const updateWorkHeadersSchema = z
     .object({
       authorization: z.string(),
     })
     .parse(request.headers)
-  const { authorization: bearerAuth } = updateDutyHeadersSchema
+  const { authorization: bearerAuth } = updateWorkHeadersSchema
 
   // Valide que as strings nao sao vazias ou nulas.
 
   try {
-    const updateUserUseCase = makeUpdateDutyUseCase()
+    const updateObraUseCase = makeUpdateWorkUseCase()
 
-    const duty = await updateUserUseCase.execute({
-      ...updateDutyBodySchema,
+    const duty = await updateObraUseCase.execute({
+      ...updateWorkBodySchema,
       bearerAuth,
     })
 
     return await reply.status(200).send({ duty })
   } catch (err: unknown) {
-    if (err instanceof DutyIdNotFoundError) {
+    if (err instanceof WorkIdNotFoundError) {
       return await reply.status(404).send({ message: err.message })
     }
 

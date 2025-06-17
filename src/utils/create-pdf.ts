@@ -283,6 +283,7 @@ function formatDateForFilename(createdAt: Date): string {
   return formattedDate.replace(/[/:]/g, '_')
 }
 
+
 async function compressImage(base64Image: string, width: number, height: number): Promise<Buffer> {
   try {
     const imageBuffer = Buffer.from(base64Image, 'base64');
@@ -407,6 +408,7 @@ export async function CreatePdf(duty: any, auth: string) {
 
   // Add the second page (OBJETIVO)
   doc.addPage()
+  let extendedDescriptions = [];
   doc.image(images.techborder, 0, 122, { width: 90, height: 720 })
   doc.image(images.bordercover, 0, 122, { width: 90, height: 720 })
   const objectivetext =
@@ -427,7 +429,7 @@ export async function CreatePdf(duty: any, auth: string) {
       const imagesdescription = descriptions;
       uploadedFileData = []; // Clear the array after processing
       descriptions = []; // Clear the array after processing
-    
+
       const imageWidth = 150; // Target width for compressed images
       const imageHeight = 120; // Target height for compressed images
       const imageMargin = 20;
@@ -441,10 +443,15 @@ export async function CreatePdf(duty: any, auth: string) {
           const compressedImageBuffer = await compressImage(base64Image, imageWidth, imageHeight);
     
           // Add the compressed image to the PDF
-          const imagedesc = imagesdescription[index];
+          // Use:
+          let imagedesc = imagesdescription[index].substring(0, 100);
+          if(imagedesc.length > 99) {
+          imagedesc += "..."
+            extendedDescriptions.push("Ocorrencia " + index + 1 + ":" + imagesdescription[index] + "\n");
+          }
           doc.image(compressedImageBuffer, x, y, { width: imageWidth, height: imageHeight });
           doc.rect(x, y + imageHeight, imageWidth, 70).fill('#007bff'); // Add a blue rectangle for the description
-          doc.fontSize(10).fill('#fff').text(imagedesc, x + 5, y + imageHeight + 5, { width: imageWidth });
+          doc.fontSize(10).fill('#fff').text(imagedesc, x + 1, y + imageHeight + 4, { width: imageWidth });
     
           x += imageWidth + 50; // Move to the next column
           if ((index + 1) % 3 === 0) {
@@ -463,6 +470,13 @@ export async function CreatePdf(duty: any, auth: string) {
           console.error('Error processing image:', error);
           continue; // Skip this image if an error occurs
         }
+      }
+      if(extendedDescriptions.length != 0) {
+        doc.addPage()
+          .fontSize(28)
+          .fill('#001233')
+          .text('DESCRIÇÕES DAS OCORRÊNCIAS', 40, 30, { align: 'center' });
+        doc.fontSize(12).fill('#001233').text(extendedDescriptions.join('\n'), 50, 100, { lineGap: 5 });
       }
     }
   //POLICIA MILITAR
@@ -741,6 +755,7 @@ export async function CreatePdf(duty: any, auth: string) {
       prevbloco = elevador.bloco
       // Count both operante and inoperante elevators for each block
       if (elevador.status === 'Operante') {
+        console.log(`Elevador: ${elevador.elevadorFullName}, Bloco: ${elevador.bloco}, Status: ${elevador.status}`)
         blockElevatorCounts[elevador.bloco] =
           (blockElevatorCounts[elevador.bloco] || 0) + 1
       } else if (elevador.status === 'Inoperante') {
@@ -754,20 +769,20 @@ export async function CreatePdf(duty: any, auth: string) {
 
     // Render the table
     await doc.table(elevadorTable, {
-      width: 500,
+      width: 500,                // Reduzir a largura total
       align: 'center',
-      x: 50,
-      columnSpacing: 2,
+      x: 50,                     // Ajustar posição X para dar mais espaço lateral
+      columnSpacing: 1,          // Reduzir espaçamento entre colunas
       divider: {
         header: {
           disabled: false,
-          width: 1,
+          width: 0.5,            // Reduzir largura do divisor
           opacity: 1,
         },
-        horizontal: { disabled: false, width: 1, opacity: 0.5 },
+        horizontal: { disabled: false, width: 0.5, opacity: 0.5 },
       },
       prepareHeader: () => {
-        doc.font('Helvetica-Bold').fillColor('black').fontSize(8)
+        doc.font('Helvetica-Bold').fillColor('black').fontSize(7) // Fonte menor
       },
       prepareCell: (cell, row, column) => {
         const options = {
@@ -775,51 +790,33 @@ export async function CreatePdf(duty: any, auth: string) {
           valign: 'center',
           lineBreak: false,
           width: doc.widthOfString(cell),
-          height: 10,
+          height: 8,             // Reduzir altura das células
+          padding: 2             // Reduzir padding
         }
-
         return options
       },
       prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
-        // Existing block color logic
+        // Código existente para lógica de cores dos blocos
         if (rectCell) {
           const bloco = row[1]
           const blocColor = bloco ? blockColors[bloco] : 'white'
-
-          doc
-            .rect(rectCell.x, rectCell.y, rectCell.width, rectCell.height)
+          doc.rect(rectCell.x, rectCell.y, rectCell.width, rectCell.height)
             .fillOpacity(0.3)
             .fillAndStroke(blocColor, 'black')
             .fillOpacity(1)
             .fillColor('black')
         }
-        if (indexRow > 0) {
-          const currentBloco = row[1]
-          const previousBloco = elevadorTable.rows[indexRow - 1][1]
 
-          if (currentBloco !== previousBloco) {
-            // Color the entire separator row
-            if (row[0] === '' && row[1] === '' && row[2] === '') {
-              doc
-                .fillOpacity(0.2)
-                .fillColor('#0047AB')
-                .rect(rectRow.x, rectRow.y, rectRow.width, rectRow.height)
-                .fill()
-                .fillOpacity(1)
-            }
-          }
-        }
-        // Existing block separator logic
+        // Simplificação do código para separadores
         if (indexColumn === 0 && indexRow > 0) {
           const currentBloco = row[1]
           const previousBloco = elevadorTable.rows[indexRow - 1][1]
-
-          if (currentBloco !== previousBloco) {
-            doc
-              .fillColor('#0047AB')
-              .rect(rectRow.x, rectRow.y - 2, rectRow.width, 2)
+          if (currentBloco !== previousBloco && currentBloco && previousBloco) {
+            // Separador mais fino
+            doc.fillColor('#0047AB')
+              .rect(rectRow.x, rectRow.y - 1, rectRow.width, 1)
               .fill()
-            doc.fillColor('black')
+              .fillColor('black')
           }
         }
       },
@@ -834,6 +831,8 @@ export async function CreatePdf(duty: any, auth: string) {
     const chartHeight = 250
 
     // Calculate max value for scaling the chart
+    console.log(blockElevatorCounts)
+    console.log(blockInoperanteElevatorCounts)
     const allCounts = [
       ...Object.values(blockElevatorCounts),
       ...Object.values(blockInoperanteElevatorCounts),

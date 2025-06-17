@@ -1,0 +1,22 @@
+meta {
+  name: updateObra
+  type: http
+  seq: 42
+}
+
+patch {
+  url: 127.0.0.1:3333/v1/obra/update
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkODQwYTY0Yi00YWQyLTRlOWQtOWExYi03MWE1YzE3NDcwZjciLCJpYXQiOjE3NTAwNzY3MTksImV4cCI6MTc1MDE0NTExOX0.TaopxB7OTcqeghmR8KOnUL_Q3p19PlxyrIu1OD9jp2k
+}
+
+body:json {
+  {
+    "id": 1,
+    "termino": "2025-12-31T23:59:59Z"
+  }
+}

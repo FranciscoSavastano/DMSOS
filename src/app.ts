@@ -16,6 +16,7 @@ export const app = fastify({
 
 const allowedOrigins = [
   'http://127.0.0.1:5500', // For local development
+  'http://localhost:63342', // For local development with JetBrains IDEs
   'http://127.0.0.1',
   'http://192.168.10.246',
   'http://192.168.10.246:80',
@@ -36,14 +37,17 @@ app.register(cors, {
   credentials: true,
   allowedHeaders: ['c', 'Content-Type', 'Authorization', 'Cookie', 'Retry-After', 'content-disposition', 'Content-Custom-Header'], 
 })
+
 app.register(fastifyStatic, {
   root: join(__dirname, '/gendocs/'),
   prefix: '/statico/',
 })
+
 app.addHook('onSend', async (request, reply, payload) => {
   reply.header('Access-Control-Expose-Headers', 'content-disposition');
   return payload;
 });
+
 app.register(fastifyJwt, {
   secret: process.env.JWT_SECRET,
   cookie: {
@@ -55,13 +59,17 @@ app.register(fastifyJwt, {
   },
   decode: { complete: true },
 })
+
 app.register(multipart, {
   limits: {
     fileSize: 50 * 1024 * 1024, // Optional: Set the file size limit to 50MB for multipart requests
   },
 })
+
 app.register(fastifyCookie)
+
 app.register(appRoutes)
+
 app.setErrorHandler((error, _, reply) => {
   if (error instanceof ZodError) {
     return reply
@@ -77,12 +85,14 @@ app.setErrorHandler((error, _, reply) => {
 
   reply.status(500).send({ message: 'Internal server error' })
 })
+
 console.log('===== VERIFICAÇÃO DO FUSO HORÁRIO =====');
 console.log(`Fuso horário configurado: ${process.env.TZ || 'Não definido'}`);
 console.log(`Data e hora atual: ${new Date().toString()}`);
 console.log(`Offset em horas: ${new Date().getTimezoneOffset() / -60}`);
 console.log(`Timezone do Intl: ${Intl.DateTimeFormat().resolvedOptions().timeZone}`);
 console.log('======================================');
+
 app.listen({ port: 3333, host: '0.0.0.0' }, (err, address) => {
   if (err) {
     console.error(err)

@@ -34,7 +34,7 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
   const { authorization: bearerAuth } = z.object({
     authorization: z.string(),
   }).parse(request.headers);
-
+  console.log(request.body)
   const {
     operadoresNomes,
     data_inicio,
@@ -70,7 +70,7 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
     let bcc = ["francisco.pereira@dmsys.com.br", "anne.nascimento@dmsys.com.br"] //Uncomment for live 
 
     // Send email with the PDF attachment
-    if(process.env.DISABLE_EMAIL != 'true') {
+    //if(process.env.DISABLE_EMAIL != 'true') { only enabled if nescessary
     await sendEmail({
       to: emailto,
       bcc: bcc, // Uncomment for live
@@ -84,7 +84,7 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
         },
       ],
     });
-    }   
+    //}
     return reply.status(201).send({ duty, ocurrences });
   } catch (err) {
     console.error(err);
