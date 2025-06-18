@@ -76,7 +76,9 @@ doc.fontSize(14).text(`Projeto: ${responseData.nome}`, 320, 110, { align: 'left'
 doc.fontSize(12).text(`Cliente: ${responseData.cliente?.nome || '-'}`, 320, 125, { width: 220 });
 doc.fontSize(12).text(`Número da Proposta: ${responseData.numproposta || '-'}`, 320, 140, { width: 220 });
 doc.moveDown();
+
 doc.fontSize(14).text('Equipe', 60, 170, { underline: true });
+
 doc.moveDown(0.5);
 if (responseData.equipe && responseData.equipe.length > 0) {
   const equipeTable = {
@@ -137,9 +139,10 @@ if (diasSelecionados && diasSelecionados.length > 0) {
         }
         doc.fontSize(11).text(`Checklist concluidas: ${(atvDia.concluidos && atvDia.concluidos.length > 0) ? atvDia.concluidos.join(', ') : '-'}`, 60, doc.y + 10);
         doc.fontSize(11).text(`Interferencias: ${atvDia.interferencias ?? '-'}`, 60, doc.y + 10);
+        if (atvDia.imagens && atvDia.imagens.length > 0) {
         doc.fontSize(11).text(`Anexos:`, 60, doc.y + 10);
         //Images
-        if (atvDia.imagens && atvDia.imagens.length > 0) {
+
   const imageWidth = 80;   // Adjust as needed
   const imageHeight = 60;  // Adjust as needed
   let imgX = 60;           // Starting x position
@@ -211,51 +214,72 @@ doc.y = barY + barHeight + 10;
           
           // Nome do arquivo
           const filePath = `${gendocsPath}/Obra ${responseData.id}.pdf`
-           
-          return new Promise(async (resolve, reject) => {
+
+      return new Promise(async (resolve, reject) => {
+        try {
+          // Criar buffer em memória em vez de arquivo no disco
+          const chunks: Buffer[] = [];
+          const writeStream = new require('stream').Writable({
+            write(chunk: Buffer, encoding: string, callback: () => void) {
+              chunks.push(chunk);
+              callback();
+            }
+          });
+
+          doc.pipe(writeStream);
+
+          writeStream.on('finish', async () => {
             try {
-              // Gerando o PDF normalmente com PDFKit
-              // (A compressão básica já está habilitada por padrão)
-              const writeStream = fs.createWriteStream(filePath);
-              doc.pipe(writeStream);
-        
-              writeStream.on('finish', async () => {
-                try {
-                  // Comprimindo o PDF gerado com pdf-lib
-                  await compressPdfWithPdfLib(filePath);
-                  resolve(filePath);
-                } catch (err) {
-                  console.error("Erro na compressão do PDF:", err);
-                  // Retornar o arquivo original caso a compressão falhe
-                  resolve(filePath);
-                }
-              });
-        
-              writeStream.on('error', (err) => {
-                console.error("Error writing PDF:", err);
-                reject(err);
-              });
-        
-              doc.on('error', (err) => {
-                console.error("Error generating PDF:", err);
-                reject(err);
-              });
-        
-              doc.end(); // Finalize the PDF
+              // Concatenar chunks em um único buffer
+              const pdfBuffer = Buffer.concat(chunks);
+
+              // Comprimir o PDF
+              const compressedBuffer = await compressPdfWithMemoryBuffer(pdfBuffer);
+
+              // Enviar como resposta HTTP
+              reply
+                .header('Content-Type', 'application/pdf')
+                .header('Content-Disposition', `attachment; filename="Obra ${responseData.id}.pdf"`)
+                .send(compressedBuffer);
+
+              resolve();
             } catch (err) {
-              console.error("Erro geral:", err);
+              console.error("Erro na compressão do PDF:", err);
               reject(err);
             }
           });
-        
-    }catch (error) {
-        console.error('Error creating PDF for obra:', error);
-        return reply.code(500).send({
-            error: 'Internal Server Error',
-            message: 'An error occurred while creating the PDF for the obra',
-        });
+
+          doc.end(); // Finaliza o PDF
+        } catch (err) {
+          console.error("Erro geral:", err);
+          reject(err);
+        }
+      });
+
+    } catch (error) {
+      console.error('Error creating PDF for obra:', error);
+      return reply.code(500).send({
+        error: 'Internal Server Error',
+        message: 'An error occurred while creating the PDF for the obra',
+      });
     }
-    async function compressPdfWithPdfLib(filePath) {
+  async function compressPdfWithMemoryBuffer(pdfBuffer: Buffer): Promise<Buffer> {
+    const { PDFDocument } = require('pdf-lib');
+
+    // Carregar o documento a partir do buffer
+    const pdfDoc = await PDFDocument.load(pdfBuffer, {
+      ignoreEncryption: true,
+      updateMetadata: false,
+    });
+
+    // Comprimir e retornar o PDF como buffer
+    return await pdfDoc.save({
+      addDefaultPage: false,
+      useObjectStreams: true,  // Ajuda na compressão
+    });
+  }
+
+  async function compressPdfWithPdfLib(filePath) {
   const { PDFDocument } = require('pdf-lib');
   const fs = require('fs');
   

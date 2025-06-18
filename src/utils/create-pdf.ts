@@ -473,21 +473,57 @@ export async function CreatePdf(duty: any, auth: string) {
         }
       }
       if(extendedDescriptions.length != 0) {
+        // Adiciona a primeira página de descrições
         doc.addPage()
           .fontSize(28)
           .fill('#001233')
           .text('DESCRIÇÕES DAS OCORRÊNCIAS', 40, 30, { align: 'center' });
-        doc.fontSize(12).fill('#001233').text(extendedDescriptions.join('\n'), 50, 100, { lineGap: 5 });
+
+        let currentY = 100;
+        const pageHeight = 750; // Altura máxima útil de uma página A4 (considerando margens)
+        const lineHeight = 16; // Altura aproximada de uma linha com fonte 12 e lineGap 5
+        let pageCount = 1;
+
+        // Processa cada descrição separadamente para controlar quebras de página
+        for(let i = 0; i < extendedDescriptions.length; i++) {
+          const description = extendedDescriptions[i];
+          const estimatedLines = Math.ceil(description.length / 80); // Estimativa de linhas (80 caracteres por linha)
+          const estimatedHeight = estimatedLines * lineHeight;
+
+          // Verifica se a descrição cabe na página atual
+          if(currentY + estimatedHeight > pageHeight) {
+            // Cria nova página
+            doc.addPage()
+              .fontSize(28)
+              .fill('#001233')
+              .text('DESCRIÇÕES DAS OCORRÊNCIAS', 40, 30, { align: 'center' });
+            currentY = 100;
+            pageCount++;
+          }
+
+          // Adiciona a descrição
+          doc.fontSize(12)
+            .fill('#001233')
+            .text(description, 50, currentY);
+
+          // Atualiza a posição Y para a próxima descrição
+          currentY += estimatedHeight + 10; // Adiciona espaço entre descrições
+        }
+
+        // Adiciona numeração de página se houver múltiplas páginas
+        if(pageCount > 1) {
+          for(let p = 0; p < pageCount; p++) {
+            doc.switchToPage(doc.pageCount - pageCount + p);
+            doc.fontSize(10)
+              .text(`Página ${p+1} de ${pageCount}`, 50, 800, { align: 'center' });
+          }
+        }
       }
     }
   //POLICIA MILITAR
-  
+
   if (contract === 'Lead Américas') {
-    const rondasTable: {
-      title: string
-      headers: { label: string; align: string; headerAlign: string }[]
-      rows: string[][]
-    } = {
+    const rondasTable = {
       title: 'RONDA',
       headers: [
         { label: 'HORÁRIO INICIO', align: 'center', headerAlign: 'center' },
@@ -500,11 +536,7 @@ export async function CreatePdf(duty: any, auth: string) {
       prepareHeader: () => doc.font('Helvetica-Bold'),
     }
 
-    const limpezaTable: {
-      title: string
-      headers: { label: string; align: string; headerAlign: string }[]
-      rows: string[][]
-    } = {
+    const limpezaTable = {
       title: 'LIMPEZA',
       headers: [
         { label: 'HORÁRIO', align: 'center', headerAlign: 'center' },
@@ -514,6 +546,8 @@ export async function CreatePdf(duty: any, auth: string) {
       rows: [],
       prepareHeader: () => doc.font('Helvetica-Bold'),
     }
+
+    // Popular tabelas como antes
     for (const occurrence of ocurrences) {
       if (occurrence.ocurrence_type === 'Limpeza') {
         limpezaTable.rows.push([
@@ -532,104 +566,134 @@ export async function CreatePdf(duty: any, auth: string) {
       }
     }
 
+    // Dividir tabelas em chunks menores para evitar quebra
+    const rowsPerPage = 15; // Ajuste este valor conforme necessário
+
+    // Processar tabela de rondas em múltiplas páginas se necessário
     if (rondasTable.rows.length > 0) {
-      doc.addPage()
-      doc
-        .fontSize(28)
-        .fill('#001233')
-        .text('RONDAS NO EMPREENDIMENTO', { align: 'center' })
-      await doc.table(rondasTable, {
-        width: 500,
-        align: 'center',
-        x: 50,
-        columnSpacing: 2,
-        divider: {
-          header: {
-            disabled: false,
-            width: 1,
-            opacity: 1,
-          },
-          horizontal: {
-            disabled: false,
-            width: 1,
-            opacity: 0.5,
-          },
-        },
-        prepareHeader: () => {
-          doc.font('Helvetica-Bold').fillColor('black').fontSize(8)
-        },
-        prepareCell: (cell, row, column) => {
-          const options = {
-            align: 'center',
-            valign: 'center',
-            lineBreak: false,
-            width: doc.widthOfString(cell),
-            height: 10,
-          }
+      // Dividir as linhas em grupos menores
+      const rondasChunks = [];
+      for (let i = 0; i < rondasTable.rows.length; i += rowsPerPage) {
+        rondasChunks.push(rondasTable.rows.slice(i, i + rowsPerPage));
+      }
 
-          return options
-        },
-        prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
-          if (rectCell) {
-            // Alternate row colors (fix for both even and odd rows)
-            const rowColor = indexRow % 2 === 0 ? '#d9ecff' : '#b3d5f7'
+      // Renderizar cada chunk em uma página separada
+      for (let i = 0; i < rondasChunks.length; i++) {
+        doc.addPage();
+        doc
+          .fontSize(28)
+          .fill('#001233')
+          .text(i === 0 ? 'RONDAS NO EMPREENDIMENTO' : 'RONDAS NO EMPREENDIMENTO (CONTINUAÇÃO)',
+            { align: 'center' });
 
-            doc
-              .rect(rectCell.x, rectCell.y, rectCell.width, rectCell.height)
-              .fillAndStroke(rowColor, 'black')
-              .fillOpacity(1)
-              .fillColor('black')
-          }
-        },
-      })
+        // Criar tabela apenas com as linhas do chunk atual
+        const chunkTable = {
+          title: rondasTable.title,
+          headers: rondasTable.headers,
+          rows: rondasChunks[i],
+          prepareHeader: rondasTable.prepareHeader
+        };
+
+        await doc.table(chunkTable, {
+          width: 500,
+          align: 'center',
+          x: 50,
+          columnSpacing: 2,
+          divider: {
+            header: { disabled: false, width: 1, opacity: 1 },
+            horizontal: { disabled: false, width: 1, opacity: 0.5 },
+          },
+          prepareHeader: () => {
+            doc.font('Helvetica-Bold').fillColor('black').fontSize(8)
+          },
+          prepareCell: (cell, row, column) => {
+            return {
+              align: 'center',
+              valign: 'center',
+              lineBreak: false,
+              width: doc.widthOfString(cell),
+              height: 10,
+            }
+          },
+          prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
+            if (rectCell) {
+              const rowColor = indexRow % 2 === 0 ? '#d9ecff' : '#b3d5f7'
+              doc
+                .rect(rectCell.x, rectCell.y, rectCell.width, rectCell.height)
+                .fillAndStroke(rowColor, 'black')
+                .fillOpacity(1)
+                .fillColor('black')
+            }
+          },
+        });
+
+        // Adicionar número da página no rodapé se houver múltiplas páginas
+        if (rondasChunks.length > 1) {
+          doc.fontSize(8)
+            .text(`Página ${i+1} de ${rondasChunks.length}`, 50, 780, { align: 'center' });
+        }
+      }
     }
 
+    // Mesmo processo para a tabela de limpeza
     if (limpezaTable.rows.length > 0) {
-      doc.moveDown(15)
-      await doc.table(limpezaTable, {
-        width: 500,
-        align: 'center',
-        x: 50,
-        columnSpacing: 2,
-        divider: {
-          header: {
-            disabled: false,
-            width: 1,
-            opacity: 1,
-          },
-          horizontal: {
-            disabled: false,
-            width: 1,
-            opacity: 0.5,
-          },
-        },
-        prepareHeader: () => {
-          doc.font('Helvetica-Bold').fillColor('black').fontSize(8)
-        },
-        prepareCell: (cell, row, column) => {
-          const options = {
-            align: 'center',
-            valign: 'center',
-            lineBreak: false,
-            width: doc.widthOfString(cell),
-            height: 10,
-          }
+      const limpezaChunks = [];
+      for (let i = 0; i < limpezaTable.rows.length; i += rowsPerPage) {
+        limpezaChunks.push(limpezaTable.rows.slice(i, i + rowsPerPage));
+      }
 
-          return options
-        },
-        prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
-          if (rectCell) {
-            // Alternate row colors (fix for both even and odd rows)
-            const rowColor = indexRow % 2 === 0 ? '#d9ecff' : '#b3d5f7'
+      for (let i = 0; i < limpezaChunks.length; i++) {
+        doc.addPage();
+        doc
+          .fontSize(28)
+          .fill('#001233')
+          .text(i === 0 ? 'LIMPEZA' : 'LIMPEZA (CONTINUAÇÃO)', { align: 'center' });
 
-            doc
-              .rect(rectCell.x, rectCell.y, rectCell.width, rectCell.height)
-              .fillAndStroke(rowColor, 'black')
-              .fillOpacity(1)
-              .fillColor('black')
-          }
-        },
-      })
+        const chunkTable = {
+          title: limpezaTable.title,
+          headers: limpezaTable.headers,
+          rows: limpezaChunks[i],
+          prepareHeader: limpezaTable.prepareHeader
+        };
+
+        await doc.table(chunkTable, {
+          width: 500,
+          align: 'center',
+          x: 50,
+          columnSpacing: 2,
+          divider: {
+            header: { disabled: false, width: 1, opacity: 1 },
+            horizontal: { disabled: false, width: 1, opacity: 0.5 },
+          },
+          prepareHeader: () => {
+            doc.font('Helvetica-Bold').fillColor('black').fontSize(8)
+          },
+          prepareCell: (cell, row, column) => {
+            return {
+              align: 'center',
+              valign: 'center',
+              lineBreak: false,
+              width: doc.widthOfString(cell),
+              height: 10,
+            }
+          },
+          prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
+            if (rectCell) {
+              const rowColor = indexRow % 2 === 0 ? '#d9ecff' : '#b3d5f7'
+              doc
+                .rect(rectCell.x, rectCell.y, rectCell.width, rectCell.height)
+                .fillAndStroke(rowColor, 'black')
+                .fillOpacity(1)
+                .fillColor('black')
+            }
+          },
+        });
+
+        if (limpezaChunks.length > 1) {
+          doc.fontSize(8)
+            .text(`Página ${i+1} de ${limpezaChunks.length}`, 50, 780, { align: 'center' });
+        }
+      }
     }
   }
   if (contract === 'Lead Américas') {
