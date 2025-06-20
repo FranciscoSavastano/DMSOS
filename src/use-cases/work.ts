@@ -15,11 +15,7 @@ interface RegisterUseCaseRequest {
   horas_previstas: number
   hh_previstas: number
   disciplinas: string[]
-  equipe: {
-    cargo: string
-    quantidade: number
-    tempoDiario: number
-  }[]
+  equipe: string[]
   tipoDias: string
   bearerAuth: string
 }
@@ -52,7 +48,7 @@ export class CreateWorkUseCase {
       throw new InvalidJwtTokenError()
     }
     //Verificar se numero da proposta segue o padrao PR ## - ##[A-Z], exemplo PR 99 - 12B
-    const regex = /^PR \d{2} - \d{2}[A-Z]$/
+    const regex = /^PR\s?\d{2}\s?-\s?\d{2}[A-Z]?$/
     if (!regex.test(numproposta)) {
       throw new UnknownProposalNumberError();
     }

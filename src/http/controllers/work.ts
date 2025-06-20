@@ -15,13 +15,7 @@ export async function createWork(request: FastifyRequest, reply: FastifyReply) {
       horas_previstas: z.number(),
       hh_previstas: z.number(),
       tipoDias: z.string(),
-      equipe: z.array(
-        z.object({
-          cargo: z.string(),
-          quantidade: z.number(),
-          tempoDiario: z.number(),
-        })
-      ),
+      equipe: z.string().array().optional(),
       disciplinas: z.string().array(),
     })
     .parse(request.body)

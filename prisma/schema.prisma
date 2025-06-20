@@ -196,7 +196,7 @@ model Obra {
   horas_previstas Float
   hh_previstas    Float       @default(0)
   tipoDias        String      @default("util")
-  equipe          Json[]      @default([])
+  equipe          String[]    @default([])
   created_at      DateTime    @default(now())
   updated_at      DateTime    @updatedAt
   dia_obra        DiaObra[]
@@ -215,7 +215,7 @@ model DiaObra {
   horas_gastas    Float
   supervisor_id   String
   observacao      String?
-  equipe          Json[]               @default([])
+  equipe          String[]             @default([])
   supervisor      User                 @relation(fields: [supervisor_id], references: [id], onDelete: Cascade)
   profissionais   ProfissionalNaObra[]
   atividadeNaObra AtividadeNoDiaObra[]
@@ -235,7 +235,6 @@ model Atividade {
   interferencia   String?
   materiais       String[]
   checklist       String[]
-  equipe          Json[]                    @default([])
   descricao       String
   profissionais   ProfissionalNaAtividade[]
   atividadeNaObra AtividadeNoDiaObra[]
@@ -250,6 +249,7 @@ model AtividadeNoDiaObra {
   atividade             Atividade @relation(fields: [atividade_id], references: [id], onDelete: Cascade)
   concluidos            String[]  @default([])
   interferencias        String?
+  equipe                String[]  @default([])
   imagens               Bytes[]   @default([])
   horas_gastas          Float?    @default(0.0)
   checklist_porcentagem String?

@@ -1,21 +1,21 @@
 meta {
   name: ReadUser
   type: http
-  seq: 5
+  seq: 6
 }
 
 post {
-  url: 127.0.0.1:3333/users/read
+  url: 127.0.0.1:3333/v1/users/read
   body: json
   auth: bearer
 }
 
 auth:bearer {
-  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmN2ZmZGYzYy1kZmEyLTQxYmQtODBmYS1jNWM3YjZlMDQ4MjciLCJpYXQiOjE3MjgwOTMxOTgsImV4cCI6MTcyODA5MzQ5OH0.y1OY7v_kxVqJu4uEcB1T-qrWkAHoHBJm-TkmQqhMnM8
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkODQwYTY0Yi00YWQyLTRlOWQtOWExYi03MWE1YzE3NDcwZjciLCJpYXQiOjE3NTA0MTg5OTMsImV4cCI6MTc1MDQ4NzM5M30.IETF6ryyvcwGobhJDjJLqvGqttRuQ09s1T7q77-ZhlM
 }
 
 body:json {
   {
-    "id" : "f7ffdf3c-dfa2-41bd-80fa-c5c7b6e04827"
+    "id" : "4a840647-6c28-4ec1-9156-673aefe74323"
   }
 }

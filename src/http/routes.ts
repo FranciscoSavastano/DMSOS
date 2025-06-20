@@ -10,6 +10,7 @@ import { readAllUser } from './controllers/read-all-users'
 import { updateUser } from './controllers/update-user'
 import { deleteUser } from './controllers/delete-users'
 import { readDuty } from './controllers/read-duty'
+import { fetchUserByContract } from './controllers/read-all-user-by-contract'
 import { readAllDuty } from './controllers/read-all-duties'
 import { updateDuty } from './controllers/update-duty'
 import { deleteDuty } from './controllers/delete-duty'
@@ -70,6 +71,7 @@ export async function appRoutes(app: FastifyInstance) {
 
   app.get('/v1/users/getnames/:user_role', fetchUserNames)
 
+  app.get('/v1/users/readUserByContract/:contract', fetchUserByContract)
   //Plantao
   app.post('/v1/duty', createDuty)
 
