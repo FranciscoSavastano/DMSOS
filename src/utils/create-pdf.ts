@@ -511,13 +511,6 @@ export async function CreatePdf(duty: any, auth: string) {
         }
 
         // Adiciona numeração de página se houver múltiplas páginas
-        if(pageCount > 1) {
-          for(let p = 0; p < pageCount; p++) {
-            doc.switchToPage(doc.pageCount - pageCount + p);
-            doc.fontSize(10)
-              .text(`Página ${p+1} de ${pageCount}`, 50, 800, { align: 'center' });
-          }
-        }
       }
     }
   //POLICIA MILITAR
