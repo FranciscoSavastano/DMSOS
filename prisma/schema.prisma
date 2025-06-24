@@ -251,6 +251,8 @@ model AtividadeNoDiaObra {
   interferencias        String?
   equipe                String[]  @default([])
   imagens               Bytes[]   @default([])
+  observacao            String?
+  qtde_concluidos       Int?      @default(0)
   horas_gastas          Float?    @default(0.0)
   checklist_porcentagem String?
 

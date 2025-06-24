@@ -4,6 +4,7 @@ import { z } from "zod";
 
 export async function createWorkDay(request : FastifyRequest, reply : FastifyReply) {
     //Debug do body
+  console.log('Request Body:', request.body);
     const registerBodySchema = z.object({
         obra_id: z.number(),
         data: z.string().datetime(),
@@ -12,13 +13,7 @@ export async function createWorkDay(request : FastifyRequest, reply : FastifyRep
         horas_gastas: z.number().optional(),
         supervisor_id: z.string(),
         observacao: z.string().optional(),
-        equipe: z.array(
-            z.object({
-              cargo: z.string(),
-              quantidade: z.number(),
-              tempoDiario: z.number(),
-            })
-          ),
+        equipe: z.string().array().optional(),
         
     }).parse(request.body)
     const createWorkHeadersSchema = z

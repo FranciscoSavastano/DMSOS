@@ -4,6 +4,7 @@ import { z } from "zod";
 
 export async function createActivityWorkDay(request: FastifyRequest, reply: FastifyReply) {
   // Ensure multipart is enabled in Fastify
+  console.log('Request Headers:', await request.parts())
   if (!request.isMultipart()) {
     return reply
       .status(400)
@@ -12,6 +13,7 @@ export async function createActivityWorkDay(request: FastifyRequest, reply: Fast
 
   // Parse multipart fields and files
   const parts = await request.parts()
+  console.log('Multipart parts:', parts)
   const fields: Record<string, any> = {}
   const concluidos: string[] = []
   const imagens: any[] = []
@@ -53,6 +55,7 @@ export async function createActivityWorkDay(request: FastifyRequest, reply: Fast
   })
 
   let parsed
+  console.log('Parsed fields:', fields)
   try {
     parsed = schema.parse(fields)
   } catch (err) {
