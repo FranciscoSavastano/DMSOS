@@ -480,19 +480,26 @@ export async function CreatePdf(duty: any, auth: string) {
           .text('DESCRIÇÕES DAS OCORRÊNCIAS', 40, 30, { align: 'center' });
 
         let currentY = 100;
-        const pageHeight = 750; // Altura máxima útil de uma página A4 (considerando margens)
-        const lineHeight = 16; // Altura aproximada de uma linha com fonte 12 e lineGap 5
+        const pageHeight = 700; // Reduzindo um pouco para ter mais margem de segurança
+        const lineHeight = 18; // Aumentando um pouco para dar mais espaço entre linhas
         let pageCount = 1;
 
         // Processa cada descrição separadamente para controlar quebras de página
         for(let i = 0; i < extendedDescriptions.length; i++) {
           const description = extendedDescriptions[i];
-          const estimatedLines = Math.ceil(description.length / 80); // Estimativa de linhas (80 caracteres por linha)
+
+          // Melhoria na estimativa de altura baseada no comprimento e complexidade do texto
+          const textWidth = 500; // Largura disponível para o texto em pontos
+          const averageCharsPerLine = 65; // Média mais conservadora de caracteres por linha
+          const estimatedLines = Math.max(
+            3, // Mínimo de 3 linhas para cada descrição
+            Math.ceil(description.length / averageCharsPerLine)
+          );
           const estimatedHeight = estimatedLines * lineHeight;
 
-          // Verifica se a descrição cabe na página atual
-          if(currentY + estimatedHeight > pageHeight) {
-            // Cria nova página
+          // Verifica se precisamos de uma nova página
+          // Adiciona margem extra de segurança (30 pontos)
+          if(currentY + estimatedHeight > pageHeight - 30) {
             doc.addPage()
               .fontSize(28)
               .fill('#001233')
@@ -501,16 +508,37 @@ export async function CreatePdf(duty: any, auth: string) {
             pageCount++;
           }
 
-          // Adiciona a descrição
+          // Adiciona a descrição com uma largura definida para melhor controle de quebra de linha
           doc.fontSize(12)
             .fill('#001233')
-            .text(description, 50, currentY);
+            .text(description, 50, currentY, {
+              width: textWidth,
+              align: 'left',
+              lineGap: 3 // Espaço adicional entre linhas para evitar sobreposição
+            });
 
           // Atualiza a posição Y para a próxima descrição
-          currentY += estimatedHeight + 10; // Adiciona espaço entre descrições
+          // Mede a altura real após renderização ou usa a estimativa com margem de segurança
+          const textHeight = doc.heightOfString(description, { width: textWidth, lineGap: 3 });
+          currentY += Math.max(estimatedHeight, textHeight) + 20; // Margem maior entre descrições
         }
 
         // Adiciona numeração de página se houver múltiplas páginas
+        if (pageCount > 1) {
+          // Salva a página atual
+          const currentPage = doc.page.pageNumber;
+
+          // Adiciona números em cada página da seção de descrições
+          for (let i = 1; i <= pageCount; i++) {
+            doc.switchToPage(currentPage - pageCount + i - 1);
+            doc.fontSize(10)
+              .fillColor('#666666')
+              .text(`Página ${i} de ${pageCount}`, 50, 780, { align: 'center' });
+          }
+
+          // Volta para a última página
+          doc.switchToPage(currentPage);
+        }
       }
     }
   //POLICIA MILITAR
