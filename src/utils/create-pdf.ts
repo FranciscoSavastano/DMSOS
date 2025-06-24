@@ -499,10 +499,7 @@ export async function CreatePdf(duty: any, auth: string) {
 
           // Verifica se precisamos de uma nova página
           if(currentY + estimatedHeight > pageHeight - 30) {
-            // Adiciona número de página na página atual antes de criar uma nova
-            doc.fontSize(10)
-              .fillColor('#666666')
-              .text(`Página ${pageCount} de ${pageCount}`, 0, 780, { align: 'center' });
+            // Removido: Numeração de página
 
             // Cria nova página
             doc.addPage()
@@ -528,10 +525,7 @@ export async function CreatePdf(duty: any, auth: string) {
           currentY += Math.max(estimatedHeight, textHeight) + 20; // Margem maior entre descrições
         }
 
-        // Adiciona número de página na última página
-        doc.fontSize(10)
-          .fillColor('#666666')
-          .text(`Página ${pageCount} de ${pageCount}`, 0, 780, { align: 'center' });
+        // Removido: Numeração de página na última página
       }
     }
   //POLICIA MILITAR
