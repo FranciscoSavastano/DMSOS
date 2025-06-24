@@ -483,6 +483,7 @@ export async function CreatePdf(duty: any, auth: string) {
         const pageHeight = 700; // Reduzindo um pouco para ter mais margem de segurança
         const lineHeight = 18; // Aumentando um pouco para dar mais espaço entre linhas
         let pageCount = 1;
+        const descStartPage = doc._pageBuffer.length - 1; // Salva o índice da primeira página de descrições
 
         // Processa cada descrição separadamente para controlar quebras de página
         for(let i = 0; i < extendedDescriptions.length; i++) {
@@ -498,7 +499,6 @@ export async function CreatePdf(duty: any, auth: string) {
           const estimatedHeight = estimatedLines * lineHeight;
 
           // Verifica se precisamos de uma nova página
-          // Adiciona margem extra de segurança (30 pontos)
           if(currentY + estimatedHeight > pageHeight - 30) {
             doc.addPage()
               .fontSize(28)
@@ -518,26 +518,34 @@ export async function CreatePdf(duty: any, auth: string) {
             });
 
           // Atualiza a posição Y para a próxima descrição
-          // Mede a altura real após renderização ou usa a estimativa com margem de segurança
           const textHeight = doc.heightOfString(description, { width: textWidth, lineGap: 3 });
           currentY += Math.max(estimatedHeight, textHeight) + 20; // Margem maior entre descrições
         }
 
         // Adiciona numeração de página se houver múltiplas páginas
         if (pageCount > 1) {
-          // Salva a página atual
-          const currentPage = doc.page.pageNumber;
+          const currentPageIndex = doc._pageBuffer.length - 1; // Índice da página atual
 
           // Adiciona números em cada página da seção de descrições
-          for (let i = 1; i <= pageCount; i++) {
-            doc.switchToPage(currentPage - pageCount + i - 1);
-            doc.fontSize(10)
-              .fillColor('#666666')
-              .text(`Página ${i} de ${pageCount}`, 50, 780, { align: 'center' });
-          }
+          for (let i = 0; i < pageCount; i++) {
+            // Verifica se o índice de página é válido
+            const pageIndex = descStartPage + i;
+            if (pageIndex >= 0 && pageIndex < doc._pageBuffer.length) {
+              // Salva o estado atual
+              const currentPage = doc._pageBuffer.length - 1;
 
-          // Volta para a última página
-          doc.switchToPage(currentPage);
+              // Muda para a página da seção de descrições
+              doc.switchToPage(pageIndex);
+
+              // Adiciona o número de página
+              doc.fontSize(10)
+                .fillColor('#666666')
+                .text(`Página ${i+1} de ${pageCount}`, 50, 780, { align: 'center' });
+
+              // Volta para a página onde estávamos
+              doc.switchToPage(currentPage);
+            }
+          }
         }
       }
     }
