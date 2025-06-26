@@ -1219,6 +1219,7 @@ export async function CreatePdf(duty: any, auth: string) {
     }
   }
   doc.addPage()
+  doc.font("roboto")
   doc
     .fontSize(28)
     .fill('#001233')
