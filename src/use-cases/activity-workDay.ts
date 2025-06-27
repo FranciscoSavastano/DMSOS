@@ -6,6 +6,7 @@ interface RegisterUseCaseRequest {
     work_day_id: number;
     concluidos: any;
     horas_gastas: number;
+    equipe: any;
     interferencias?: string;
     imagens?: any;
     checklist_porcentagem?: string;
@@ -22,6 +23,7 @@ export class CreateActivityWorkDayUseCase {
         activity_id,
         work_day_id,
         concluidos,
+        equipe,
         horas_gastas,
         interferencias,
         imagens,
@@ -32,6 +34,7 @@ export class CreateActivityWorkDayUseCase {
             work_day_id,
             interferencias,
             concluidos,
+            equipe,
             imagens,
             horas_gastas,
             checklist_porcentagem,

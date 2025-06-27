@@ -16,6 +16,7 @@ export async function createActivityWorkDay(request: FastifyRequest, reply: Fast
   console.log('Multipart parts:', parts)
   const fields: Record<string, any> = {}
   const concluidos: string[] = []
+  const equipe: string[] = []
   const imagens: any[] = []
 
   for await (const part of parts) {
@@ -38,6 +39,9 @@ export async function createActivityWorkDay(request: FastifyRequest, reply: Fast
         concluidos.push(part.value)
       } else {
         fields[part.fieldname] = part.value
+      }
+      if (part.fieldname === 'equipe[]') {
+        equipe.push(part.value)
       }
     }
   }
@@ -79,6 +83,7 @@ export async function createActivityWorkDay(request: FastifyRequest, reply: Fast
       activity_id: parsed.activity_id,
       work_day_id: parsed.work_day_id,
       concluidos,
+      equipe,
       horas_gastas: parsed.horas_gastas,
       interferencias: parsed.interferencias,
       checklist_porcentagem: parsed.checklist_percent,

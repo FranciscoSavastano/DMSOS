@@ -155,7 +155,7 @@ Table obras {
   horas_previstas Float [not null]
   hh_previstas Float [not null, default: 0]
   tipoDias String [not null, default: 'util']
-  equipe Json[] [not null]
+  equipe String[] [not null]
   created_at DateTime [default: `now()`, not null]
   updated_at DateTime [not null]
   dia_obra dia_obras [not null]
@@ -172,7 +172,7 @@ Table dia_obras {
   horas_gastas Float [not null]
   supervisor_id String [not null]
   observacao String
-  equipe Json[] [not null]
+  equipe String[] [not null]
   supervisor users [not null]
   profissionais ProfissionalNaObra [not null]
   atividadeNaObra AtividadeNoDiaObra [not null]
@@ -190,7 +190,6 @@ Table atividades {
   interferencia String
   materiais String[] [not null]
   checklist String[] [not null]
-  equipe Json[] [not null]
   descricao String [not null]
   profissionais ProfissionalNaAtividade [not null]
   atividadeNaObra AtividadeNoDiaObra [not null]
@@ -203,7 +202,10 @@ Table AtividadeNoDiaObra {
   atividade atividades [not null]
   concluidos String[] [not null]
   interferencias String
+  equipe String[] [not null]
   imagens Bytes[] [not null]
+  observacao String
+  qtde_concluidos Int [default: 0]
   horas_gastas Float [default: 0]
   checklist_porcentagem String
 
