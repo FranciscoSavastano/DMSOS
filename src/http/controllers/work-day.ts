@@ -14,6 +14,7 @@ export async function createWorkDay(request : FastifyRequest, reply : FastifyRep
         supervisor_id: z.string(),
         observacao: z.string().optional(),
         equipe: z.string().array().optional(),
+        tipo_dia: z.string().optional(),
         
     }).parse(request.body)
     const createWorkHeadersSchema = z
@@ -31,6 +32,7 @@ export async function createWorkDay(request : FastifyRequest, reply : FastifyRep
         supervisor_id,
         observacao,
         equipe,
+      tipo_dia,
     } = registerBodySchema
     try {
         const registerWorkDayCase = makeCreateWorkDayUseCase()
@@ -43,6 +45,7 @@ export async function createWorkDay(request : FastifyRequest, reply : FastifyRep
             supervisor_id,
             observacao,
             equipe,
+            tipo_dia,
             bearerAuth,
         })
         return reply.status(201).send(workDay)

@@ -12,6 +12,7 @@ interface RegisterUseCaseRequest {
     horas_gastas?: number
     supervisor_id: string
     observacao?: string
+  tipo_dia?: string
     equipe: {
         cargo: string
         quantidade: number
@@ -35,6 +36,7 @@ export class CreateWorkDayUseCase {
         horas_gastas,
         supervisor_id,
         observacao,
+      tipo_dia,
         equipe,
         bearerAuth,
     }: RegisterUseCaseRequest): Promise<RegisterUseCaseResponse> {
@@ -52,6 +54,7 @@ export class CreateWorkDayUseCase {
             termino,
             horas_gastas,
             supervisor_id,
+          tipo_dia,
             observacao,
             equipe
         });

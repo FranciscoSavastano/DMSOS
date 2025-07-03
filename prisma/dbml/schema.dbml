@@ -172,6 +172,7 @@ Table dia_obras {
   horas_gastas Float [not null]
   supervisor_id String [not null]
   observacao String
+  tipo_dia String [default: 'util']
   equipe String[] [not null]
   supervisor users [not null]
   profissionais ProfissionalNaObra [not null]

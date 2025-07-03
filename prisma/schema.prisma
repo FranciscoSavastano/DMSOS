@@ -215,6 +215,7 @@ model DiaObra {
   horas_gastas    Float
   supervisor_id   String
   observacao      String?
+  tipo_dia        String?              @default("util")
   equipe          String[]             @default([])
   supervisor      User                 @relation(fields: [supervisor_id], references: [id], onDelete: Cascade)
   profissionais   ProfissionalNaObra[]
