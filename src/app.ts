@@ -16,7 +16,9 @@ export const app = fastify({
 
 const allowedOrigins = [
   'http://127.0.0.1:5500', // For local development
-  'http://localhost:63342', // For local development with JetBrains IDEs
+  'http://localhost:63342',
+  'http://localhost:65250',
+  // For local development with JetBrains IDEs
   'http://127.0.0.1',
   'http://192.168.10.246',
   'http://192.168.10.246:80',
