@@ -94,8 +94,6 @@ export async function createObraPdf(request: FastifyRequest, reply: FastifyReply
     doc.fontSize(12).text(`Cliente: ${responseData.cliente?.nome || '-'}`, 320, 125, { width: 220 });
     doc.fontSize(12).text(`Número da Proposta: ${responseData.numproposta || '-'}`, 320, 140, { width: 220 });
     doc.moveDown();
-
-    doc.fontSize(14).text('Equipe', 60, 170, { underline: true });
     console.log('Equipe:', responseData.equipe);
 
     doc.moveDown(0.5);
@@ -131,7 +129,25 @@ export async function createObraPdf(request: FastifyRequest, reply: FastifyReply
 
 // Get all dias da obra
     const diasObra = diaObraData.data.workDay.workDay;
-
+    doc.moveDown(0.5);
+    if (responseData.equipe && responseData.equipe.length > 0 && usuariosData.data && Array.isArray(usuariosData.data)) {
+      // Filtra os usuários que estão na equipe
+      const equipeUsuarios = usuariosData.data.filter((user: any) =>
+        responseData.equipe.includes(user.id)
+      );
+      const equipeTable = {
+        headers: ['Nome', 'Cargo'],
+        rows: equipeUsuarios.map((u: any) => [u.nome, u.user_role]),
+      };
+      await doc.table(equipeTable, {
+        width: 247,
+        x: 53,
+        y: 170,
+        columnSize: [190, 30] // 80% e 20% da largura total
+      });
+    } else {
+      doc.fontSize(12).text('Nenhuma equipe cadastrada.');
+    }
 // Filter for the requested diaObraId, or skip if not provided
     const diasSelecionados = diaObraId
       ? diasObra.filter(dia => dia.id === diaObraId)
