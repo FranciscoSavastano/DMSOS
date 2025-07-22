@@ -5,7 +5,7 @@ import pdfkit from 'pdfkit-table'
 import path from "path";
 import sharp from 'sharp';
 import fs from 'fs'
-const watermarkPath = path.join('./src/utils/pdf-img/logo.png'); // Adjust path as needed
+const watermarkPath = path.join('./src/utils/pdf-img/logo-jpg.jpg'); // Adjust path as needed
 
 export async function createObraPdf(request: FastifyRequest, reply: FastifyReply) {
   try {
@@ -68,6 +68,7 @@ export async function createObraPdf(request: FastifyRequest, reply: FastifyReply
     const doc = new pdfkit();
 //For each page, set a background image company logo
     doc.fontSize(25).text('Relatório Diario de Obra', { align: 'center' });
+    doc.image(watermarkPath, 40, 50 , { width: , height: 100, align: 'center', valign: 'center' });
 // Add a horizontal line
     doc.moveTo(50, 100)
       .lineTo(550, 100)
