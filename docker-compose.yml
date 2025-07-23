@@ -21,6 +21,10 @@ services:
       # Other environment variables
     ports:
       - "3333:3333"
+    volumes:
+      - gendocs:/app/build/gendocs # Mount the named volume to the gendocs directory
 volumes:
   db:
+    driver: local
+  gendocs: # Define the named volume for gendocs
     driver: local

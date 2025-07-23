@@ -48,10 +48,11 @@ export class CreateWorkUseCase {
       throw new InvalidJwtTokenError()
     }
     //Verificar se numero da proposta segue o padrao PR ## - ##[A-Z], exemplo PR 99 - 12B
-    const regex = /^PR\s?\d{2}\s?-\s?\d{2}[A-Z]?$/
-    if (!regex.test(numproposta)) {
-      throw new UnknownProposalNumberError();
-    }
+    //Desabilitado devido a pedido do cliente para aceitar qualquer numero de proposta
+    //const regex = /^PR\s?\d{2}\s?-\s?\d{2}[A-Z]?$/
+    //if (!regex.test(numproposta)) {
+    //  throw new UnknownProposalNumberError();
+    //}
     const work = await this.workRepository.create({
       cliente_id,
       gerente_id,
