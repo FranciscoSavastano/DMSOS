@@ -91,9 +91,9 @@ export async function createObraPdf(request: FastifyRequest, reply: FastifyReply
     doc.fontSize(12).text(`Nome: ${responseData.gerente?.nome || '-'}`, 60, 130, { width: 220 });
 
 // Projeto (right side)
-    doc.fontSize(14).text(`Projeto: ${responseData.nome}`, 320, 110, { align: 'left', width: 220 });
-    doc.fontSize(12).text(`Cliente: ${responseData.cliente?.nome || '-'}`, 320, 125, { width: 220 });
-    doc.fontSize(12).text(`Número da Proposta: ${responseData.numproposta || '-'}`, 320, 140, { width: 220 });
+    doc.fontSize(12).text(`Projeto: ${responseData.nome}`, 320, 110, { align: 'left', width: 220 });
+    doc.fontSize(12).text(`Cliente: ${responseData.cliente?.nome || '-'}`, 320, doc.y + 15, { width: 220 });
+    doc.fontSize(12).text(`Número da Proposta: ${responseData.numproposta || '-'}`, 320, doc.y + 15, { width: 220 });
     doc.moveDown();
     console.log('Equipe:', responseData.equipe);
 

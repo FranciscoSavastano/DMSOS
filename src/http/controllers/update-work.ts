@@ -1,19 +1,24 @@
 import { InvalidJwtTokenError } from '@/use-cases/errors/invalid-jwt-token-error'
-import { DutyIdNotFoundError } from '@/use-cases/errors/duty-id-not-found-error'
-import { makeUpdateDutyUseCase } from '@/use-cases/factories/make-update-duty-use-case'
-import type { FastifyReply, FastifyRequest } from 'fastify'
-import { z } from 'zod'
 import { WorkIdNotFoundError } from '@/use-cases/errors/work-id-not-found-error'
 import { makeUpdateWorkUseCase } from '@/use-cases/factories/make-update-work-use-case'
+import type { FastifyReply, FastifyRequest } from 'fastify'
+import { z } from 'zod'
 
 export async function updateWork(request: FastifyRequest, reply: FastifyReply) {
   const updateWorkBodySchema = z
     .object({
       id: z.number(),
-      data_inicio: z.string().datetime().optional(),
-      data_fim: z.string().datetime().optional(),
-      horario_rf: z.string().datetime().optional(),
-      termino: z.string().datetime().optional(),
+      cliente_id: z.string().optional(),
+      gerente_id: z.string().optional(),
+      nome: z.string().optional(),
+      inicio: z.string().optional(),
+      termino: z.string().optional(),
+      numproposta: z.string().optional(),
+      horas_previstas: z.number().optional(),
+      hh_previstas: z.number().optional(),
+      tipoDias: z.string().optional(),
+      equipe: z.string().array().optional(),
+      disciplinas: z.string().array().optional(),
     })
     .parse(request.body)
 
@@ -24,17 +29,41 @@ export async function updateWork(request: FastifyRequest, reply: FastifyReply) {
     .parse(request.headers)
   const { authorization: bearerAuth } = updateWorkHeadersSchema
 
-  // Valide que as strings nao sao vazias ou nulas.
+  const {
+    id,
+    cliente_id,
+    gerente_id,
+    nome,
+    inicio,
+    termino,
+    numproposta,
+    horas_previstas,
+    hh_previstas,
+    disciplinas,
+    equipe,
+    tipoDias,
+  } = updateWorkBodySchema
 
   try {
-    const updateObraUseCase = makeUpdateWorkUseCase()
+    const updateWorkUseCase = makeUpdateWorkUseCase()
 
-    const duty = await updateObraUseCase.execute({
-      ...updateWorkBodySchema,
+    const { work } = await updateWorkUseCase.execute({
+      id,
+      cliente_id,
+      gerente_id,
+      nome,
+      inicio: inicio ? new Date(inicio) : undefined,
+      termino: termino ? new Date(termino) : undefined,
+      numproposta,
+      horas_previstas,
+      hh_previstas,
+      disciplinas,
+      equipe: equipe || [],
+      tipoDias,
       bearerAuth,
     })
 
-    return await reply.status(200).send({ duty })
+    return await reply.status(200).send({ work })
   } catch (err: unknown) {
     if (err instanceof WorkIdNotFoundError) {
       return await reply.status(404).send({ message: err.message })

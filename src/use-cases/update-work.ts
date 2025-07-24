@@ -1,54 +1,79 @@
 import { verify } from 'jsonwebtoken'
-import env from '@/config/env'
-import type { DutyRepository } from '@/repositories/duties-repository'
-import type { Obra, Plantao } from '@prisma/client'
-import { InvalidJwtTokenError } from './errors/invalid-jwt-token-error'
-import { UserEmailNotFoundError } from './errors/user-email-not-found-error'
-import { WorkRepository } from '@/repositories/works-repository'
+      import env from '@/config/env'
+      import type { Obra } from '@prisma/client'
+      import { InvalidJwtTokenError } from './errors/invalid-jwt-token-error'
+      import { WorkIdNotFoundError } from './errors/work-id-not-found-error'
+      import { WorkRepository } from '@/repositories/works-repository'
 
-interface UpdateUseCaseRequest {
-  bearerAuth: string
-  id: number
-  data_inicio?: Date
-  data_fim?: Date
-  termino: Date
-}
+      interface UpdateUseCaseRequest {
+        bearerAuth: string
+        id: number
+        cliente_id?: string
+        gerente_id?: string
+        nome?: string
+        inicio?: Date
+        termino?: Date
+        numproposta?: string
+        horas_previstas?: number
+        hh_previstas?: number
+        disciplinas?: string[]
+        equipe?: string[]
+        tipoDias?: string
+      }
 
-interface UpdateUseCaseResponse {
-  work: Obra
-}
+      interface UpdateUseCaseResponse {
+        work: Obra
+      }
 
-export class UpdateWorkUseCase {
-  constructor(private readonly workRepository: WorkRepository) {}
+      export class UpdateWorkUseCase {
+        constructor(private readonly workRepository: WorkRepository) {}
 
-  async execute({
-    bearerAuth,
-    id,
-    data_inicio,
-    data_fim,
-    termino
-  }: UpdateUseCaseRequest): Promise<UpdateUseCaseResponse> {
-    const token = bearerAuth.split(' ')[1]
-    let token_payload: { sub: string }
+        async execute({
+          bearerAuth,
+          id,
+          cliente_id,
+          gerente_id,
+          nome,
+          inicio,
+          termino,
+          numproposta,
+          horas_previstas,
+          hh_previstas,
+          disciplinas,
+          equipe,
+          tipoDias,
+        }: UpdateUseCaseRequest): Promise<UpdateUseCaseResponse> {
+          const token = bearerAuth.split(' ')[1]
 
-    try {
-      token_payload = verify(token, env.JWT_SECRET) as { sub: string }
-    } catch (error) {
-      throw new InvalidJwtTokenError()
-    }
+          try {
+            verify(token, env.JWT_SECRET) as { sub: string }
+          } catch (error) {
+            throw new InvalidJwtTokenError()
+          }
 
-    const work = await this.workRepository.update({
-      id,
-      data: {
-        termino
-        },
-    })
+          const updateData: Partial<Obra> = {}
 
+          if (cliente_id !== undefined) updateData.cliente_id = cliente_id
+          if (gerente_id !== undefined) updateData.gerente_id = gerente_id
+          if (nome !== undefined) updateData.nome = nome
+          if (inicio !== undefined) updateData.inicio = inicio
+          if (termino !== undefined) updateData.termino = termino
+          if (numproposta !== undefined) updateData.numproposta = numproposta
+          if (horas_previstas !== undefined) updateData.horas_previstas = horas_previstas
+          if (hh_previstas !== undefined) updateData.hh_previstas = hh_previstas
+          if (disciplinas !== undefined) updateData.disciplinas = disciplinas
+          if (equipe !== undefined) updateData.equipe = equipe
+          if (tipoDias !== undefined) updateData.tipoDias = tipoDias
 
-    if (work === null) {
-      throw new UserEmailNotFoundError()
-    }
+          const work = await this.workRepository.update({
+            id,
+            data: updateData,
+          })
 
-    return { work }
-  }
-}
+          if (work === null) {
+            throw new WorkIdNotFoundError()
+          }
+
+          return { work }
+        }
+      }
