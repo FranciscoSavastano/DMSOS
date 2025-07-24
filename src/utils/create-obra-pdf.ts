@@ -92,8 +92,8 @@ export async function createObraPdf(request: FastifyRequest, reply: FastifyReply
 
 // Projeto (right side)
     doc.fontSize(12).text(`Projeto: ${responseData.nome}`, 320, 110, { align: 'left', width: 220 });
-    doc.fontSize(12).text(`Cliente: ${responseData.cliente?.nome || '-'}`, 320, doc.y + 15, { width: 220 });
-    doc.fontSize(12).text(`Número da Proposta: ${responseData.numproposta || '-'}`, 320, doc.y + 15, { width: 220 });
+    doc.fontSize(12).text(`Cliente: ${responseData.cliente?.nome || '-'}`, 320, doc.y , { width: 220 });
+    doc.fontSize(12).text(`Número da Proposta: ${responseData.numproposta || '-'}`, 320, doc.y, { width: 220 });
     doc.moveDown();
     console.log('Equipe:', responseData.equipe);
 
