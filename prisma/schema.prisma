@@ -160,6 +160,8 @@ model Ocorrencia {
   observacao     String?
   acao           String?
   responsavel    String?
+  created_at     DateTime  @default(now())
+  updated_at     DateTime  @updatedAt
 
   @@map("ocorrencias")
 }
@@ -175,6 +177,8 @@ model Revisao {
   nomeSolicitante String
   solicitacao     String
   isSolved        Boolean  @default(false)
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
 
   @@map("revisoes")
 }
@@ -220,6 +224,8 @@ model DiaObra {
   supervisor      User                 @relation(fields: [supervisor_id], references: [id], onDelete: Cascade)
   profissionais   ProfissionalNaObra[]
   atividadeNaObra AtividadeNoDiaObra[]
+  created_at      DateTime             @default(now())
+  updated_at      DateTime             @updatedAt
 
   @@map("dia_obras")
 }
@@ -239,6 +245,8 @@ model Atividade {
   descricao       String
   profissionais   ProfissionalNaAtividade[]
   atividadeNaObra AtividadeNoDiaObra[]
+  created_at      DateTime                  @default(now())
+  updated_at      DateTime                  @updatedAt
 
   @@map("atividades")
 }
@@ -256,6 +264,8 @@ model AtividadeNoDiaObra {
   qtde_concluidos       Int?      @default(0)
   horas_gastas          Float?    @default(0.0)
   checklist_porcentagem String?
+  created_at            DateTime  @default(now())
+  updated_at            DateTime  @updatedAt
 
   @@id([dia_obra_id, atividade_id])
 }

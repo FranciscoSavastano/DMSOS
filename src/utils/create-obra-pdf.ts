@@ -1,11 +1,13 @@
 import axios from "axios";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { z } from "zod";
-import pdfkit from 'pdfkit-table'
+import pdfkit from 'pdfkit-table';
 import path from "path";
 import sharp from 'sharp';
-import fs from 'fs'
-const watermarkPath = path.join('./src/utils/pdf-img/logo-jpg.jpg'); // Adjust path as needed
+import fs from 'fs';
+import { Writable } from 'stream';
+
+const watermarkPath = path.join('./src/utils/pdf-img/logo-jpg.jpg');
 
 export async function createObraPdf(request: FastifyRequest, reply: FastifyReply) {
   try {
@@ -15,21 +17,40 @@ export async function createObraPdf(request: FastifyRequest, reply: FastifyReply
       assinatura: z.boolean().optional(),
       emails: z.string().array().optional(),
     }).parse(request.body);
+
     const createObraPdfHeadersSchema = z
       .object({
         authorization: z.string(),
       })
       .parse(request.headers);
+
     const { authorization: bearerAuth } = createObraPdfHeadersSchema;
     const { id, diaObraId, assinatura } = createObraPdfBodySchema;
-    //Get information about the obra
+
+    // Get information about the obra
     const obraResponse = axios.post('http://127.0.0.1:3333/v1/obra/read', {
       id: id,
     }, {
       headers: {
         Authorization: bearerAuth,
       },
+    }).catch(error => {
+      if (error.response.status === 404) {
+        return reply.code(404).send({
+          error: 'Not Found',
+          message: 'Obra not found',
+        });
+      }
+      else if (error.response.status === 401) {
+        return reply.code(401).send({
+          error: 'Unauthorized',
+          message: 'Invalid or missing authorization token',
+        });
+      }
+      console.error('Error fetching obra data:', error);
+      throw new Error('Failed to fetch obra data');
     });
+
     const diaObraResponse = axios.post('http://127.0.0.1:3333/v1/obra/dia/readAllWorkDaysByWID', {
       id: id,
     }, {
@@ -37,97 +58,178 @@ export async function createObraPdf(request: FastifyRequest, reply: FastifyReply
         Authorization: bearerAuth,
       },
     });
+
     const diaObraData = await diaObraResponse;
     const obra = await obraResponse;
+
     if (!obra) {
       return reply.code(404).send({
         error: 'Not Found',
         message: 'Obra not found',
       });
     }
+
     const responseData = obra.data.work.work;
     const usuarios = axios.get('http://127.0.0.1:3333/v1/users/readUserByContract/Implantação', {
       headers: {
         Authorization: bearerAuth,
       }
     });
+
     const usuariosData = await usuarios;
     console.log('Usuarios Data:', usuariosData.data);
-    if (!usuariosData) {
 
+    if (!usuariosData) {
       return reply.code(404).send({
         error: 'Not Found',
         message: 'No users found for the specified contract',
       });
     }
+
     let usuariosArray = [];
-    for (const user of usuariosData.data){
+    for (const user of usuariosData.data) {
       console.log(`User ID: ${user.id}, Name: ${user.nome}`);
     }
-    //Crie o PDF com os dados da obra
+
+    // Create PDF with obra data
     const doc = new pdfkit();
-//For each page, set a background image company logo
+
+    // For each page, set a background image company logo
     doc.fontSize(25).text('Relatório Diario de Obra', { align: 'center' });
-    doc.image(watermarkPath, 40, 23 , { fit: [100, 100], align: 'center', valign: 'center' });
-// Add a horizontal line
+    doc.image(watermarkPath, 40, 23, { fit: [100, 100], align: 'center', valign: 'center' });
+
+    // Add a horizontal line
     doc.moveTo(50, 100)
       .lineTo(550, 100)
-      .stroke()
-// Verical line
-    doc.moveTo(300, 280)
-      .lineTo(300, 100)
       .stroke();
-// Closing horizontal line
-    doc.moveTo(50, 160)
-      .lineTo(550, 160)
-      .stroke();
-// Observação horizontal line
-    doc.moveTo(50, 280)
-      .lineTo(550, 280)
-      .stroke();
-    doc.moveDown();
 
+    // Vertical line
+    doc.moveTo(300, 100)
+      .lineTo(300, 160)
+      .stroke();
+
+    // Header content
     doc.fontSize(14).text('Responsável da Obra', 60, 110, { underline: true, width: 220 });
     doc.fontSize(12).text(`Nome: ${responseData.gerente?.nome || '-'}`, 60, 130, { width: 220 });
 
-// Projeto (right side)
+    // Projeto (right side)
     doc.fontSize(12).text(`Projeto: ${responseData.nome}`, 320, 110, { align: 'left', width: 220 });
-    doc.fontSize(12).text(`Cliente: ${responseData.cliente?.nome || '-'}`, 320, doc.y , { width: 220 });
+    doc.fontSize(12).text(`Cliente: ${responseData.cliente?.nome || '-'}`, 320, doc.y, { width: 220 });
     doc.fontSize(12).text(`Número da Proposta: ${responseData.numproposta || '-'}`, 320, doc.y, { width: 220 });
-    doc.moveDown();
+
+    // Closing horizontal line for header
+    doc.moveTo(50, 160)
+      .lineTo(550, 160)
+      .stroke();
+
     console.log('Equipe:', responseData.equipe);
 
-    doc.moveDown(0.5);
-    if (responseData.equipe && responseData.equipe.length > 0 && usuariosData.data && Array.isArray(usuariosData.data)) {
-      // Filtra os usuários que estão na equipe
-      console.log(responseData.equipe[0]);
-      if(typeof responseData.equipe === 'string') {
-        const equipe = JSON.parse(responseData.equipe);
-        console.log('Equipe:', equipe);
-      }
+    let tableEndY = 170; // Default position if no table
 
+    if (responseData.equipe && responseData.equipe.length > 0 && usuariosData.data && Array.isArray(usuariosData.data)) {
+      // Filter users that are in the team
+      const equipeUsuarios = usuariosData.data.filter((user: any) =>
+        responseData.equipe.includes(user.id)
+      );
+
+      if (equipeUsuarios.length > 0) {
+        const equipeTable = {
+          headers: ['Nome', 'Cargo'],
+          rows: equipeUsuarios.map((u: any) => [u.nome, u.user_role]),
+        };
+
+        // Calculate table height: header + rows + padding
+        const rowHeight = 20; // Approximate row height
+        const headerHeight = 25; // Header height
+        const tableHeight = headerHeight + (equipeUsuarios.length * rowHeight) - 30; // -30px padding
+
+        await doc.table(equipeTable, {
+          width: 247,
+          x: 53,
+          y: 170,
+          columnsSize: [130, 100]
+        });
+
+        // Update tableEndY to actual table end position
+        tableEndY = 170 + tableHeight;
+      }
     } else {
-      doc.fontSize(12).text('Nenhuma equipe cadastrada.');
+      doc.fontSize(12).text('Nenhuma equipe cadastrada.', 60, 170);
+      tableEndY = 190; // Adjust for text height
     }
-//Use the diaObraId 
-    const diaObra = diaObraId ? responseData.dia_obra.find(d => d.id === diaObraId) : null;
+
+    // Draw responsive horizontal line below the table/text
+    doc.moveTo(50, tableEndY)
+      .lineTo(550, tableEndY)
+      .stroke();
+
+    // Extend vertical line to meet the new horizontal line
+    doc.moveTo(300, 160)
+      .lineTo(300, tableEndY)
+      .stroke();
+
+    // Use the diaObraId
+    const diaObra = diaObraId ? responseData.dia_obra.find((d: any) => d.id === diaObraId) : null;
+
     if (diaObra) {
-      doc.fontSize(14).text(`Data: ${new Date(diaObra.data).toLocaleDateString()}`, 320, 170, {
+      console.log('Dia da Obra:', diaObra);
+
+      const formatLocalDateTime = (dateValue: string | Date) => {
+        let dateObj: Date;
+
+        if (dateValue instanceof Date) {
+          dateObj = dateValue;
+        } else if (typeof dateValue === 'string') {
+          if (dateValue.includes('T') && dateValue.includes('Z')) {
+            dateObj = new Date(dateValue);
+            dateObj.setHours(dateObj.getHours() + 3);
+          } else {
+            const cleanDateTime = dateValue.replace(/\.\d{3}$/, '');
+            const [datePart, timePart] = cleanDateTime.split(' ');
+            const [year, month, day] = datePart.split('-');
+            const [hour, minute, second] = timePart ? timePart.split(':') : ['00', '00', '00'];
+
+            dateObj = new Date(
+              parseInt(year),
+              parseInt(month) - 1,
+              parseInt(day),
+              parseInt(hour || '0'),
+              parseInt(minute || '0'),
+              parseInt(second || '0')
+            );
+          }
+        } else {
+          dateObj = new Date();
+        }
+
+        return dateObj;
+      };
+
+      const dataFormatada = formatLocalDateTime(diaObra.data).toLocaleDateString('pt-BR');
+      const inicioFormatado = formatLocalDateTime(diaObra.inicio).toLocaleTimeString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      const terminoFormatado = formatLocalDateTime(diaObra.termino).toLocaleTimeString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+
+      doc.fontSize(14).text(`Data: ${dataFormatada}`, 320, 170, {
         align: 'left',
         width: 220
       });
-      doc.fontSize(14).text(`Inicio: ${new Date(diaObra.inicio).toLocaleTimeString()}`, 320, 190, {
+      doc.fontSize(14).text(`Inicio: ${inicioFormatado}`, 320, 190, {
         align: 'left',
         width: 220
       });
-      doc.fontSize(14).text(`Termino: ${new Date(diaObra.termino).toLocaleTimeString()}`, 320, 210, {
+      doc.fontSize(14).text(`Termino: ${terminoFormatado}`, 320, 210, {
         align: 'left',
         width: 220
       });
     } else {
       doc.fontSize(14).text(`Sem informações da obra`, 320, 170, { align: 'left', width: 220 });
     }
-
 // Get all dias da obra
     const diasObra = diaObraData.data.workDay.workDay;
     doc.moveDown(0.5);
@@ -144,7 +246,7 @@ export async function createObraPdf(request: FastifyRequest, reply: FastifyReply
         width: 247,
         x: 53,
         y: 170,
-        columnSize: [190, 30] // 80% e 20% da largura total
+        columnsSize: [130, 100] // 80% e 20% da largura total,
       });
     } else {
       doc.fontSize(12).text('Nenhuma equipe cadastrada.');
@@ -162,7 +264,7 @@ export async function createObraPdf(request: FastifyRequest, reply: FastifyReply
             const atividade = responseData.atividades.find(a => a.id === atvDia.atividade_id);
             if (atividade) {
               if (first) {
-                doc.fontSize(13).text(`Atividade: ${atividade.nome}`, 60, 290);
+                doc.fontSize(13).text(`Atividade: ${atividade.nome}`, 60, tableEndY + 20);
                 first = false;
               } else {
                 //Check if is near the end of the page
@@ -270,13 +372,17 @@ export async function createObraPdf(request: FastifyRequest, reply: FastifyReply
             doc.moveDown(2);
 
             if (atvDia.imagens && atvDia.imagens.length > 0) {
+              console.log(doc.y)
+              if(doc.y > 550) {
+                doc.addPage();
+              }
               doc.fontSize(11).text('Anexos:', 60);
               doc.moveDown(0.5);
 
               const imageWidth = 80;
               const imageHeight = 60;
               let imgX = 60;
-              const imgY = doc.y;
+              let imgY = doc.y;
 
               for (const img of atvDia.imagens) {
                 try {
@@ -294,7 +400,12 @@ export async function createObraPdf(request: FastifyRequest, reply: FastifyReply
               doc.moveDown(1);
             }
 
-// Barra de progresso
+            // Barra de progresso - verificar se há espaço suficiente
+            const progressBarHeight = 50; // Altura total necessária para texto + barra + espaçamento
+            if (doc.y + progressBarHeight > 750) { // 750 é próximo do limite da página A4
+              doc.addPage();
+            }
+
             doc.fontSize(11).text('Progresso da Atividade:', 60, doc.y + 10);
             const percentStr = atvDia.checklist_porcentagem ?? "0";
             const percent = Math.max(0, Math.min(100, parseInt(percentStr, 10) || 0));
@@ -304,6 +415,9 @@ export async function createObraPdf(request: FastifyRequest, reply: FastifyReply
             const barHeight = 18;
             const radius = 8;
 
+            if(barY > 700) {
+              doc.addPage();
+            }
             doc.save()
               .roundedRect(barX, barY, barWidth, barHeight, radius)
               .fill('#e0e0e0');
@@ -316,7 +430,7 @@ export async function createObraPdf(request: FastifyRequest, reply: FastifyReply
             doc
               .fillColor('#000')
               .fontSize(11)
-              .text(`${percent}%`, barX, barY + 2, {
+              .text(`${percent}%`, barX, barY +3, {
                 width: barWidth,
                 align: 'center'
               });

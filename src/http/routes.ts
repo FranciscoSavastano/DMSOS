@@ -45,8 +45,9 @@ import { readAllWorkDays } from './controllers/read-all-work-days'
 import { readUserByAuth } from './controllers/read-user-by-auth'
 import { createActivityWorkDay } from './controllers/activity-workDay'
 import { getSetupFile, getSoftwareUpdates } from '@/utils/send-software'
-import { createObraPdf } from '@/utils/create-obra-pdf'
+import { createObraPdf, testPdfCreation } from '@/utils/create-obra-pdf'
 import { updateWork } from '@/http/controllers/update-work'
+import { testPdfCeation } from '@/utils/create-pdf-test'
 
 export async function appRoutes(app: FastifyInstance) {
   app.post('/v1/users', register)
@@ -156,4 +157,5 @@ export async function appRoutes(app: FastifyInstance) {
   app.get('/v1/software', getSetupFile) //Mantenha esta rota para compatiblidade
 
   app.get('/v1/software/:filename', getSoftwareUpdates); //Nova rota para atualizações de software
+
 }
