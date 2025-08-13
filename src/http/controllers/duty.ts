@@ -16,7 +16,7 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
     consideracoes: z.string(),
     horario_rf: z.string().datetime(),
     imagens: z.any(),
-    operadorEmail: z.string().array().optional(),
+    operadorEmail: z.string().optional(),
     ocurrence: z.array(z.object({
       ocorrencia_desc: z.string().optional().default(''),
       ocorrencia_horario: z.string().datetime().optional(),
