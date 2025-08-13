@@ -225,7 +225,7 @@ model DiaObra {
   profissionais   ProfissionalNaObra[]
   atividadeNaObra AtividadeNoDiaObra[]
   created_at      DateTime             @default(now())
-  updated_at      DateTime             @updatedAt
+  updated_at      DateTime             @default(now()) @updatedAt
 
   @@map("dia_obras")
 }
@@ -246,7 +246,7 @@ model Atividade {
   profissionais   ProfissionalNaAtividade[]
   atividadeNaObra AtividadeNoDiaObra[]
   created_at      DateTime                  @default(now())
-  updated_at      DateTime                  @updatedAt
+  updated_at      DateTime                  @default(now()) @updatedAt
 
   @@map("atividades")
 }
@@ -265,7 +265,7 @@ model AtividadeNoDiaObra {
   horas_gastas          Float?    @default(0.0)
   checklist_porcentagem String?
   created_at            DateTime  @default(now())
-  updated_at            DateTime  @updatedAt
+  updated_at            DateTime  @default(now()) @updatedAt
 
   @@id([dia_obra_id, atividade_id])
 }

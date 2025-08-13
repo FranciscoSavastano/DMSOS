@@ -126,6 +126,8 @@ Table ocorrencias {
   observacao String
   acao String
   responsavel String
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
 }
 
 Table revisoes {
@@ -139,6 +141,8 @@ Table revisoes {
   nomeSolicitante String [not null]
   solicitacao String [not null]
   isSolved Boolean [not null, default: false]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
 }
 
 Table obras {
@@ -150,7 +154,7 @@ Table obras {
   nome String [not null]
   inicio DateTime [not null]
   termino DateTime
-  numproposta String [not null]
+  numproposta String [not null, default: '']
   disciplinas String[] [not null]
   horas_previstas Float [not null]
   hh_previstas Float [not null, default: 0]
@@ -177,6 +181,8 @@ Table dia_obras {
   supervisor users [not null]
   profissionais ProfissionalNaObra [not null]
   atividadeNaObra AtividadeNoDiaObra [not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
 }
 
 Table atividades {
@@ -194,6 +200,8 @@ Table atividades {
   descricao String [not null]
   profissionais ProfissionalNaAtividade [not null]
   atividadeNaObra AtividadeNoDiaObra [not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
 }
 
 Table AtividadeNoDiaObra {
@@ -209,6 +217,8 @@ Table AtividadeNoDiaObra {
   qtde_concluidos Int [default: 0]
   horas_gastas Float [default: 0]
   checklist_porcentagem String
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [default: `now()`, not null]
 
   indexes {
     (dia_obra_id, atividade_id) [pk]

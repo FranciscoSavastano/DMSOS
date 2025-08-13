@@ -60,7 +60,7 @@ interface PDFRequestParams {
         // Format the date as DD-MM-YYYY to match your file naming convention
         const filedate = `${date.getDate().toString().padStart(2, '0')}_${(date.getMonth() + 1).toString().padStart(2, '0')}_${date.getFullYear()}`
         // Construct path to the gendocs directory
-        const gendocsPath = path.join(__dirname, '/../', 'build', 'gendocs')
+        const gendocsPath = path.join(__dirname, '/../', 'public', 'gendocs')
         // Create the exact filename based on your pattern
         const fileName = `Relatorio ${contract} ${filedate} ${id}.pdf`
         const filePath = path.join(gendocsPath, fileName)

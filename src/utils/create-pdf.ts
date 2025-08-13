@@ -435,7 +435,7 @@ export async function CreatePdf(duty: any, auth: string) {
       const imageMargin = 20;
     
       let x = imageMargin;
-      let y = imageWidth;
+      let y = 100;
     
       for (const [index, base64Image] of base64Images.entries()) {
         try {
@@ -459,9 +459,9 @@ export async function CreatePdf(duty: any, auth: string) {
             x = imageMargin;
             y += imageHeight + 100; // Move to the next row
           }
-          if ((index + 1) % 9 === 0) {
+          if ((index + 1) % 9 === 0 && index < base64Images.length - 1) {
             x = imageMargin;
-            y = imageWidth; // Reset position for a new page
+            y = 100; // Reset position for a new page
             doc.addPage()
               .fontSize(28)
               .fill('#001233')
@@ -1235,7 +1235,7 @@ export async function CreatePdf(duty: any, auth: string) {
   // Finalize o arquivo e salve na pasta
   const filedate = formatDateForFilename(relatorioData)
   // Se não houver pasta crie uma recursivamente
-  const gendocsPath = path.join(__dirname, '/', 'gendocs')
+  const gendocsPath = path.join(__dirname, '/../', 'public', 'gendocs')
   if (!fs.existsSync(gendocsPath)) {
     fs.mkdirSync(gendocsPath, { recursive: true })
   }
