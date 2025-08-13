@@ -16,6 +16,7 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
     consideracoes: z.string(),
     horario_rf: z.string().datetime(),
     imagens: z.any(),
+    operadorEmail: z.string().array().optional(),
     ocurrence: z.array(z.object({
       ocorrencia_desc: z.string().optional().default(''),
       ocorrencia_horario: z.string().datetime().optional(),
@@ -37,6 +38,7 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
   console.log(request.body)
   const {
     operadoresNomes,
+    operadorEmail,
     data_inicio,
     data_fim,
     contrato,
@@ -67,7 +69,7 @@ export async function createDuty(request: FastifyRequest, reply: FastifyReply) {
     //const emailto = "francisco.pereira@dmsys.com.br"; //Test email
     const subject = `Relatório Diário ${contrato}`;
     const message = `Relatório do contrato ${contrato} na data de ${moment(data_inicio).format('DD/MM/YYYY')}`;
-    let bcc = ["francisco.pereira@dmsys.com.br", "anne.nascimento@dmsys.com.br"] //Uncomment for live 
+    let bcc = ["francisco.pereira@dmsys.com.br", "anne.nascimento@dmsys.com.br", operadorEmail] //Uncomment for live
 
     // Send email with the PDF attachment
     //if(process.env.DISABLE_EMAIL != 'true') { only enabled if nescessary
