@@ -18,4 +18,4 @@ VOLUME /app/build/gendocs
 
 EXPOSE 3333
 
-CMD ["sh", "-c", "npx prisma generate && npx prisma migrate status && npm run start:prod"]
+CMD ["sh", "-c", "npx prisma generate && npm run start:prod"]
