@@ -4,7 +4,7 @@ services:
     restart: on-failure:10
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: DmSyS135790
+      POSTGRES_PASSWORD: exemplo
       POSTGRES_DATABASE: backend
     ports:
       - '5432:5432'
@@ -17,14 +17,14 @@ services:
       - db
     restart: on-failure:10
     environment:
-      DATABASE_URL: postgresql://postgres:DmSyS135790@db:5432/backend
+      DATABASE_URL: postgresql://postgres:exemplo@db:5432/backend
       # Other environment variables
     ports:
       - "3333:3333"
     volumes:
-      - gendocs:/app/public/gendocs # Mount the named volume to the gendocs directory
+      - gendocs:/app/public/gendocs
 volumes:
   db:
     driver: local
-  gendocs: # Define the named volume for gendocs
+  gendocs: 
     driver: local
